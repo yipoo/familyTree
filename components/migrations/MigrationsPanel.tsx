@@ -25,6 +25,17 @@ interface MigrationItem {
   toLocation: { id: string; fullText: string } | null;
 }
 
+/**
+ * 三态合一：避免独立的 (items, loading, error) 多源 setState；effect 只在 await 之后写 state，
+ * 不触发 react-hooks/set-state-in-effect。
+ */
+type FetchState =
+  | { kind: "loading" }
+  | { kind: "loaded"; items: MigrationItem[] }
+  | { kind: "error"; message: string };
+
+const LOADING: FetchState = { kind: "loading" };
+
 export function MigrationsPanel({
   familyId,
   scope,
@@ -38,48 +49,71 @@ export function MigrationsPanel({
   branchId?: string;
   canEdit: boolean;
 }) {
-  const [items, setItems] = useState<MigrationItem[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [state, setState] = useState<FetchState>(LOADING);
+  const [reloadKey, setReloadKey] = useState(0);
   const [pending, startTransition] = useTransition();
+  // 删除 / 提交后的临时错误（与 fetch 错误隔离开，避免覆盖列表数据）
+  const [opError, setOpError] = useState<string | null>(null);
 
-  function reload() {
-    setLoading(true);
-    const sp = new URLSearchParams();
-    if (scope === "PERSON" && personId) sp.set("personId", personId);
-    if (scope === "BRANCH" && branchId) sp.set("branchId", branchId);
-    sp.set("scope", scope);
-    fetch(`/api/families/${familyId}/migrations?${sp}`)
-      .then(async (r) => {
+  // 数据拉取：effect 仅做 fetch + await + setState
+  useEffect(() => {
+    let cancelled = false;
+    const ctrl = new AbortController();
+    (async () => {
+      try {
+        const sp = new URLSearchParams();
+        if (scope === "PERSON" && personId) sp.set("personId", personId);
+        if (scope === "BRANCH" && branchId) sp.set("branchId", branchId);
+        sp.set("scope", scope);
+        const r = await fetch(`/api/families/${familyId}/migrations?${sp}`, {
+          signal: ctrl.signal,
+        });
+        if (cancelled) return;
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const j = await r.json();
-        setItems(j.data ?? []);
-        setError(null);
-      })
-      .catch((e) => setError(e instanceof Error ? e.message : "加载失败"))
-      .finally(() => setLoading(false));
-  }
+        if (cancelled) return;
+        setState({ kind: "loaded", items: (j.data ?? []) as MigrationItem[] });
+      } catch (e) {
+        if (cancelled) return;
+        if ((e as Error).name === "AbortError") return;
+        setState({
+          kind: "error",
+          message: e instanceof Error ? e.message : "加载失败",
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+    };
+  }, [familyId, scope, personId, branchId, reloadKey]);
 
-  useEffect(() => {
-    // eslint-disable-next-line react-hooks/set-state-in-effect
-    reload();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [familyId, scope, personId, branchId]);
+  function reload() {
+    // 在事件处理器中调用——setState 在事件中合规
+    setState(LOADING);
+    setReloadKey((k) => k + 1);
+  }
 
   function handleDelete(id: string) {
     if (!confirm("删除此迁徙记录？")) return;
+    setOpError(null);
     startTransition(async () => {
       const r = await fetch(`/api/families/${familyId}/migrations/${id}`, {
         method: "DELETE",
       });
       if (!r.ok) {
         const e = await r.json().catch(() => null);
-        setError(e?.error?.message ?? "删除失败");
+        setOpError(e?.error?.message ?? "删除失败");
         return;
       }
       reload();
     });
   }
+
+  const items = state.kind === "loaded" ? state.items : [];
+  const loading = state.kind === "loading";
+  const fetchError = state.kind === "error" ? state.message : null;
+  const error = opError ?? fetchError;
 
   return (
     <div className="space-y-3 text-sm">
