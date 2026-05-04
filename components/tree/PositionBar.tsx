@@ -27,19 +27,14 @@ export function PositionBar({
   const trackRef = useRef<HTMLDivElement>(null);
   const [dragging, setDragging] = useState<"x" | "y" | null>(null);
 
-  // 当前可视世界范围
+  // 当前可视世界范围（仅横向参与 UI；垂直滚动条暂未实现）
   const worldLeft = -vx / zoom;
-  const worldTop = -vy / zoom;
   const visibleW = screenW / zoom;
   const visibleH = screenH / zoom;
 
   // 横向比例
   const hThumbLeftPct = clamp(worldLeft / worldWidth, 0, 1);
   const hThumbWidthPct = clamp(visibleW / worldWidth, 0.02, 1);
-
-  // 纵向比例
-  const vThumbTopPct = clamp(worldTop / worldHeight, 0, 1);
-  const vThumbHeightPct = clamp(visibleH / worldHeight, 0.02, 1);
 
   function jumpToWorldX(targetWorldLeft: number) {
     const x = -targetWorldLeft * zoom;

@@ -205,7 +205,6 @@ export function TreeView({
             <PersonInspector
               familyId={familyId}
               personId={selectedId}
-              layout={data.layout}
               layoutIndex={layoutIndex}
               residenceByPersonId={data.residenceByPersonId}
               onClearSelection={() => setSelectedId(null)}
@@ -224,7 +223,6 @@ export function TreeView({
               <PersonInspector
                 familyId={familyId}
                 personId={selectedId}
-                layout={data.layout}
                 layoutIndex={layoutIndex}
                 residenceByPersonId={data.residenceByPersonId}
                 onClearSelection={() => setSelectedId(null)}

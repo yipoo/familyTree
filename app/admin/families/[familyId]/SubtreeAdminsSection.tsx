@@ -54,7 +54,7 @@ export function SubtreeAdminsSection({
     <section>
       <h2 className="mb-1 text-base font-semibold">子树管理员（{grants.length}）</h2>
       <p className="mb-3 text-xs text-zinc-500">
-        将"某人 + 其父系所有后代"的写权限授予某用户；该用户即可在该子树内编辑、添加、删除人物。
+        {`将"某人 + 其父系所有后代"的写权限授予某用户；该用户即可在该子树内编辑、添加、删除人物。`}
       </p>
 
       <div className="mb-3 flex flex-wrap items-end gap-2 rounded-lg border border-zinc-200 bg-white p-3 dark:border-zinc-800 dark:bg-zinc-900">
