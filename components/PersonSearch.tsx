@@ -1,5 +1,10 @@
 "use client";
-import { useEffect, useRef, useState } from "react";
+import {
+  useEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 
 export interface SearchResult {
   id: string;
@@ -32,6 +37,89 @@ interface Props {
   historyLimit?: number;
 }
 
+// ------------------------------------------------------------------
+// 历史记录：localStorage 视为外部存储，通过 useSyncExternalStore 订阅
+// ------------------------------------------------------------------
+
+const HISTORY_EVENT = "personsearch:history-change";
+const EMPTY_HISTORY: SearchResult[] = [];
+
+/** 跨组件实例广播变更（同标签页内 storage 事件不触发，自己派一个） */
+function broadcastHistoryChange() {
+  if (typeof window === "undefined") return;
+  window.dispatchEvent(new Event(HISTORY_EVENT));
+}
+
+function readHistoryRaw(key: string | undefined): string | null {
+  if (!key || typeof window === "undefined") return null;
+  try {
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+function parseHistory(raw: string | null): SearchResult[] {
+  if (!raw) return EMPTY_HISTORY;
+  try {
+    const parsed = JSON.parse(raw);
+    if (Array.isArray(parsed)) return parsed as SearchResult[];
+  } catch {
+    // ignore
+  }
+  return EMPTY_HISTORY;
+}
+
+function useHistory(historyKey: string | undefined): SearchResult[] {
+  // 缓存最近一次解析结果——useSyncExternalStore 要求 snapshot "内容相同则同对象引用"。
+  const snapshotRef = useRef<{ raw: string | null; parsed: SearchResult[] }>({
+    raw: null,
+    parsed: EMPTY_HISTORY,
+  });
+
+  function getSnapshot() {
+    const raw = readHistoryRaw(historyKey);
+    if (raw === snapshotRef.current.raw) return snapshotRef.current.parsed;
+    const parsed = parseHistory(raw);
+    snapshotRef.current = { raw, parsed };
+    return parsed;
+  }
+
+  function subscribe(notify: () => void) {
+    if (typeof window === "undefined") return () => {};
+    window.addEventListener("storage", notify);
+    window.addEventListener(HISTORY_EVENT, notify);
+    return () => {
+      window.removeEventListener("storage", notify);
+      window.removeEventListener(HISTORY_EVENT, notify);
+    };
+  }
+
+  return useSyncExternalStore(subscribe, getSnapshot, () => EMPTY_HISTORY);
+}
+
+function pushHistoryStorage(key: string, next: SearchResult[]) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(next));
+  } catch {
+    // ignore quota errors
+  }
+  broadcastHistoryChange();
+}
+
+function clearHistoryStorage(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch {
+    // ignore
+  }
+  broadcastHistoryChange();
+}
+
+// ------------------------------------------------------------------
+// PersonSearch
+// ------------------------------------------------------------------
+
 export function PersonSearch({
   familyId,
   onPick,
@@ -45,80 +133,63 @@ export function PersonSearch({
   historyLimit = 8,
 }: Props) {
   const [q, setQ] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
   const [open, setOpen] = useState(false);
   const [active, setActive] = useState(0);
+  // 拉取到的最新一组结果。effect 仅在 fetch 完成后（await 之后）才 setState，
+  // 避免 react-hooks/set-state-in-effect。
+  const [fetchedResults, setFetchedResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  const [history, setHistory] = useState<SearchResult[]>([]);
-  const ref = useRef<HTMLDivElement>(null);
 
-  // 加载历史
-  useEffect(() => {
-    if (!historyKey) return;
-    try {
-      const raw = localStorage.getItem(historyKey);
-      if (raw) setHistory(JSON.parse(raw));
-    } catch {
-      // ignore
-    }
-  }, [historyKey]);
+  // 派生：q 为空时不展示任何结果——派生而非同步
+  const trimmed = q.trim();
+  const results: SearchResult[] = trimmed.length === 0 ? EMPTY_HISTORY : fetchedResults;
+
+  const history = useHistory(historyKey);
+  const ref = useRef<HTMLDivElement>(null);
 
   function pushHistory(p: SearchResult) {
     if (!historyKey) return;
-    setHistory((prev) => {
-      const next = [p, ...prev.filter((x) => x.id !== p.id)].slice(0, historyLimit);
-      try {
-        localStorage.setItem(historyKey, JSON.stringify(next));
-      } catch {
-        // ignore quota errors
-      }
-      return next;
-    });
+    const next = [p, ...history.filter((x) => x.id !== p.id)].slice(0, historyLimit);
+    pushHistoryStorage(historyKey, next);
   }
   function clearHistory() {
-    setHistory([]);
-    if (historyKey) {
-      try {
-        localStorage.removeItem(historyKey);
-      } catch {
-        // ignore
-      }
-    }
+    if (historyKey) clearHistoryStorage(historyKey);
   }
 
-  // Debounce search
+  // Debounce search —— 仅当 trimmed 非空才发请求。
+  // setLoading(true) 已经由 onChange 在用户输入时触发，effect 内部不再做同步 setState。
   useEffect(() => {
-    if (!q.trim()) {
-      setResults([]);
-      return;
-    }
+    if (!trimmed) return;
     const ctrl = new AbortController();
+    let cancelled = false;
     const t = setTimeout(async () => {
-      setLoading(true);
       try {
-        const sp = new URLSearchParams({ q: q.trim(), limit: "20" });
+        const sp = new URLSearchParams({ q: trimmed, limit: "20" });
         if (gender) sp.set("gender", gender);
         const res = await fetch(
           `/api/families/${familyId}/persons/search?${sp}`,
           { signal: ctrl.signal },
         );
+        if (cancelled) return;
         if (!res.ok) return;
         const json = (await res.json()) as { data: SearchResult[] };
-        setResults(json.data);
+        if (cancelled) return;
+        setFetchedResults(json.data);
         setActive(0);
       } catch {
-        // ignore abort
+        // ignore abort / network errors（保留旧 results 减少闪烁）
       } finally {
-        setLoading(false);
+        if (!cancelled) setLoading(false);
       }
     }, 200);
     return () => {
+      cancelled = true;
       ctrl.abort();
       clearTimeout(t);
     };
-  }, [q, familyId, gender]);
+  }, [trimmed, familyId, gender]);
 
-  // Close on outside click
+  // Close on outside click —— 此 effect 不做任何 setState，仅挂监听
   useEffect(() => {
     function onDoc(e: MouseEvent) {
       if (!ref.current) return;
@@ -138,7 +209,7 @@ export function PersonSearch({
     onPick?.(p);
     if (clearOnPick) {
       setQ("");
-      setResults([]);
+      setFetchedResults(EMPTY_HISTORY);
     }
     setOpen(false);
   }
@@ -166,8 +237,11 @@ export function PersonSearch({
         type="text"
         value={q}
         onChange={(e) => {
-          setQ(e.target.value);
+          const next = e.target.value;
+          setQ(next);
           setOpen(true);
+          // loading 状态由用户输入事件直接驱动——非 effect 内 setState
+          setLoading(next.trim().length > 0);
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={onKeyDown}
@@ -177,7 +251,7 @@ export function PersonSearch({
       />
 
       {/* 搜索结果 */}
-      {open && q.trim().length > 0 && (
+      {open && trimmed.length > 0 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-72 overflow-y-auto rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
           {loading && results.length === 0 ? (
             <div className="px-3 py-2 text-xs text-zinc-500">搜索中…</div>
@@ -201,7 +275,7 @@ export function PersonSearch({
       )}
 
       {/* 历史记录：仅当输入为空、面板打开 且 启用了 historyKey */}
-      {open && q.trim().length === 0 && historyKey && history.length > 0 && (
+      {open && trimmed.length === 0 && historyKey && history.length > 0 && (
         <div className="absolute left-0 right-0 top-full z-50 mt-1 max-h-72 overflow-y-auto rounded-md border border-zinc-200 bg-white shadow-lg dark:border-zinc-700 dark:bg-zinc-900">
           <div className="flex items-center justify-between border-b border-zinc-100 px-3 py-1 text-[10px] uppercase tracking-wide text-zinc-500 dark:border-zinc-800">
             <span>最近搜索</span>
