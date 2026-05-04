@@ -229,15 +229,21 @@ export async function buildAlbumBook(
   };
 }
 
+type PrismaPerson = Awaited<ReturnType<typeof prisma.person.findMany>>[number];
+type PrismaLocation = Awaited<
+  ReturnType<typeof prisma.location.findMany>
+>[number];
+type PersonWithResidence = PrismaPerson & { residence: PrismaLocation | null };
+
 function buildChapters(
-  list: Awaited<ReturnType<typeof prisma.person.findMany>>,
+  list: PersonWithResidence[],
   generationNames: { generation: number; character: string }[],
-  personById: Map<string, Awaited<ReturnType<typeof prisma.person.findMany>>[number]>,
+  personById: Map<string, PersonWithResidence>,
   spousesOf: Map<string, string[]>,
   childrenOf: Map<string, string[]>,
   fatherOf: Map<string, string>,
   motherOf: Map<string, string>,
-  resolveResidenceText: (p: Awaited<ReturnType<typeof prisma.person.findMany>>[number]) => string | null,
+  resolveResidenceText: (p: PersonWithResidence) => string | null,
 ): AlbumChapter[] {
   const charByGen = new Map(generationNames.map((g) => [g.generation, g.character]));
   const byGen = new Map<number, AlbumPersonEntry[]>();

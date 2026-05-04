@@ -25,7 +25,7 @@ export async function GET(
       );
     }
     const buf = await renderAlbumPdf(book);
-    return new NextResponse(buf, {
+    return new NextResponse(new Uint8Array(buf), {
       status: 200,
       headers: {
         "content-type": "application/pdf",

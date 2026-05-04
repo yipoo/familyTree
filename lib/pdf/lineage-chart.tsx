@@ -11,6 +11,7 @@ import {
   Document,
   Page,
   Svg,
+  G,
   Rect,
   Line as PdfLine,
   Text as PdfText,
@@ -116,13 +117,7 @@ function LineageChartDocument({
           })}
 
           {/* 内容（应用 scale）—— 用 transform 在 SVG 中实现 */}
-          <Svg
-            x={genColW}
-            y={headerH}
-            width={layout.width * scale}
-            height={layout.height * scale}
-            viewBox={`0 0 ${layout.width} ${layout.height}`}
-          >
+          <G transform={`translate(${genColW}, ${headerH}) scale(${scale})`}>
             {/* 连线 */}
             {layout.lines.map((l, i) => (
               <PdfLine
@@ -180,7 +175,7 @@ function LineageChartDocument({
                 </React.Fragment>
               );
             })}
-          </Svg>
+          </G>
         </Svg>
       </Page>
     </Document>

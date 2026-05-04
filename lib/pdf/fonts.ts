@@ -36,7 +36,6 @@ export function ensureCjkFont(): "CJK" | "Helvetica" {
       Font.register({
         family: "CJK",
         src: p,
-        format: p.toLowerCase().endsWith(".ttc") ? "truetype" : undefined,
       });
       registered = true;
       return "CJK";

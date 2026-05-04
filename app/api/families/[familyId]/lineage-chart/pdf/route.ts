@@ -103,7 +103,7 @@ export async function GET(
       generationChars,
     });
 
-    return new NextResponse(pdfBytes, {
+    return new NextResponse(new Uint8Array(pdfBytes), {
       status: 200,
       headers: {
         "content-type": "application/pdf",

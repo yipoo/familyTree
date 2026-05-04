@@ -157,14 +157,14 @@ export default async function PersonDetailPage({
       }
       let nextId: string | null = null;
       if (cur.isMarriedIn) {
-        const m = await prisma.marriage.findFirst({
+        const mr: { husbandId: string } | null = await prisma.marriage.findFirst({
           where: { wifeId: cur.id },
           orderBy: { order: "asc" },
           select: { husbandId: true },
         });
-        nextId = m?.husbandId ?? null;
+        nextId = mr?.husbandId ?? null;
       } else {
-        const pc = await prisma.parentChild.findFirst({
+        const pc: { parentId: string } | null = await prisma.parentChild.findFirst({
           where: { childId: cur.id, isPrimary: true, parent: { gender: "MALE" } },
           select: { parentId: true },
         });
@@ -172,10 +172,11 @@ export default async function PersonDetailPage({
       }
       if (!nextId || seen.has(nextId)) break;
       seen.add(nextId);
-      const nxt = await prisma.person.findUnique({
-        where: { id: nextId },
-        select: { id: true, isMarriedIn: true, residenceId: true },
-      });
+      const nxt: { id: string; isMarriedIn: boolean; residenceId: string | null } | null =
+        await prisma.person.findUnique({
+          where: { id: nextId },
+          select: { id: true, isMarriedIn: true, residenceId: true },
+        });
       cur = nxt;
       depth++;
     }
