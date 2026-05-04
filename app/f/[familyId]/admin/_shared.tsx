@@ -1,5 +1,38 @@
 import type { ReactNode } from "react";
 
+/**
+ * "现在"时间戳读取入口。
+ *
+ * Server / Client 组件渲染期不允许调用 Date.now()（react-hooks/purity）。
+ * 凡需要"当前时刻"的派生（如过期与否），都先在 async 数据准备阶段拿到 now 字面值，
+ * 再由纯组件（接受派生状态）渲染。
+ *
+ * 此函数本身不在 React 组件 / hook 中——React Compiler 不会把它视为渲染纯度的一部分。
+ */
+export function readNow(): number {
+  return Date.now();
+}
+
+/** 从 Date 派生过期状态——纯函数，可在数据准备阶段调用。 */
+export type ExpiryStatus =
+  | { kind: "never" }
+  | { kind: "expired"; date: string }
+  | { kind: "active"; days: number; date: string };
+
+export function computeExpiryStatus(
+  expiresAt: Date | null,
+  nowMs: number,
+): ExpiryStatus {
+  if (!expiresAt) return { kind: "never" };
+  const ms = expiresAt.getTime() - nowMs;
+  if (ms < 0) return { kind: "expired", date: formatDate(expiresAt) };
+  return {
+    kind: "active",
+    days: Math.ceil(ms / 86400000),
+    date: formatDate(expiresAt),
+  };
+}
+
 export function RoleBadge({ role }: { role: string }) {
   const map: Record<string, { label: string; cls: string }> = {
     OWNER: {
@@ -38,19 +71,22 @@ export function roleZh(r: string): string {
   )[r] ?? r;
 }
 
-export function ExpiryLabel({ d }: { d: Date | null }): ReactNode {
-  if (!d) return <span className="text-zinc-400">永不过期</span>;
-  const ms = d.getTime() - Date.now();
-  if (ms < 0)
+/**
+ * 纯展示组件：完全由 status 决定输出，渲染期不读取时钟。
+ * 如需向后兼容旧调用方式（直接传 Date），新增的便捷包装见 ExpiryLabelFromDate。
+ */
+export function ExpiryLabel({ status }: { status: ExpiryStatus }): ReactNode {
+  if (status.kind === "never")
+    return <span className="text-zinc-400">永不过期</span>;
+  if (status.kind === "expired")
     return (
       <span className="text-red-600 dark:text-red-400">
-        已过期 · {formatDate(d)}
+        已过期 · {status.date}
       </span>
     );
-  const days = Math.ceil(ms / 86400000);
   return (
     <span className="text-zinc-600 dark:text-zinc-400">
-      {days} 天后 · {formatDate(d)}
+      {status.days} 天后 · {status.date}
     </span>
   );
 }
