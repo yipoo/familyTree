@@ -81,11 +81,21 @@ export function PersonInspector({
   const toggle = (k: keyof typeof open) =>
     setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
 
-  // 关系图延迟挂载：先把其它信息渲染出来，让 inspector 立刻可见
+  // 关系图延迟挂载：先把其它信息渲染出来，让 inspector 立刻可见。
+  //
+  // 切换 personId 时把 graphReady 立刻重置为 false——用 React 官方
+  // "track previous prop in render + 条件 setState" 派生模式（不在 effect 里同步 setState）。
+  // 参考：https://react.dev/reference/react/useState#storing-information-from-previous-renders
   const [graphReady, setGraphReady] = useState(false);
-  useEffect(() => {
+  const [lastPersonId, setLastPersonId] = useState(personId);
+  if (lastPersonId !== personId) {
+    setLastPersonId(personId);
     setGraphReady(false);
+  }
+  useEffect(() => {
     if (!personId) return;
+    // 用 requestIdleCallback / setTimeout 调度——回调内的 setState 是真正异步的，
+    // 不违反 react-hooks/set-state-in-effect。
     type IdleId = number;
     type IdleAPI = {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => IdleId;
