@@ -31,40 +31,79 @@ export function LocationCombo({
   const [active, setActive] = useState(0);
   const ref = useRef<HTMLDivElement>(null);
 
-  // 外部 value 变化（如清空）→ 同步显示
-  useEffect(() => {
+  // 外部 value 变化时把内部 selected / q 同步——用 React 官方
+  // "track previous prop in render + 条件 setState" 派生模式，避免在 useEffect 中同步 setState。
+  // 参考：https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  const [lastValue, setLastValue] = useState(value);
+  if (lastValue !== value) {
+    setLastValue(value);
     if (!value) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
+      // 外部清空 → 内部状态一并清掉
       setSelected(null);
       setQ("");
-      return;
+    } else if (selected?.id !== value) {
+      // 外部传入新的 id 但缓存里还没对应 Option ——清掉旧 selected，下方 effect 异步去加载
+      setSelected(null);
     }
-    if (selected?.id === value) return;
-    fetch(`/api/families/${familyId}/locations/search?q=`)
-      .then(async (r) => (r.ok ? ((await r.json()).data as Option[]) : []))
-      .then((list) => {
+  }
+
+  // value 已设置但 selected 还未对上：去后端取一次（异步 setState，不违反规则）
+  const selectedId = selected?.id ?? null;
+  useEffect(() => {
+    if (!value) return;
+    if (selectedId === value) return;
+    let cancelled = false;
+    const ctrl = new AbortController();
+    (async () => {
+      try {
+        const r = await fetch(
+          `/api/families/${familyId}/locations/search?q=`,
+          { signal: ctrl.signal },
+        );
+        if (cancelled || !r.ok) return;
+        const list = (((await r.json()).data ?? []) as Option[]).filter(Boolean);
+        if (cancelled) return;
         const o = list.find((x) => x.id === value);
         if (o) {
           setSelected(o);
           setQ(o.short || o.fullText);
         }
-      })
-      .catch(() => {});
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [value, familyId]);
+      } catch {
+        // ignore（包含 AbortError / 网络错误）
+      }
+    })();
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+    };
+  }, [value, familyId, selectedId]);
 
+  // 下拉搜索：q / open / familyId 变化时拉候选项；setState 全部在 await 之后
   useEffect(() => {
-    const ctrl = new AbortController();
     if (!open) return;
-    fetch(`/api/families/${familyId}/locations/search?q=${encodeURIComponent(q)}`, {
-      signal: ctrl.signal,
-    })
-      .then((r) => (r.ok ? r.json() : { data: [] }))
-      .then((j) => setOpts(j.data ?? []))
-      .catch(() => {});
-    return () => ctrl.abort();
+    let cancelled = false;
+    const ctrl = new AbortController();
+    (async () => {
+      try {
+        const r = await fetch(
+          `/api/families/${familyId}/locations/search?q=${encodeURIComponent(q)}`,
+          { signal: ctrl.signal },
+        );
+        if (cancelled || !r.ok) return;
+        const j = await r.json();
+        if (cancelled) return;
+        setOpts((j.data ?? []) as Option[]);
+      } catch {
+        // ignore
+      }
+    })();
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+    };
   }, [familyId, q, open]);
 
+  // 关闭面板：点击外部
   useEffect(() => {
     function onDoc(e: MouseEvent) {
       if (!ref.current?.contains(e.target as Node)) setOpen(false);
@@ -76,8 +115,17 @@ export function LocationCombo({
   function pick(o: Option) {
     setSelected(o);
     setQ(o.short || o.fullText);
+    // 同步 lastValue，避免 onChange 触发外部 value 变化后又被 render 派生重置
+    setLastValue(o.id);
     onChange(o.id);
     setOpen(false);
+  }
+
+  function clear() {
+    setSelected(null);
+    setQ("");
+    setLastValue(null);
+    onChange(null);
   }
 
   return (
@@ -88,7 +136,10 @@ export function LocationCombo({
         onChange={(e) => {
           setQ(e.target.value);
           setOpen(true);
-          if (!e.target.value) onChange(null);
+          if (!e.target.value) {
+            setLastValue(null);
+            onChange(null);
+          }
         }}
         onFocus={() => setOpen(true)}
         onKeyDown={(e) => {
@@ -110,11 +161,7 @@ export function LocationCombo({
       {selected && (
         <button
           type="button"
-          onClick={() => {
-            setSelected(null);
-            setQ("");
-            onChange(null);
-          }}
+          onClick={clear}
           className="absolute right-1 top-1.5 text-xs text-zinc-400 hover:text-zinc-700"
           aria-label="清除"
         >
