@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { LineageTabs } from "@/components/LineageTabs";
 import { lineagePersonWhere, parseLineage } from "@/lib/services/lineage";
+import { StatsCards } from "@/components/stats/StatsCards";
+import { computeFamilyStats } from "@/lib/services/family-stats";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,8 @@ export default async function FamilyDetailPage({
   });
 
   if (!family) notFound();
+
+  const familyStats = await computeFamilyStats(familyId);
 
   const persons = await prisma.person.findMany({
     where: {
@@ -126,6 +130,16 @@ export default async function FamilyDetailPage({
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
+        {/* 视图统计卡片 */}
+        {familyStats && (
+          <section className="mb-8">
+            <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              概览
+            </h2>
+            <StatsCards familyId={familyId} stats={familyStats} />
+          </section>
+        )}
+
         {/* 字辈表 */}
         <section className="mb-8">
           <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">
