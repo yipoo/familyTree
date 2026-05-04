@@ -18,7 +18,7 @@ import {
   MarriageType,
   ParentRelation,
 } from "@/lib/generated/prisma/enums";
-import type { XlsxParseResult, XlsxRawPerson } from "@/lib/services/xlsx-import";
+import type { XlsxParseResult } from "@/lib/services/xlsx-import";
 
 export interface ImportStats {
   personsCreated: number;

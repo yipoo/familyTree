@@ -34,6 +34,7 @@ export function LocationCombo({
   // 外部 value 变化（如清空）→ 同步显示
   useEffect(() => {
     if (!value) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSelected(null);
       setQ("");
       return;
