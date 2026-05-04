@@ -36,16 +36,14 @@ export function PositionBar({
   const hThumbLeftPct = clamp(worldLeft / worldWidth, 0, 1);
   const hThumbWidthPct = clamp(visibleW / worldWidth, 0.02, 1);
 
+  // 单击轨道时跳转——独立 helper（仅 mousedown handler 里用一次）
   function jumpToWorldX(targetWorldLeft: number) {
     const x = -targetWorldLeft * zoom;
     rf.setViewport({ x, y: vy, zoom });
   }
-  function jumpToWorldY(targetWorldTop: number) {
-    const y = -targetWorldTop * zoom;
-    rf.setViewport({ x: vx, y, zoom });
-  }
 
-  // 横向拖拽 / 单击
+  // 横向 / 纵向拖拽：把跳转逻辑内联进 effect，依赖完整真实，无需 disable exhaustive-deps。
+  // （此前 jumpToWorldX/Y 两个 helper 在组件作用域，每次 render 都新建，放进 deps 会无限触发，所以以前用 disable 绕开。）
   useEffect(() => {
     if (!dragging) return;
     function onMove(e: MouseEvent) {
@@ -55,11 +53,13 @@ export function PositionBar({
         const ratio = clamp((e.clientX - rect.left) / rect.width, 0, 1);
         // 让点击位置成为视口中心
         const target = ratio * worldWidth - visibleW / 2;
-        jumpToWorldX(clamp(target, 0, Math.max(0, worldWidth - visibleW)));
+        const newLeft = clamp(target, 0, Math.max(0, worldWidth - visibleW));
+        rf.setViewport({ x: -newLeft * zoom, y: vy, zoom });
       } else {
         const ratio = clamp((e.clientY - rect.top) / rect.height, 0, 1);
         const target = ratio * worldHeight - visibleH / 2;
-        jumpToWorldY(clamp(target, 0, Math.max(0, worldHeight - visibleH)));
+        const newTop = clamp(target, 0, Math.max(0, worldHeight - visibleH));
+        rf.setViewport({ x: vx, y: -newTop * zoom, zoom });
       }
     }
     function onUp() {
@@ -71,8 +71,7 @@ export function PositionBar({
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dragging, worldWidth, worldHeight, visibleW, visibleH, vx, vy, zoom]);
+  }, [dragging, worldWidth, worldHeight, visibleW, visibleH, vx, vy, zoom, rf]);
 
   return (
     <div className="pointer-events-none absolute inset-x-0 top-0 z-20 flex items-center gap-2 px-2 pt-2 sm:px-3">
