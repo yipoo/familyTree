@@ -20,6 +20,9 @@ import { TREE_LAYOUT_CONSTS, type LayoutResult } from "@/lib/services/tree-layou
 
 const nodeTypes = { person: PersonNode };
 
+// 复用同一空 Set 以保持对象引用稳定（避免触发依赖 collapsedIds 的 memo 重算）
+const EMPTY_SET: Set<string> = new Set();
+
 /** 当前选中的人物 id；放进 Context，避免每次切换都重建 10K 节点数组 */
 export const SelectedIdContext = createContext<string | null>(null);
 
@@ -62,10 +65,15 @@ function TreeCanvasInner({
   const locateId = sp.get("locate");
   const locateNonce = sp.get("n");
 
-  // layout 改变时（如重新搜索/聚焦）重置折叠状态为"全部展开"
-  useEffect(() => {
-    setCollapsedIds(new Set());
-  }, [layout]);
+  // layout 改变时（如重新搜索/聚焦）重置折叠状态为"全部展开"。
+  // React 官方派生模式：track previous prop in render，条件性 setState。
+  // 不能用 useEffect+setState（会被 react-hooks/set-state-in-effect 命中）。
+  // 参考：https://react.dev/reference/react/useState#storing-information-from-previous-renders
+  const [lastLayout, setLastLayout] = useState(layout);
+  if (layout !== lastLayout) {
+    setLastLayout(layout);
+    setCollapsedIds(EMPTY_SET);
+  }
 
   // 父→子图（仅可见的父子边参与折叠语义）
   const childrenByParent = useMemo(() => {
@@ -96,10 +104,11 @@ function TreeCanvasInner({
   }, [collapsedIds, childrenByParent]);
 
   // ⚠️ 关键性能：不要把 selectedId 放进 deps，否则每次点击都重建 10K 节点
-  // 选中态通过 SelectedIdContext 读取，PersonNode 内自比 id
+  // 选中态通过 SelectedIdContext 读取，PersonNode 内自比 id。
+  //
+  // 此处禁止读取 performance.now() / Date.now() 等不纯函数（react-hooks/purity）；
+  // 原本的耗时日志已移除——开发态可用 React Profiler 替代。
   const { nodes, edges } = useMemo(() => {
-    const t0 =
-      typeof performance !== "undefined" ? performance.now() : 0;
     const ns: Node<PersonNodeData>[] = layout.nodes
       .filter((n) => !hiddenIds.has(n.id))
       .map((n) => {
@@ -141,11 +150,6 @@ function TreeCanvasInner({
             : { stroke: "#94a3b8", strokeWidth: 1.5 },
       }));
 
-    if (typeof performance !== "undefined") {
-      console.log(
-        `[tree] rebuild nodes/edges: ${ns.length} nodes, ${es.length} edges in ${(performance.now() - t0).toFixed(1)}ms`,
-      );
-    }
     return { nodes: ns, edges: es };
   }, [layout, hiddenIds, collapsedIds, childrenByParent, residenceByPersonId]);
 
@@ -171,7 +175,6 @@ function TreeCanvasInner({
   // 单击：通知父级更新 selectedId
   const handleNodeClick: NodeMouseHandler = useCallback(
     (_, n) => {
-      console.log(`[tree] node click: ${n.id}`, performance.now());
       onSelectChange(n.id);
     },
     [onSelectChange],
