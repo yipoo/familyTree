@@ -21,6 +21,7 @@ import {
   requireWriteOnPerson,
 } from "@/lib/auth/guard";
 import { resolveResidence } from "@/lib/services/residence";
+import { writeAudit } from "@/lib/services/audit";
 
 const partSchema = z.object({
   province: z.string().trim().max(20).optional().nullable(),
@@ -130,8 +131,10 @@ export async function PUT(
   ctx: { params: Promise<{ familyId: string; personId: string }> },
 ) {
   const { familyId, personId } = await ctx.params;
+  let actorId: string;
   try {
-    await requireWriteOnPerson(familyId, personId);
+    const c = await requireWriteOnPerson(familyId, personId);
+    actorId = c.user.id;
   } catch (e) {
     return authErrorResponse(e);
   }
@@ -173,6 +176,14 @@ export async function PUT(
     where: { id: personId },
     data: { residenceId: loc.id },
   });
+  await writeAudit({
+    familyId,
+    actorId,
+    kind: "UPDATE",
+    entity: "Person",
+    entityId: personId,
+    after: { residenceId: loc.id, residenceFullText: loc.fullText },
+  });
 
   return NextResponse.json({ data: { residence: loc } });
 }
@@ -182,8 +193,10 @@ export async function DELETE(
   ctx: { params: Promise<{ familyId: string; personId: string }> },
 ) {
   const { familyId, personId } = await ctx.params;
+  let actorId: string;
   try {
-    await requireWriteOnPerson(familyId, personId);
+    const c = await requireWriteOnPerson(familyId, personId);
+    actorId = c.user.id;
   } catch (e) {
     return authErrorResponse(e);
   }
@@ -191,6 +204,14 @@ export async function DELETE(
   await prisma.person.update({
     where: { id: personId },
     data: { residenceId: null },
+  });
+  await writeAudit({
+    familyId,
+    actorId,
+    kind: "UPDATE",
+    entity: "Person",
+    entityId: personId,
+    after: { residenceId: null },
   });
   return NextResponse.json({ data: { cleared: true } });
 }
