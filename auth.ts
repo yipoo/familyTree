@@ -7,9 +7,13 @@ import { prisma } from "@/lib/db";
 import { normalizePhone, verifyPassword } from "@/lib/auth/password";
 
 const credentialsSchema = z.object({
-  phone: z.string().min(1),
+  identifier: z.string().min(1).optional(),
+  phone: z.string().min(1).optional(),
+  email: z.string().min(1).optional(),
   password: z.string().min(1),
 });
+
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
 declare module "next-auth" {
   interface Session {
@@ -33,19 +37,28 @@ export const { handlers, auth, signIn, signOut } = NextAuth({
   ...authConfig,
   providers: [
     Credentials({
-      name: "phone-password",
+      name: "credentials",
       credentials: {
-        phone: { label: "手机号", type: "text" },
+        identifier: { label: "手机号或邮箱", type: "text" },
         password: { label: "密码", type: "password" },
       },
       async authorize(raw) {
         const parsed = credentialsSchema.safeParse(raw);
         if (!parsed.success) return null;
 
-        const phone = normalizePhone(parsed.data.phone);
-        if (!phone) return null;
+        const id = parsed.data.identifier ?? parsed.data.phone ?? parsed.data.email;
+        if (!id) return null;
 
-        const user = await prisma.user.findUnique({ where: { phone } });
+        let user = null as Awaited<ReturnType<typeof prisma.user.findUnique>> | null;
+        if (EMAIL_RE.test(id)) {
+          user = await prisma.user.findUnique({
+            where: { email: id.toLowerCase() },
+          });
+        } else {
+          const phone = normalizePhone(id);
+          if (!phone) return null;
+          user = await prisma.user.findUnique({ where: { phone } });
+        }
         if (!user || !user.passwordHash) return null;
 
         const ok = await verifyPassword(parsed.data.password, user.passwordHash);
