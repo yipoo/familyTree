@@ -29,6 +29,7 @@ export function AdminSidebar({
     { href: `${root}/generations`, label: "字辈表" },
     { href: `${root}/locations`, label: "居住地字典" },
     { href: `${root}/submissions`, label: "待审提交", badge: pendingCount },
+    { href: `${root}/migrations`, label: "支系迁徙" },
     { href: `${root}/import`, label: "数据导入" },
     { href: `${root}/audit`, label: "审计日志" },
   ];

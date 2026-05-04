@@ -23,6 +23,7 @@ import { prisma } from "@/lib/db";
 import { canWriteOnPerson } from "@/lib/auth/guard";
 import type { Gender, MarriageType } from "@/lib/generated/prisma/enums";
 import { PersonDetailActions } from "./PersonDetailActions";
+import { MigrationsPanel } from "@/components/migrations/MigrationsPanel";
 
 export const dynamic = "force-dynamic";
 
@@ -454,26 +455,15 @@ export default async function PersonDetailPage({
               </Card>
             )}
 
-            {/* 迁徙 */}
-            {person.migrations.length > 0 && (
-              <Card title={`迁徙（${person.migrations.length}）`}>
-                <ol className="space-y-1.5 text-sm">
-                  {person.migrations.map((m) => (
-                    <li key={m.id} className="flex flex-wrap items-baseline gap-2">
-                      <span className="font-mono text-xs text-zinc-500">
-                        {m.year ?? "—"}
-                      </span>
-                      <span>
-                        {m.fromLocation?.fullText ?? "—"} → {m.toLocation?.fullText ?? "—"}
-                      </span>
-                      {m.reason && (
-                        <span className="text-xs text-zinc-500">（{m.reason}）</span>
-                      )}
-                    </li>
-                  ))}
-                </ol>
-              </Card>
-            )}
+            {/* 迁徙：客户端面板，可读+可写 */}
+            <Card title={`迁徙（${person.migrations.length}）`}>
+              <MigrationsPanel
+                familyId={familyId}
+                scope="PERSON"
+                personId={personId}
+                canEdit={canEdit}
+              />
+            </Card>
           </section>
 
           {/* ---------------- 边栏 ---------------- */}
