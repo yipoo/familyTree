@@ -1,0 +1,60 @@
+import { notFound, redirect } from "next/navigation";
+
+import { prisma } from "@/lib/db";
+import { canManageFamily } from "./actions";
+import { AdminSidebar } from "./AdminSidebar";
+
+export const dynamic = "force-dynamic";
+
+export default async function AdminLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ familyId: string }>;
+}) {
+  const { familyId } = await params;
+  if (!(await canManageFamily(familyId))) redirect(`/f/${familyId}`);
+
+  const family = await prisma.family.findUnique({
+    where: { id: familyId },
+    select: { id: true, name: true, surname: true, deletedAt: true },
+  });
+  if (!family || family.deletedAt) notFound();
+
+  // 待审数量（badge）
+  const pendingCount = await prisma.pendingSubmission.count({
+    where: { familyId, status: "PENDING" },
+  });
+
+  return (
+    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+      <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
+        {/* 左侧菜单 */}
+        <aside className="hidden w-56 shrink-0 lg:block">
+          <div className="sticky top-16">
+            <p className="mb-2 px-2 text-xs uppercase tracking-wider text-zinc-400">
+              {family.name} · 后台
+            </p>
+            <AdminSidebar familyId={familyId} pendingCount={pendingCount} />
+          </div>
+        </aside>
+
+        {/* 右侧内容 */}
+        <main className="min-w-0 flex-1">
+          {/* 移动端横向菜单 */}
+          <div className="mb-4 lg:hidden">
+            <h1 className="mb-2 text-lg font-semibold">{family.name} · 后台</h1>
+            <AdminSidebar
+              familyId={familyId}
+              pendingCount={pendingCount}
+              horizontal
+            />
+          </div>
+
+          <div className="space-y-6">{children}</div>
+        </main>
+      </div>
+    </div>
+  );
+}

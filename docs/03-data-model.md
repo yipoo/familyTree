@@ -1,114 +1,319 @@
 # 数据模型
 
-本文档定义核心业务实体、关键字段与一致性规则。实现时以 **Prisma** 建模（`schema.prisma` 与迁移对齐本文）；命名采用 `snake_case` 表名示例。
+> 版本：v0.1（草案）
+> 配套：`01-requirements.md`、`02-architecture.md`
+> ORM：Prisma；DB：PostgreSQL
 
-## 1. 标识与软删除
+## 1. ER 总览
 
-- 主键：`uuid` 或 `bigint` 均可；对外暴露建议 UUID。
-- 所有业务表：`tenant_id NOT NULL`。
-- 软删除：`deleted_at timestamptz NULL`；唯一约束需包含 `deleted_at` 或使用部分唯一索引。
-- 时间戳：`created_at`, `updated_at`；审计表另含 `actor_user_id`, `ip`, `payload`。
-
-## 2. 实体关系概览（ER 摘要）
-
-```mermaid
-erDiagram
-  TENANT ||--o{ TENANT_MEMBER : has
-  USER ||--o{ TENANT_MEMBER : joins
-  TENANT ||--o{ PERSON : owns
-  PERSON ||--o{ PERSON_NAME : aliases
-  PERSON ||--o{ RELATIONSHIP : endpoints
-  FAMILY ||--o{ FAMILY_MEMBER : contains
-  PERSON ||--o{ EVENT_PARTICIPANT : participates
-  EVENT }o--|| EVENT_TYPE : typed
-  PERSON ||--o{ MEDIA_LINK : has
-  MEDIA_ASSET }o--|| MEDIA_LINK : referenced
-  PERSON ||--o{ CITATION : cites
-  MERGE_JOB ||--o{ AUDIT_LOG : logs
-  STATS_SNAPSHOT }o--|| TENANT : for
+```
+User ──< FamilyMember >── Family ──< Branch
+                              │       │
+                              │       └──< Migration (支系级)
+                              │
+                              ├──< GenerationName  (字辈表，固定)
+                              ├──< Person ──< Marriage >── Person
+                              │       │
+                              │       ├──< ParentChild (作为 child)
+                              │       ├──< ParentChild (作为 parent)
+                              │       ├──< Migration (个人级)
+                              │       └──< PersonLocation
+                              │
+                              ├──< ShareLink
+                              └──< AuditLog
 ```
 
-## 3. 表清单（逻辑）
+## 2. 表定义（Prisma 风格伪代码）
 
-### 3.1 组织与成员
+### 2.1 用户与家族成员
 
-| 表 | 说明 |
-|----|------|
-| `tenant` | 空间：名称、配置 JSON、状态。 |
-| `tenant_member` | `user_id`, `tenant_id`, 角色集合、可选 `branch_root_person_id` 范围。 |
-| `invitation` | 邀请 token、过期时间、预分配角色与范围。 |
+```prisma
+model User {
+  id            String   @id @default(cuid())
+  email         String?  @unique
+  phone         String?  @unique
+  passwordHash  String?
+  name          String
+  avatarUrl     String?
+  createdAt     DateTime @default(now())
+  members       FamilyMember[]
+}
 
-### 3.2 家谱核心
+model Family {
+  id            String   @id @default(cuid())
+  surname       String                    // 姓氏，如"丁"
+  name          String                    // 显示名，如"丁氏家族"
+  founderName   String?                   // 始祖姓名
+  description   String?
+  ownerId       String                    // 创建者 user.id
+  createdAt     DateTime @default(now())
 
-| 表 | 说明 |
-|----|------|
-| `person` | 人员主档：性别、存殁、默认显示名、隐私模板引用、合并目标指针（被合并指向存活者）。 |
-| `person_external_id` | 导入外部 ID 映射，`(tenant_id, source, external_id)` 唯一。 |
-| `person_name` | 别名行：类型（谱名/字/号…）、文本、默认标记。 |
-| `life_dates` | 生卒：历法、精度、日期起止、地点 FK（可选拆表）。 |
-| `relationship` | `person_a`, `person_b`, `type`, `metadata` JSONB；有序亲子用 `parent_id`,`child_id` 更清晰——实现二选一并文档化。 |
-| `family` | 可选家庭单元；`family_member`：`role`（父/母/子）。 |
-| `generation_title` | 字辈行：代数、用字、说明。 |
+  members          FamilyMember[]
+  generationNames  GenerationName[]
+  persons          Person[]
+  branches         Branch[]
+  migrations       Migration[]
+  shareLinks       ShareLink[]
+}
 
-### 3.3 事件与地点
+enum FamilyRole { OWNER ADMIN MEMBER GUEST }
 
-| 表 | 说明 |
-|----|------|
-| `place` | 规范化地点：层级、别名、坐标。 |
-| `event` | 类型、时间表达、地点 FK、描述、可见性。 |
-| `event_participant` | 多对多：人物与角色（主角/配偶等）。 |
+model FamilyMember {
+  id        String     @id @default(cuid())
+  userId    String
+  familyId  String
+  role      FamilyRole
+  // 该成员对应族谱里的哪个人物（用于"补录自己分支"权限判定）
+  personId  String?
+  joinedAt  DateTime   @default(now())
 
-### 3.4 媒体与来源
+  @@unique([userId, familyId])
+  @@index([familyId])
+}
+```
 
-| 表 | 说明 |
-|----|------|
-| `media_asset` | 存储 key、mime、大小、checksum、版权元数据。 |
-| `media_link` | 关联 `person` 或 `event`。 |
-| `citation` | 来源：类型、标题、URL、页码、摘录、`subject`（多态指向 person/event/relationship）。 |
+### 2.2 字辈表（固定）
 
-### 3.5 协作与审计
+```prisma
+model GenerationName {
+  id          String  @id @default(cuid())
+  familyId    String
+  generation  Int                     // 第几世，从 1 开始
+  character   String                  // 该世字辈用字，如"良"
 
-| 表 | 说明 |
-|----|------|
-| `change_request` | 修订工单：JSON diff 或关联草稿表、状态、审阅人。 |
-| `comment` | 多态关联 + threaded `parent_comment_id`。 |
-| `audit_log` | 不可篡改追加：动作类型、资源指针、前后摘要（或 JSON patch）。 |
+  @@unique([familyId, generation])
+  @@index([familyId])
+}
+```
 
-### 3.6 谱书与版本
+> 一次性录入，普通流程不动态扩展；管理员显式编辑作为纠错入口。
 
-| 表 | 说明 |
-|----|------|
-| `pedigree_snapshot` | 版本元数据：创建时间、创建者、说明。 |
-| `pedigree_snapshot_entity` | 大快照可存对象存储指针；小空间可内嵌 JSONB（注意体积）。 |
+### 2.3 人物
 
-### 3.7 导入与统计
+```prisma
+enum Gender { MALE FEMALE UNKNOWN }
+enum LifeStatus { ALIVE DECEASED LOST UNKNOWN }
 
-| 表 | 说明 |
-|----|------|
-| `import_job`, `import_staging_*` | 任务状态、暂存行、错误报告路径。 |
-| `export_job` | 类型、状态、输出 URL、过期时间。 |
-| `stats_snapshot` | `tenant_id`, `filter_hash`, `metric_key`, `payload` JSONB, `computed_at`。 |
+model Person {
+  id            String     @id @default(cuid())
+  familyId      String                       // 多租户键
+  branchId      String?                      // 所属支系（可空）
+  name          String                       // 姓名（含全名或"X氏"）
+  surnameOnly   Boolean    @default(false)   // 仅记姓（嫁入女性常见）
+  gender        Gender
+  generation    Int                          // 第几世
+  generationChar String?                     // 该人字辈用字（冗余，便于显示）
+  birthYear     Int?
+  deathYear     Int?
+  birthDate     String?                      // 农历或不完整日期，存原文
+  deathDate     String?
+  status        LifeStatus @default(ALIVE)
+  avatarUrl     String?
+  note          String?
 
-## 4. 关键一致性规则
+  // 是否由"嫁入/入赘"产生（关系另存于 Marriage，这里只是显示用标记）
+  isMarriedIn   Boolean    @default(false)
 
-1. **有向亲子图**：在同一 `tenant_id` 内，以「父母→子女」有向边构成的图须无环（允许多父的合法情况需在规则中明确：通常检测「生物直系」子图）。
-2. **配偶对称**：配偶边可存一条或两条对称记录；必须约定唯一性，避免重复。
-3. **合并后引用**：所有外键指向被删人员时，合并任务须重写为存活人员。
-4. **删除策略**：人员默认软删除；物理删除仅运维脚本且需离线备份。
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-## 5. 索引建议（非穷尽）
+  // 关系反向引用
+  marriagesAsHusband Marriage[]    @relation("husband")
+  marriagesAsWife    Marriage[]    @relation("wife")
+  childRelations     ParentChild[] @relation("childSide")
+  parentRelations    ParentChild[] @relation("parentSide")
+  locations          PersonLocation[]
+  migrations         Migration[]   @relation("personMigration")
 
-- `person(tenant_id, deleted_at)`；搜索常用 `(tenant_id, lower(primary_name))`。
-- `relationship(tenant_id, parent_id)`、`(tenant_id, child_id)`（若拆亲子列）。
-- `event(tenant_id, date_start)` BRIN 或 B-tree（视数据量）。
-- `audit_log(tenant_id, created_at DESC)`。
-- `stats_snapshot(tenant_id, filter_hash, metric_key)` 唯一。
+  @@index([familyId, generation])
+  @@index([familyId, branchId])
+  @@index([familyId, name])
+}
+```
 
-## 6. 行级安全（可选）
+### 2.4 婚姻（含原配/继配/入赘）
 
-PostgreSQL RLS 可将 `tenant_id = current_setting('app.tenant')` 作为策略；应用层仍须校验权限，RLS 作为纵深防御。
+```prisma
+enum MarriageType { PRIMARY SECONDARY CONCUBINE UXORILOCAL }
+//   PRIMARY=原配  SECONDARY=继配  CONCUBINE=妾（历史数据）  UXORILOCAL=入赘
 
-## 7. JSONB 使用边界
+model Marriage {
+  id           String        @id @default(cuid())
+  familyId     String
+  husbandId    String                     // 男方 person.id
+  wifeId       String                     // 女方 person.id
+  type         MarriageType  @default(PRIMARY)
+  order        Int           @default(1)  // 该男方/女方的婚姻次序
+  marriedYear  Int?
+  endedYear    Int?
+  endedReason  String?                    // 离/丧/...
+  note         String?
 
-- **适合**：扩展属性、导入原始字段、统计快照。
-- **不适合**：需要强约束的外键关系（仍用正规列）。
+  husband      Person        @relation("husband", fields: [husbandId], references: [id])
+  wife         Person        @relation("wife",    fields: [wifeId],    references: [id])
+
+  @@index([familyId, husbandId])
+  @@index([familyId, wifeId])
+}
+```
+
+> 招赘语义：`type = UXORILOCAL` 时，该婚姻所产子女的 `Person.familyId / branchId / generation` 按**女方**家族登记；男方 `Person.isMarriedIn = true`。
+
+### 2.5 亲子（支持过继）
+
+```prisma
+enum ParentRelation { BIOLOGICAL ADOPTED FOSTER STEP }
+
+model ParentChild {
+  id           String          @id @default(cuid())
+  familyId     String
+  parentId     String                       // 父或母
+  childId      String
+  relation     ParentRelation  @default(BIOLOGICAL)
+  birthOrder   Int?                          // 子女排行（同一对父母下）
+  isPrimary    Boolean         @default(true) // 是否登记为主要父母（过继时区分生/养）
+
+  parent       Person          @relation("parentSide", fields: [parentId], references: [id])
+  child        Person          @relation("childSide",  fields: [childId],  references: [id])
+
+  @@unique([parentId, childId, relation])
+  @@index([familyId, parentId])
+  @@index([familyId, childId])
+}
+```
+
+> 一个孩子可以有多条 `ParentChild`（生父+生母+养父+养母），用 `relation` 与 `isPrimary` 区分。
+
+### 2.6 支系
+
+```prisma
+model Branch {
+  id            String   @id @default(cuid())
+  familyId      String
+  name          String                    // 如"十七世训贤支"
+  rootPersonId  String                    // 支系根人物
+  locationId    String?                   // 现住地
+  description   String?
+
+  migrations    Migration[]
+
+  @@index([familyId])
+}
+```
+
+### 2.7 地点与迁徙
+
+```prisma
+model Location {
+  id          String  @id @default(cuid())
+  province    String?
+  city        String?
+  county      String?
+  town        String?
+  village     String?
+  detail      String?       // 门牌、自由文本
+  fullText    String        // 拼接全名，便于搜索
+}
+
+model PersonLocation {
+  id          String   @id @default(cuid())
+  personId    String
+  locationId  String
+  fromYear    Int?
+  toYear      Int?
+  isCurrent   Boolean  @default(false)
+}
+
+enum MigrationScope { BRANCH PERSON }
+
+model Migration {
+  id            String          @id @default(cuid())
+  familyId      String
+  scope         MigrationScope            // 支系级 or 个人级
+  branchId      String?                   // scope=BRANCH 时
+  personId      String?                   // scope=PERSON 时
+  year          Int?
+  fromLocationId String?
+  toLocationId   String?
+  reason        String?                   // "分居" "塌陷" "战乱" 等
+  note          String?
+
+  person        Person?  @relation("personMigration", fields: [personId], references: [id])
+
+  @@index([familyId, branchId])
+  @@index([familyId, personId])
+}
+```
+
+### 2.8 协作 / 分享 / 审计
+
+```prisma
+model ShareLink {
+  id          String   @id @default(cuid())
+  familyId    String
+  token       String   @unique
+  scope       Json                   // 可见范围：整族 / 某支系 / 某人
+  expiresAt   DateTime?
+  passwordHash String?
+  createdBy   String
+  createdAt   DateTime @default(now())
+}
+
+enum ChangeKind { CREATE UPDATE DELETE APPROVE REJECT }
+
+model AuditLog {
+  id          String     @id @default(cuid())
+  familyId    String
+  actorId     String                 // user.id
+  kind        ChangeKind
+  entity      String                 // "Person" | "Marriage" | ...
+  entityId    String
+  before      Json?
+  after       Json?
+  createdAt   DateTime   @default(now())
+
+  @@index([familyId, createdAt])
+}
+
+enum SubmissionStatus { PENDING APPROVED REJECTED }
+
+model PendingSubmission {
+  id          String           @id @default(cuid())
+  familyId    String
+  submitterId String                       // 普通成员
+  payload     Json                         // 待写入的人物/关系草稿
+  status      SubmissionStatus @default(PENDING)
+  reviewerId  String?
+  reviewNote  String?
+  createdAt   DateTime         @default(now())
+  reviewedAt  DateTime?
+
+  @@index([familyId, status])
+}
+```
+
+## 3. 关键约束与一致性
+
+1. **多租户**：所有业务表必带 `familyId`；外键引用必须同 `familyId`（应用层校验）
+2. **世代单调**：`Person.generation = parent.generation + 1`（除入赘的特殊归属逻辑）
+3. **字辈一致**：`Person.generationChar` 应与 `GenerationName{ familyId, generation }.character` 一致；不一致需提示
+4. **婚姻次序**：同一 `husbandId` 下 `(order)` 唯一且连续；`PRIMARY` 仅一条
+5. **删除策略**：人物默认软删（增加 `deletedAt`），保留审计；硬删仅 Owner 可执行
+
+## 4. 索引与性能
+
+- 树渲染主查询：`Person where familyId AND (branchId IN ...) ORDER BY generation, birthOrder`
+- 近亲查询：以 `personId` 为根做内存 BFS，预先一次性加载族内所有 `Person + ParentChild + Marriage`
+- 单族数据量预估：≤ 5000 人 / ≤ 8000 关系 / ≤ 2000 迁徙记录，全量加载内存即可
+
+## 5. 迁移与种子数据
+
+- 初始迁移由 Prisma 生成
+- 提供丁氏家族 demo 种子（基于 `docs/2.png`、`docs/详细图.pdf`）用于本地开发与演示
+- 字辈示例：`良 / 允 / 贤 / 方 / 正 / 维 / 先 / 克`
+
+## 6. 待定 / 后续
+
+- GEDCOM 互通字段映射（远期）
+- 多媒体（家族照片、墓地照片、扫描件）模型扩展
+- 全文搜索：一期用 PostgreSQL `pg_trgm`；远期可接 ElasticSearch

@@ -1,177 +1,185 @@
 # 系统架构
 
-本文档描述家谱 Web 系统的逻辑架构、物理部署视图、核心数据流与非功能约束。具体表结构见 `03-data-model.md`，API 路径约定见 `04-api-design.md`。
+> 版本：v0.1（草案）
+> 配套：`01-requirements.md`、`03-data-model.md`、`12-tech-stack.md`
 
-## 1. 架构目标
+## 1. 总体原则
 
-| 目标 | 说明 |
-|------|------|
-| 多租户隔离 | 空间（Tenant）之间数据与配置严格隔离。 |
-| 可演进 | 领域模型稳定，统计与报表可独立迭代。 |
-| 可审计 | 关键写操作留痕；支持谱书快照与恢复点。 |
-| 可扩展 | 万级人员规模下树浏览与统计查询可用（依赖索引与异步预聚合策略）。 |
+1. **API 优先**：所有端（Web、App、小程序）通过同一套 HTTP API 访问数据，前端不直连数据库
+2. **Web 一期，多端二期**：Web 阶段使用 Next.js 全栈（同进程 API Routes）以降低复杂度；二期 App / 小程序接入时若 API Routes 仍能满足，则不强行拆分
+3. **多租户硬隔离**：所有业务表带 `family_id`，每次查询强制注入；权限层在 API 边界统一校验
+4. **展示与业务分层**：业务逻辑（关系推导、字辈计算、近亲过滤等）封装为纯函数 / Service，不与渲染耦合，便于多端复用
+5. **响应式而非两套代码**：Web 一期通过断点 + 组件自适应同时覆盖桌面与手机浏览器，不做独立 m 站
 
-## 2. 高层逻辑架构
+## 2. 分层
 
-```mermaid
-flowchart TB
-  subgraph clients["客户端"]
-    Web["Next.js（浏览器 + RSC）"]
-  end
-
-  subgraph edge["边缘层"]
-    CDN["静态资源 CDN"]
-    WAF["WAF / 限流"]
-  end
-
-  subgraph app["应用层"]
-    API["Next Route Handlers / Server Actions"]
-    Worker["异步任务 Worker"]
-    Realtime["可选 Realtime 通道"]
-  end
-
-  subgraph data["数据层"]
-    DB[(关系型数据库 PostgreSQL)]
-    Obj["对象存储 媒体/导出"]
-    Cache[(Redis 会话与热点)]
-    Search["可选 全文检索 OpenSearch"]
-  end
-
-  Web --> CDN
-  Web --> WAF --> API
-  API --> DB
-  API --> Cache
-  API --> Obj
-  API --> Worker
-  Worker --> DB
-  Worker --> Obj
-  API -.-> Realtime
-  Realtime -.-> Web
-  API -.-> Search
+```
+┌─────────────────────────────────────────────────────────┐
+│  客户端                                                  │
+│  ├─ Web（Next.js, 一期）—— 桌面 / 平板 / 手机浏览器       │
+│  ├─ App（iOS / Android, 二期）                           │
+│  └─ 微信小程序（二期，轻浏览 + 分享）                     │
+└──────────────────────┬──────────────────────────────────┘
+                       │ HTTPS / JSON
+┌──────────────────────▼──────────────────────────────────┐
+│  API 层（Next.js API Routes）                            │
+│  ├─ 认证 / 会话                                          │
+│  ├─ 权限（按 family_id + 角色校验）                       │
+│  ├─ 资源路由：family / person / relation / migration ... │
+│  └─ 导出：PDF / Excel / GEDCOM                           │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│  Service 层（纯逻辑，可单测）                             │
+│  ├─ 世代/字辈推导                                         │
+│  ├─ 关系推导（近亲、父系、母系子图）                       │
+│  ├─ 家庭单元构造（详细图行级语义）                         │
+│  ├─ 吊线图布局算法                                        │
+│  └─ 册谱渲染（套模板）                                    │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│  数据访问层（Prisma）                                     │
+└──────────────────────┬──────────────────────────────────┘
+                       │
+┌──────────────────────▼──────────────────────────────────┐
+│  PostgreSQL                                              │
+└─────────────────────────────────────────────────────────┘
 ```
 
-### 2.1 组件职责
+## 3. 前端（Web 一期）
 
-- **Web SPA**：家谱可视化、表单、统计图表、权限 UI；不持久化业务机密。
-- **API 服务**：认证授权、领域校验、事务性写入、查询编排、生成导出任务。
-- **异步 Worker**：GEDCOM/大表导入解析、PDF 生成、批量重算统计快照、邮件/Webhook。
-- **关系型 DB**：人员、关系、事件、权限、审计、工单、版本快照元数据。
-- **对象存储**：媒体原文件、导出文件、大备份包；由 API 签发预签名 URL。
-- **Redis**：会话、限流计数、短期统计缓存、分布式锁（导入单空间互斥等）。
-- **全文检索（可选）**：人物/传记/别名搜索；无则 PostgreSQL `pg_trgm` / GIN 降级。
+### 3.1 技术栈
+- **Next.js 15+ App Router**（已初始化）
+- **Tailwind CSS**：响应式断点
+- **shadcn/ui**：基础组件
+- **React Flow**：交互式树谱渲染（推荐，支持节点自定义、缩放、平移；性能优于 D3 自渲染）
+- **react-pdf / @react-pdf/renderer**：册谱 PDF 输出
+- **TanStack Query**：服务端状态
+- **Zustand**：少量本地 UI 状态
 
-## 3. 多租户模型
+### 3.2 响应式断点
 
-- **TenantId** 贯穿所有业务表；连接池层或 ORM 层强制 `tenant_id` 过滤（防呆查询封装）。
-- 超级运维角色跨租户只读需单独审批流程与审计（默认关闭）。
+| 断点 | 适用 | 布局 |
+|---|---|---|
+| `< 768px` | 手机浏览器 | 单栏 + 底部 Tab；左侧世代轴竖排折叠；浮动操作按钮 |
+| `768–1279px` | 平板 | 单栏；顶部导航；世代轴可固定/折叠 |
+| `≥ 1280px` | 桌面 | 左右分栏：左侧世代轴+大纲，主区树谱，右侧详情抽屉 |
 
-## 4. 有界上下文（DDD 划分建议）
+实现：Tailwind `sm:` `md:` `lg:` 前缀；树谱节点尺寸自适应；触屏手势（pinch zoom、双指拖动）通过 React Flow 内建支持。
 
-| 上下文 | 职责 | 对外暴露 |
-|--------|------|----------|
-| Identity | 用户、会话、MFA、空间成员资格 | JWT / Session 声明含 `tenant_roles` |
-| Genealogy | 人员、关系、家庭、事件、地点、字辈 | REST + 领域事件 |
-| Media | 文件元数据、存储 key、关联 | REST + 回调 |
-| Collaboration | 工单、评论、通知 | REST + 可选 WebSocket |
-| Statistics | 指标定义、物化快照、查询 API | 只读 REST |
-| Publishing | 谱书版本快照、冻结规则 | REST |
-| Admin | 字典、空间配置、用量 | REST |
+### 3.3 页面结构（信息架构）
 
-上下文之间通过 **应用服务编排** 或 **领域事件**（同一进程内可简化为事务后钩子；多服务时用消息队列）同步，避免循环依赖。
-
-## 5. 核心请求路径
-
-### 5.1 读家谱子树
-
-1. 客户端请求 `GET /trees/subtree?rootId=&depth=`（示例，见 API 文档定稿）。
-2. API 校验用户对该 `rootId` 子树的 `read` 权限。
-3. 从 DB 读取人员与关系边（分页或按层）；敏感字段按策略剥离。
-4. 可选：Redis 缓存子树 JSON（键含 `tenant + root + depth + policy_version`）。
-
-### 5.2 写关系（事务边界）
-
-1. `POST` 关系创建 → 校验两端人员可见、无环路（对「亲子」有向边做 DAG 检测）、业务规则（如单亲重复）。
-2. 同一事务写入 `relationship` + `audit_log`；发布内部事件 `RelationshipChanged`。
-3. Worker 订阅事件：将受影响子树加入 **统计重算队列**（防抖合并同一租户任务）。
-
-### 5.3 统计查询
-
-- **在线聚合**：简单计数、分代直方图可由 SQL 直接算（依赖索引）。
-- **重快照**：复杂报表或大数据量时由 Worker 写入 `stats_snapshot` 表，前端读快照 + `computed_at`。
-- 所有统计接口必须接受 **筛选器**（房支根、时间窗、存殁等）并返回 `sample_size` 与 `excluded_reasons` 摘要。
-
-## 6. 权限架构
-
-- **认证**：JWT（短期）+ Refresh Token 旋转；或 Session Cookie（HttpOnly）。
-- **授权模型**：RBAC + ABAC 混合——角色决定默认能力，**数据范围**（房支/子树）与 **字段策略** 用属性规则解析（见 `05-security-privacy.md`）。
-- **强制过滤**：列表与详情在数据库查询层附加权限谓词，禁止仅在前端隐藏。
-
-## 7. 合并人员与冲突处理
-
-- 合并操作为 **异步长事务**：先锁定两人记录 → 生成 `merge_plan` → 人工确认（或工单批准）→ Worker 执行重映射外键 → 软删被并人员 → 审计。
-- 并发合并同一人员：数据库唯一约束 + 应用层幂等键（`Idempotency-Key` header）。
-
-## 8. 导入导出架构
-
-- 大文件上传 → 对象存储临时区 → Worker 流式解析 GEDCOM/CSV → 暂存 `import_staging` 表 → 校验报告 → 用户确认映射 → 批量提交事务（分批提交降低锁时间）。
-- 导出：API 创建 `export_job` → Worker 生成文件 → 对象存储 → 返回限时下载链接。
-
-## 9. 实时性（可选）
-
-- 评论与工单通知：优先轮询或 SSE；若需强实时再引入 WebSocket 服务，与 API 分离以简化水平扩展。
-
-## 10. 技术栈（已定）
-
-**Next.js（App Router）+ PostgreSQL** 为全项目核心栈；细节、版本约束、连接池与 Worker 方案见 **[`12-tech-stack.md`](./12-tech-stack.md)**，决策记录见 **[`adr/002-nextjs-postgresql.md`](./adr/002-nextjs-postgresql.md)**。
-
-| 层级 | 选型 |
-|------|------|
-| Web | Next.js、React、TypeScript |
-| 数据 | PostgreSQL；ORM **Prisma** + Prisma Migrate |
-| 长作业 | 独立 Worker（BullMQ 等）或托管队列（Inngest 等） |
-| 家谱图 | 自研布局 + Canvas/SVG；Client Component 承载交互 |
-
-其他组件（Redis、对象存储、Auth.js）以 `12-tech-stack.md` 为准。
-
-## 11. 部署拓扑（生产参考）
-
-```mermaid
-flowchart LR
-  LB[负载均衡]
-  API1[API 副本]
-  API2[API 副本]
-  WR1[Worker]
-  WR2[Worker]
-  LB --> API1
-  LB --> API2
-  API1 --> PG[(PostgreSQL 主)]
-  API2 --> PG
-  PG --> PGR[(只读副本 可选)]
-  API1 --> R[(Redis)]
-  API2 --> R
-  WR1 --> PG
-  WR2 --> PG
-  WR1 --> S3[(对象存储)]
+```
+/                       概览/我的家族
+/f/[familyId]/tree      树谱
+/f/[familyId]/scroll    吊线图（整族 / 支系）
+/f/[familyId]/table     详细图
+/f/[familyId]/book      册谱（模板预览 + 导出）
+/f/[familyId]/admin     管理（成员、字辈表、审核）
+/f/[familyId]/p/[id]    人物详情
+/share/[token]          只读分享链接
+/discover               发现（远期）
+/me                     账户
 ```
 
-- 数据库主从：统计只读查询可走副本（注意延迟）。
-- Worker 与 API **分离进程**，避免 PDF/GEDCOM 阻塞 HTTP 线程。
+### 3.4 关键组件
 
-## 12. 观测与运维钩子
+- `<TreeCanvas>`：基于 React Flow，支持父系/母系/近亲/全部模式切换
+- `<GenerationAxis>`：世代+字辈轴，固定左侧或顶部
+- `<PersonCard>`：节点卡片，男蓝女粉，头像+姓名
+- `<PersonDetailDrawer>`：详情抽屉
+- `<ScrollChart>`：吊线图（SVG 渲染，可截图/导出 PDF）
+- `<DetailTable>`：详细图表格
+- `<BookTemplateRenderer>`：套模板的册谱预览与 PDF 导出
 
-- **日志**：结构化 JSON；请求 `trace_id` 贯穿。
-- **指标**：HTTP 延迟、错误率、Worker 队列深度、导入失败率。
-- **追踪**：OpenTelemetry（可选）。
-- **健康检查**：`/healthz`（浅）、`/readyz`（含 DB ping）。
+## 4. API 设计概览
 
-## 13. 架构决策记录（ADR）
+详细路由见 `04-api-design.md`。约定：
 
-重大决策（多租户方案、是否上 OpenSearch、JWT vs Session）以 `docs/adr/NNN-title.md` 追加；已定栈见 `002`。
+- RESTful 风格 + 资源嵌套：`/api/families/:fid/persons/:pid`
+- 写操作返回受影响实体的最新状态，避免前端二次拉取
+- 列表接口默认分页（`?cursor=&limit=`）
+- 所有 API 强制鉴权（除 `/share/[token]` 通道）
+- 树渲染数据通过专用接口 `/api/families/:fid/graph?mode=paternal|maternal|kin5|all&center=:pid` 一次性返回，避免 N+1
 
-## 14. 与后续文档的映射
+## 5. 认证与权限
 
-- 表与 ER：`03-data-model.md`
-- URL 与资源：`04-api-design.md`
-- 字段级隐私与审计细节：`05-security-privacy.md`
-- 前端模块与家谱性能：`06-frontend-architecture.md`
-- 运行时与依赖版本：`12-tech-stack.md`
+- **认证**：邮箱+密码 / 手机号验证码 / 微信扫码（远期）。一期使用 Auth.js（NextAuth）
+- **角色**（per-family）：Owner / Admin / Member / Guest
+- **权限矩阵**：
+
+| 操作 | Owner | Admin | Member | Guest |
+|---|---|---|---|---|
+| 查看 | ✓ | ✓ | ✓ | 仅公开/分享 |
+| 编辑全族 | ✓ | ✓ | ✗ | ✗ |
+| 补录自己分支 | ✓ | ✓ | ✓（待审核）| ✗ |
+| 邀请成员 | ✓ | ✓ | ✗ | ✗ |
+| 字辈表修订 | ✓ | ✓ | ✗ | ✗ |
+| 转让/删除家族 | ✓ | ✗ | ✗ | ✗ |
+
+- **多租户隔离**：在 API 中间件强制根据 `session.user → familyMember.family_id` 过滤；所有 Prisma 查询通过统一 wrapper 注入 `where: { familyId }`
+
+## 6. 关键算法 / Service
+
+### 6.1 世代与字辈推导
+- 新增人物指派父母时，自动 `generation = parent.generation + 1`
+- 按 `family.generationNames[generation]` 自动提示用字
+- 入赘场景：子女的 `generation` 与 `branchFamilyId` 取**女方**家族
+- 字辈表固定：变更时校验所有受影响人物，警示管理员
+
+### 6.2 近亲过滤（5 代）
+以中心人物 `P` 为根做双向 BFS：
+- 上行：父母 → ... 共 5 代祖先
+- 下行：子女 → ... 共 5 代后代
+- 旁支：祖先的所有后代，按到 `P` 的最近公共祖先距离 ≤ 5 代纳入
+- 实现为内存图算法，单族 1000+ 人下 < 50ms
+
+### 6.3 家庭单元构造（详细图）
+- 输入：所有 `Marriage` + `ParentChild`
+- 输出：每行 `{husband, wives[], children[]}`，wives 按 `is_primary` 与 `married_at` 排序，children 按排行排序
+
+### 6.4 吊线图布局
+- Reingold–Tilford 树布局变种：
+  - 同一对夫妻横向并列（保持图 1.jpg / 2.png 中"丈夫居中、妻子在左"的语义）
+  - 子女均匀分布于父母下方
+  - 同世代对齐到同一 Y 坐标，由世代轴决定
+
+### 6.5 册谱模板渲染
+- 模板 = JSON 描述（封面、目录、章节顺序、字体、留白）
+- 渲染器接受 `(family, template) → PDF`
+- 一期提供 2–3 套模板（古典竖排、现代横排、简约）
+
+## 7. 数据导入导出
+
+- **导入**：Excel 模板（人物表 + 关系表 + 迁徙表三 sheet），后端校验冲突后入库
+- **导出**：
+  - JSON（全量备份）
+  - Excel（分 sheet）
+  - PDF（吊线图 / 详细图 / 册谱）
+  - GEDCOM 5.5.1（远期，国际通用，便于与海外族谱软件互通）
+
+## 8. 性能与可伸缩
+
+- 一期：单 PostgreSQL 实例，单 Next.js 部署
+- 大族（>2000 人）的树谱：服务端预计算图结构 + 客户端虚拟化渲染（仅渲染视口内节点）
+- 静态资源 / 头像走 CDN（远期）
+- PDF 生成异步化：放入队列，完成后通知用户下载（远期，初期同步）
+
+## 9. 部署
+
+- **一期**：Vercel 或自建 Node 部署 + 托管 PostgreSQL（如 Neon / Supabase / 自建）
+- **远期**：容器化（Docker），可独立部署到企业内网（部分家族对数据私有性敏感）
+
+## 10. 可观测性
+
+- 应用日志（结构化 JSON）
+- 操作审计表（`audit_log`：谁、何时、对哪条记录做了什么）
+- 错误监控：Sentry（远期）
+
+## 11. 开发与协作流程
+
+详见 `10-development-process.md`。要点：
+- 单一主分支，Feature Branch + PR
+- 每个 PR 需通过类型检查、Lint、单测
+- DB 变更走 Prisma Migration，禁止手改数据库

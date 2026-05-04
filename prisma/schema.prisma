@@ -1,0 +1,461 @@
+// 家谱系统数据模型
+// 参考 docs/03-data-model.md
+// ORM: Prisma 7  |  DB: PostgreSQL
+
+generator client {
+  provider = "prisma-client"
+  output   = "../lib/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+// ============================================================
+// 用户与家族
+// ============================================================
+
+enum PlatformRole {
+  SUPERADMIN
+  USER
+}
+
+model User {
+  id           String       @id @default(cuid())
+  email        String?      @unique
+  phone        String?      @unique
+  passwordHash String?
+  name         String
+  avatarUrl    String?
+  platformRole PlatformRole @default(USER)
+  createdAt    DateTime     @default(now())
+  updatedAt    DateTime     @updatedAt
+
+  members        FamilyMember[]
+  subtreeAdmins  SubtreeAdmin[] @relation("subtreeAdminUser")
+  subtreeGrants  SubtreeAdmin[] @relation("subtreeAdminGranter")
+  invitesCreated FamilyInvite[] @relation("inviteCreator")
+  inviteUses     FamilyInviteUse[] @relation("inviteUser")
+}
+
+model Family {
+  id          String    @id @default(cuid())
+  surname     String
+  name        String
+  founderName String?
+  description String?
+  ownerId     String
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  deletedAt   DateTime?
+
+  members         FamilyMember[]
+  generationNames GenerationName[]
+  persons         Person[]
+  branches        Branch[]
+  marriages       Marriage[]
+  parentChild     ParentChild[]
+  migrations      Migration[]
+  shareLinks      ShareLink[]
+  auditLogs       AuditLog[]
+  subtreeAdmins   SubtreeAdmin[]
+  invites         FamilyInvite[]
+  submissions     PendingSubmission[]
+}
+
+enum FamilyRole {
+  OWNER
+  ADMIN
+  MEMBER
+  GUEST
+}
+
+model FamilyMember {
+  id       String     @id @default(cuid())
+  userId   String
+  familyId String
+  role     FamilyRole
+  personId String?
+  joinedAt DateTime   @default(now())
+
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, familyId])
+  @@index([familyId])
+}
+
+// ============================================================
+// 字辈表（一次性录入，固定不动态扩展）
+// ============================================================
+
+model GenerationName {
+  id         String @id @default(cuid())
+  familyId   String
+  generation Int
+  character  String
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@unique([familyId, generation])
+  @@index([familyId])
+}
+
+// ============================================================
+// 人物
+// ============================================================
+
+enum Gender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum LifeStatus {
+  ALIVE
+  DECEASED
+  LOST
+  UNKNOWN
+}
+
+model Person {
+  id             String     @id @default(cuid())
+  familyId       String
+  branchId       String?
+  externalId     String?    // 来自外部数据源（如 Excel）的稳定 ID，用于导入对账
+  name           String
+  alias          String?    // 别名
+  surnameOnly    Boolean    @default(false)
+  gender         Gender
+  generation     Int
+  generationChar String?
+  birthOrder     Int?       // 同辈排行（0=未知，1=长，2=次……）
+  birthYear      Int?
+  deathYear      Int?
+  birthDate      String?
+  deathDate      String?
+  birthPlace     String?    // 出生地（自由文本）
+  status         LifeStatus @default(ALIVE)
+  avatarUrl      String?
+  note           String?
+  noteHint       String?    // 线索备注
+  paperRecord    String?    // 纸谱行传
+  succession     String?    // 出承（过继 / 嗣子等）
+  biography      String?    // 个人传记
+  isMarriedIn    Boolean    @default(false)
+  residenceId    String?    // 显式居住地；null = 沿父系/夫上溯继承
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime?
+
+  family    Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  branch    Branch?   @relation(fields: [branchId], references: [id])
+  residence Location? @relation("residence", fields: [residenceId], references: [id])
+
+  marriagesAsHusband Marriage[]       @relation("husband")
+  marriagesAsWife    Marriage[]       @relation("wife")
+  childRelations     ParentChild[]    @relation("childSide")
+  parentRelations    ParentChild[]    @relation("parentSide")
+  locations          PersonLocation[]
+  migrations         Migration[]      @relation("personMigration")
+  branchesRoot       Branch[]         @relation("branchRoot")
+  subtreeAdmins      SubtreeAdmin[]   @relation("subtreeRoot")
+
+  @@unique([familyId, externalId])
+  @@index([familyId, generation])
+  @@index([familyId, branchId])
+  @@index([familyId, name])
+}
+
+// ============================================================
+// 婚姻
+// ============================================================
+
+enum MarriageType {
+  PRIMARY // 原配
+  SECONDARY // 继配
+  CONCUBINE // 妾（历史数据）
+  UXORILOCAL // 入赘
+}
+
+model Marriage {
+  id          String       @id @default(cuid())
+  familyId    String
+  husbandId   String
+  wifeId      String
+  type        MarriageType @default(PRIMARY)
+  order       Int          @default(1)
+  marriedYear Int?
+  endedYear   Int?
+  endedReason String?
+  note        String?
+
+  family  Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  husband Person @relation("husband", fields: [husbandId], references: [id], onDelete: Cascade)
+  wife    Person @relation("wife", fields: [wifeId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, husbandId])
+  @@index([familyId, wifeId])
+}
+
+// ============================================================
+// 亲子（支持过继）
+// ============================================================
+
+enum ParentRelation {
+  BIOLOGICAL
+  ADOPTED
+  FOSTER
+  STEP
+}
+
+model ParentChild {
+  id         String         @id @default(cuid())
+  familyId   String
+  parentId   String
+  childId    String
+  relation   ParentRelation @default(BIOLOGICAL)
+  birthOrder Int?
+  isPrimary  Boolean        @default(true)
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  parent Person @relation("parentSide", fields: [parentId], references: [id], onDelete: Cascade)
+  child  Person @relation("childSide", fields: [childId], references: [id], onDelete: Cascade)
+
+  @@unique([parentId, childId, relation])
+  @@index([familyId, parentId])
+  @@index([familyId, childId])
+}
+
+// ============================================================
+// 支系
+// ============================================================
+
+model Branch {
+  id           String  @id @default(cuid())
+  familyId     String
+  name         String
+  rootPersonId String
+  locationId   String?
+  description  String?
+
+  family     Family      @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  rootPerson Person      @relation("branchRoot", fields: [rootPersonId], references: [id])
+  location   Location?   @relation(fields: [locationId], references: [id])
+  persons    Person[]
+  migrations Migration[]
+
+  @@index([familyId])
+}
+
+// ============================================================
+// 地点与迁徙
+// ============================================================
+
+model Location {
+  id       String  @id @default(cuid())
+  province String?
+  city     String?
+  county   String?
+  town     String?
+  village  String?
+  detail   String?
+  fullText String
+
+  branches        Branch[]
+  personLocations PersonLocation[]
+  migrationsFrom  Migration[]      @relation("migrationFrom")
+  migrationsTo    Migration[]      @relation("migrationTo")
+  residents       Person[]         @relation("residence")
+}
+
+model PersonLocation {
+  id         String  @id @default(cuid())
+  personId   String
+  locationId String
+  fromYear   Int?
+  toYear     Int?
+  isCurrent  Boolean @default(false)
+
+  person   Person   @relation(fields: [personId], references: [id], onDelete: Cascade)
+  location Location @relation(fields: [locationId], references: [id])
+
+  @@index([personId])
+  @@index([locationId])
+}
+
+enum MigrationScope {
+  BRANCH
+  PERSON
+}
+
+model Migration {
+  id             String         @id @default(cuid())
+  familyId       String
+  scope          MigrationScope
+  branchId       String?
+  personId       String?
+  year           Int?
+  fromLocationId String?
+  toLocationId   String?
+  reason         String?
+  note           String?
+
+  family       Family    @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  branch       Branch?   @relation(fields: [branchId], references: [id])
+  person       Person?   @relation("personMigration", fields: [personId], references: [id])
+  fromLocation Location? @relation("migrationFrom", fields: [fromLocationId], references: [id])
+  toLocation   Location? @relation("migrationTo", fields: [toLocationId], references: [id])
+
+  @@index([familyId, branchId])
+  @@index([familyId, personId])
+}
+
+// ============================================================
+// 协作 / 分享 / 审计
+// ============================================================
+
+model ShareLink {
+  id           String    @id @default(cuid())
+  familyId     String
+  token        String    @unique
+  scope        Json
+  expiresAt    DateTime?
+  passwordHash String?
+  createdBy    String
+  createdAt    DateTime  @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId])
+}
+
+enum ChangeKind {
+  CREATE
+  UPDATE
+  DELETE
+  APPROVE
+  REJECT
+}
+
+model AuditLog {
+  id        String     @id @default(cuid())
+  familyId  String
+  actorId   String
+  kind      ChangeKind
+  entity    String
+  entityId  String
+  before    Json?
+  after     Json?
+  createdAt DateTime   @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
+}
+
+enum SubmissionStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
+model PendingSubmission {
+  id          String           @id @default(cuid())
+  familyId    String
+  submitterId String
+  payload     Json
+  status      SubmissionStatus @default(PENDING)
+  reviewerId  String?
+  reviewNote  String?
+  createdAt   DateTime         @default(now())
+  reviewedAt  DateTime?
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, status])
+}
+
+// ============================================================
+// 子树管理员：给某用户授予「某人 + 该人父系后代」的写权限
+// ============================================================
+
+model SubtreeAdmin {
+  id           String   @id @default(cuid())
+  userId       String
+  familyId     String
+  rootPersonId String
+  grantedById  String
+  grantedAt    DateTime @default(now())
+  note         String?
+
+  user      User   @relation("subtreeAdminUser", fields: [userId], references: [id], onDelete: Cascade)
+  grantedBy User   @relation("subtreeAdminGranter", fields: [grantedById], references: [id])
+  family    Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  root      Person @relation("subtreeRoot", fields: [rootPersonId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, rootPersonId])
+  @@index([familyId, userId])
+  @@index([rootPersonId])
+}
+
+// ============================================================
+// 家族邀请码：管理员预先发码，用户凭码加入家族（无需审批）
+// ============================================================
+
+model FamilyInvite {
+  id          String     @id @default(cuid())
+  familyId    String
+  code        String     @unique  // 8 位 base32 友好码（如 K3FH9P2X）
+  role        FamilyRole @default(MEMBER)
+  maxUses     Int?       // null = 不限次（多用），1 = 单次
+  uses        Int        @default(0)
+  expiresAt   DateTime?
+  note        String?
+  createdById String
+  createdAt   DateTime   @default(now())
+  revokedAt   DateTime?
+
+  family      Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy   User              @relation("inviteCreator", fields: [createdById], references: [id])
+  usesLog     FamilyInviteUse[]
+
+  @@index([familyId, createdAt])
+}
+
+model FamilyInviteUse {
+  id        String       @id @default(cuid())
+  inviteId  String
+  userId    String
+  usedAt    DateTime     @default(now())
+
+  invite    FamilyInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  user      User         @relation("inviteUser", fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([inviteId, userId])
+  @@index([userId])
+}
+
+// ============================================================
+// 短信验证码（登录 / 注册 / 改手机号）
+// ============================================================
+
+enum VerificationPurpose {
+  LOGIN
+  REGISTER
+  CHANGE_PHONE
+}
+
+model VerificationCode {
+  id         String              @id @default(cuid())
+  phone      String
+  codeHash   String
+  purpose    VerificationPurpose
+  expiresAt  DateTime
+  attempts   Int                 @default(0)
+  consumedAt DateTime?
+  createdAt  DateTime            @default(now())
+
+  @@index([phone, purpose, createdAt])
+}
