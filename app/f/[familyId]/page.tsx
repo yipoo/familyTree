@@ -110,6 +110,12 @@ export default async function FamilyDetailPage({
               详细表
             </Link>
             <Link
+              href={`/f/${familyId}/search`}
+              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            >
+              高级搜索
+            </Link>
+            <Link
               href={`/f/${familyId}/admin`}
               className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
             >
