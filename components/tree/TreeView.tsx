@@ -45,6 +45,7 @@ interface GraphResponse {
   rootPersonName: string;
   branchInfo: { name: string; rootName: string } | null;
   lineage: "paternal" | "maternal" | "all";
+  mode?: "full" | "kin5";
   focusPersonId: string | null;
   upGen: number | null;
   stats: { total: number; male: number; female: number };
@@ -98,6 +99,7 @@ export function TreeView({
   const root = params.get("root") ?? "";
   const focus = params.get("focus") ?? "";
   const lineage = params.get("lineage") ?? "all";
+  const mode = params.get("mode") === "kin5" ? "kin5" : "full";
 
   // 三态合一的 fetch state：避免在 effect 中同步 setLoading(true)
   const [state, setState] = useState<FetchState>(LOADING);
@@ -214,7 +216,7 @@ export function TreeView({
 
   // 路由参数变化（不同 family / root / focus / lineage / spacing）→ 重置回 loading + 清空折叠：
   // 用 React 官方"render 内 track previous + 条件 setState"派生模式，避免 effect 中同步 setState。
-  const requestKey = `${familyId}|${root}|${focus}|${lineage}|${spacing}`;
+  const requestKey = `${familyId}|${root}|${focus}|${lineage}|${spacing}|${mode}`;
   const [lastRequestKey, setLastRequestKey] = useState(requestKey);
   if (lastRequestKey !== requestKey) {
     setLastRequestKey(requestKey);
@@ -234,6 +236,7 @@ export function TreeView({
         // 默认 "all" 与 API 默认对齐——非默认才显式带参，URL 更短
         if (lineage !== "all") sp.set("lineage", lineage);
         if (spacing !== DEFAULT_SPACING) sp.set("spacing", spacing);
+        if (mode === "kin5") sp.set("mode", "kin5");
         const r = await fetch(`/api/families/${familyId}/graph?${sp}`, {
           signal: ctrl.signal,
         });
@@ -267,7 +270,7 @@ export function TreeView({
       cancelled = true;
       ctrl.abort();
     };
-  }, [familyId, root, focus, lineage, spacing, router]);
+  }, [familyId, root, focus, lineage, spacing, mode, router]);
 
   // 计算当前可见集合中"不匹配筛选"的人物 id（dimmedIds）。
   // 注意：layout.nodes 已经按 lineage / focus / root 过滤过，所以"总数"取这里的长度。
@@ -342,6 +345,26 @@ export function TreeView({
             </span>
           )}
           <LineageTabs />
+          {root && (
+            <Link
+              href={`/f/${familyId}/tree?root=${root}${
+                mode === "kin5" ? "" : "&mode=kin5"
+              }${lineage !== "all" ? `&lineage=${lineage}` : ""}`}
+              prefetch={false}
+              className={`rounded-md border px-2 py-1 text-xs transition ${
+                mode === "kin5"
+                  ? "border-blue-500 bg-blue-500 text-white"
+                  : "border-zinc-300 hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
+              }`}
+              title={
+                mode === "kin5"
+                  ? "近亲视图：±2 代直系 + 兄弟 + 配偶 + 侄甥。点击切换回完整视图"
+                  : "近亲视图：以选中分支根为中心展示 5 代核心关系"
+              }
+            >
+              {mode === "kin5" ? "完整视图" : "近亲视图"}
+            </Link>
+          )}
           <TreeHeaderSearch familyId={familyId} />
           <FilterPanel
             familyId={familyId}
@@ -353,8 +376,9 @@ export function TreeView({
           <span className="ml-auto flex items-center gap-3 text-xs text-zinc-500">
             <SpacingControl value={spacing} onChange={handleSpacingChange} />
             <ScrollModeToggle value={scrollMode} onChange={handleScrollModeChange} />
+            {/* 小屏隐藏统计数字（避免顶栏溢出），≥sm 才显示 */}
             {data && (
-              <>
+              <span className="hidden items-center gap-3 sm:flex">
                 <span>
                   人数{" "}
                   <strong className="text-zinc-900 dark:text-zinc-50">
@@ -367,7 +391,7 @@ export function TreeView({
                 <span>
                   女 <strong className="text-pink-600">{data.stats.female}</strong>
                 </span>
-              </>
+              </span>
             )}
             {loading && <span className="animate-pulse">加载中…</span>}
           </span>

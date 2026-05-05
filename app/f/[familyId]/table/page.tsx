@@ -70,8 +70,8 @@ export default async function DetailTablePage({
   );
 
   return (
-    <div>
-      <header className="border-b border-hairline bg-surface">
+    <div className="print:bg-white">
+      <header className="border-b border-hairline bg-surface print:hidden">
         <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-3 px-4 py-5 sm:px-6 lg:px-8">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">

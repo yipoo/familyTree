@@ -27,6 +27,7 @@ export function AdminSidebar({
     { href: `${root}/grants`, label: "子树管理员" },
     { href: `${root}/shares`, label: "分享链接" },
     { href: `${root}/generations`, label: "字辈表" },
+    { href: `${root}/branches`, label: "支系管理" },
     { href: `${root}/locations`, label: "居住地字典" },
     { href: `${root}/submissions`, label: "待审提交", badge: pendingCount },
     { href: `${root}/migrations`, label: "支系迁徙" },

@@ -13,6 +13,7 @@ import { encode } from "next-auth/jwt";
 
 import { prisma } from "@/lib/db";
 import { hashPassword, normalizePhone } from "@/lib/auth/password";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const SESSION_COOKIE = "authjs.session-token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
@@ -20,7 +21,7 @@ const SALT = SESSION_COOKIE;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(req: Request) {
+async function registerHandler(req: Request) {
   const formData = await req.formData();
   const phoneRaw = String(formData.get("phone") ?? "").trim();
   const emailRaw = String(formData.get("email") ?? "").trim();
@@ -90,3 +91,10 @@ export async function POST(req: Request) {
   });
   return res;
 }
+
+// 限流：单 IP 每分钟最多 5 次注册（注册比登录贵）。
+export const POST = withRateLimit(registerHandler, {
+  bucket: "register",
+  limit: 5,
+  windowMs: 60_000,
+});

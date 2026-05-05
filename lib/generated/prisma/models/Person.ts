@@ -1003,10 +1003,6 @@ export type PersonUncheckedUpdateManyWithoutFamilyNestedInput = {
   deleteMany?: Prisma.PersonScalarWhereInput | Prisma.PersonScalarWhereInput[]
 }
 
-export type BoolFieldUpdateOperationsInput = {
-  set?: boolean
-}
-
 export type EnumGenderFieldUpdateOperationsInput = {
   set?: $Enums.Gender
 }

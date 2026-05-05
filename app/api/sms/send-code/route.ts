@@ -10,6 +10,7 @@ import { NextResponse } from "next/server";
 import { normalizePhone } from "@/lib/auth/password";
 import { issueCode } from "@/lib/services/verification";
 import type { VerificationPurpose } from "@/lib/generated/prisma/enums";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const VALID_PURPOSES: VerificationPurpose[] = [
   "LOGIN",
@@ -17,7 +18,7 @@ const VALID_PURPOSES: VerificationPurpose[] = [
   "CHANGE_PHONE",
 ];
 
-export async function POST(req: Request) {
+async function sendCodeHandler(req: Request) {
   const body = await req.json().catch(() => null);
   const phoneRaw = String(body?.phone ?? "").trim();
   const purposeRaw = String(body?.purpose ?? "LOGIN");
@@ -51,3 +52,10 @@ export async function POST(req: Request) {
   }
   return NextResponse.json({ data: { cooldownSec: r.cooldownSec } });
 }
+
+// 限流：单 IP 每分钟最多 5 次发送验证码（更严格，发短信成本高）。
+export const POST = withRateLimit(sendCodeHandler, {
+  bucket: "sms-send",
+  limit: 5,
+  windowMs: 60_000,
+});

@@ -3,6 +3,7 @@
  * 路由：/f/[familyId]/admin/audit
  */
 import { prisma } from "@/lib/db";
+import { requireFamilyRole } from "@/lib/auth/guard";
 
 import { AdminSection } from "../_shared";
 import { AuditLogTable } from "./AuditLogTable";
@@ -18,6 +19,12 @@ export default async function AdminAuditPage({
 }) {
   const { familyId } = await params;
   const { entity, kind, actorId } = await searchParams;
+  // OWNER / ADMIN 才允许撤回
+  const auth = await requireFamilyRole(familyId, "ADMIN");
+  const canUndo =
+    auth.role === "OWNER" ||
+    auth.role === "ADMIN" ||
+    auth.user.platformRole === "SUPERADMIN";
 
   const where: Record<string, unknown> = { familyId };
   if (entity) where.entity = entity;
@@ -77,6 +84,8 @@ export default async function AdminAuditPage({
 
       <div className="mt-4">
         <AuditLogTable
+          familyId={familyId}
+          canUndo={canUndo}
           items={items.map((a) => ({
             id: a.id,
             entity: a.entity,

@@ -101,3 +101,22 @@ export const VerificationPurpose = {
 } as const
 
 export type VerificationPurpose = (typeof VerificationPurpose)[keyof typeof VerificationPurpose]
+
+
+export const PdfJobType = {
+  LINEAGE_CHART: 'LINEAGE_CHART',
+  ALBUM: 'ALBUM'
+} as const
+
+export type PdfJobType = (typeof PdfJobType)[keyof typeof PdfJobType]
+
+
+export const PdfJobStatus = {
+  PENDING: 'PENDING',
+  RUNNING: 'RUNNING',
+  DONE: 'DONE',
+  FAILED: 'FAILED',
+  CANCELED: 'CANCELED'
+} as const
+
+export type PdfJobStatus = (typeof PdfJobStatus)[keyof typeof PdfJobStatus]

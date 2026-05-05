@@ -16,12 +16,13 @@ import { encode } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { normalizePhone } from "@/lib/auth/password";
 import { verifyCode } from "@/lib/services/verification";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const SESSION_COOKIE = "authjs.session-token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 const SALT = SESSION_COOKIE;
 
-export async function POST(req: Request) {
+async function loginCodeHandler(req: Request) {
   const formData = await req.formData();
   const phoneRaw = String(formData.get("phone") ?? "").trim();
   const codeRaw = String(formData.get("code") ?? "").trim();
@@ -96,3 +97,10 @@ export async function POST(req: Request) {
   });
   return res;
 }
+
+// 限流：单 IP 每分钟最多 10 次验证码登录尝试。
+export const POST = withRateLimit(loginCodeHandler, {
+  bucket: "login-code",
+  limit: 10,
+  windowMs: 60_000,
+});

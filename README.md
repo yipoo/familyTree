@@ -5,17 +5,23 @@ Web 一期：基于 Next.js 16 + Auth.js v5 + Prisma 7 + PostgreSQL 的家族族
 ## 快速开始
 
 ```bash
-# 安装依赖
+# 1) 安装依赖
 pnpm install
 
-# 同步生产库 schema（针对 .env 中的 DATABASE_URL）
+# 2) 复制 env 模板，至少填好 DATABASE_URL 和 AUTH_SECRET
+cp .env.example .env
+
+# 3) 同步生产库 schema
 pnpm db:migrate
 
-# 开发
+# 4) 启动 dev server
 pnpm dev
 ```
 
 访问 [http://localhost:3000](http://localhost:3000)。
+
+完整环境变量列表见 [`.env.example`](.env.example)；
+生产部署 / 备份 / 常见问题见 [`docs/deploy.md`](docs/deploy.md)。
 
 ## 数据库布局：生产 / Demo 隔离
 

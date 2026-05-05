@@ -5,9 +5,12 @@
  *
  * 打印：window.print()，页面通过 @media print / .print:hidden 切换到全图打印态
  * 下载 SVG：直接抓 main 内第一个 <svg>，序列化为 image/svg+xml
+ * 下载 PDF：异步任务（PdfJobButton），适配大家族（10000+ 人）
  */
 import { useRouter } from "next/navigation";
 import { useTransition } from "react";
+
+import { PdfJobButton } from "@/components/PdfJobButton";
 
 export interface LineageBranchOption {
   id: string;
@@ -77,12 +80,12 @@ export function LineageChartActions({ familyId, rootId, branches }: Props) {
       >
         下载 SVG
       </button>
-      <a
-        href={`/api/families/${familyId}/lineage-chart/pdf${rootId ? `?root=${rootId}` : ""}`}
-        className="rounded border border-zinc-300 px-2.5 py-1 text-xs hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
-      >
-        下载 PDF（服务端）
-      </a>
+      <PdfJobButton
+        familyId={familyId}
+        type="LINEAGE_CHART"
+        params={rootId ? { root: rootId } : {}}
+        label="下载 PDF（服务端）"
+      />
       <button
         type="button"
         onClick={handlePrint}

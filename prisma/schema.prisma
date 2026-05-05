@@ -45,6 +45,7 @@ model Family {
   founderName String?
   description String?
   ownerId     String
+  isPublic    Boolean   @default(false) // P2 发现页：公开家族才会出现在 /discover
   createdAt   DateTime  @default(now())
   updatedAt   DateTime  @updatedAt
   deletedAt   DateTime?
@@ -61,6 +62,10 @@ model Family {
   subtreeAdmins   SubtreeAdmin[]
   invites         FamilyInvite[]
   submissions     PendingSubmission[]
+  pdfJobs         PdfJob[]
+
+  @@index([deletedAt])
+  @@index([isPublic])
 }
 
 enum FamilyRole {
@@ -459,3 +464,45 @@ model VerificationCode {
 
   @@index([phone, purpose, createdAt])
 }
+
+// ============================================================
+// 异步 PDF 渲染任务（吊线图 / 册谱）
+// ============================================================
+
+enum PdfJobType {
+  LINEAGE_CHART
+  ALBUM
+}
+
+enum PdfJobStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+  CANCELED
+}
+
+model PdfJob {
+  id            String        @id @default(cuid())
+  familyId      String
+  type          PdfJobType
+  status        PdfJobStatus  @default(PENDING)
+  progress      Int           @default(0)        // 0..100
+  // 输入参数（吊线图的 root 等）
+  params        Json?
+  // 结果与诊断
+  outputBytes   Bytes?
+  outputName    String?
+  error         String?
+  requestedById String
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  startedAt     DateTime?
+  finishedAt    DateTime?
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
+  @@index([status])
+}
+
