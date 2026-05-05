@@ -1,8 +1,12 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono, Noto_Serif_SC } from "next/font/google";
+import { cookies } from "next/headers";
 import { Suspense } from "react";
 
-import { TopNav } from "@/components/TopNav";
+import { AppShell } from "@/components/layout/AppShell";
+import { ThemeScript } from "@/components/layout/ThemeScript";
+import { TopNav } from "@/components/layout/TopNav";
+import { THEME_COOKIE, isTheme } from "@/components/layout/theme";
 
 import "./globals.css";
 
@@ -60,21 +64,38 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  // SSR 读 cookie 决定首屏 dark class，避免主题闪烁
+  // —— 'system' 时拿不到客户端 prefers-color-scheme，由 ThemeScript inline 同步覆盖
+  const cookieStore = await cookies();
+  const themeCookie = cookieStore.get(THEME_COOKIE)?.value;
+  const initialTheme = isTheme(themeCookie) ? themeCookie : "system";
+  const initialResolved = initialTheme === "dark" ? "dark" : "light";
+
   return (
     <html
       lang="zh-CN"
-      className={`${geistSans.variable} ${geistMono.variable} ${notoSerifSC.variable} h-full antialiased`}
+      data-theme={initialTheme}
+      data-resolved-theme={initialResolved}
+      className={`${geistSans.variable} ${geistMono.variable} ${notoSerifSC.variable} h-full antialiased ${
+        initialResolved === "dark" ? "dark" : ""
+      }`}
+      style={{ colorScheme: initialResolved }}
     >
-      <body className="min-h-full flex flex-col">
-        <Suspense fallback={null}>
-          <TopNav />
-        </Suspense>
-        {children}
+      <head>
+        <ThemeScript />
+      </head>
+      <body className="min-h-full flex flex-col bg-background text-foreground">
+        <AppShell>
+          <Suspense fallback={null}>
+            <TopNav />
+          </Suspense>
+          {children}
+        </AppShell>
       </body>
     </html>
   );

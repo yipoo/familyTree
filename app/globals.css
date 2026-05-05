@@ -1,33 +1,141 @@
 @import "tailwindcss";
 
+/* ---------------------------------------------------------------- */
+/*  Tailwind v4 自定义 dark 变体                                      */
+/*                                                                  */
+/*  仍然支持 `dark:` 前缀，但开关方式从 prefers-color-scheme 改为     */
+/*  `<html class="dark">`，由 ThemeProvider/ThemeScript 控制。       */
+/*  这样 light / dark / system 三态都能精确切换，且 SSR 不闪烁。      */
+/* ---------------------------------------------------------------- */
+@custom-variant dark (&:where(.dark, .dark *));
+
+/* ---------------------------------------------------------------- */
+/*  设计 token                                                       */
+/*                                                                  */
+/*  品牌色 brand：hsl(212, 75%, 50%) —— 沉稳的蓝紫，暗色模式提亮 10%  */
+/*  色阶按 surface / panel / muted / border / fg 分层               */
+/*  栅格间距 4 / 8 / 12 / 16 / 24 / 32 / 48                          */
+/* ---------------------------------------------------------------- */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --brand-h: 212;
+  --brand-s: 75%;
+  --brand-l: 50%;
+  --brand: hsl(var(--brand-h) var(--brand-s) var(--brand-l));
+  --brand-fg: #ffffff;
+  --brand-soft: hsl(var(--brand-h) 80% 96%);
+  --brand-soft-fg: hsl(var(--brand-h) 70% 32%);
+
+  --bg: hsl(220 18% 98%);
+  --surface: #ffffff;
+  --panel: #ffffff;
+  --muted: hsl(220 14% 96%);
+  --border: hsl(220 13% 91%);
+  --hairline: hsl(220 13% 88%);
+  --fg: hsl(222 22% 11%);
+  --fg-muted: hsl(222 12% 38%);
+  --fg-subtle: hsl(222 8% 56%);
+
+  --shadow-sm: 0 1px 2px hsl(220 25% 12% / 0.04), 0 1px 1px hsl(220 25% 12% / 0.04);
+  --shadow-md: 0 4px 12px hsl(220 25% 12% / 0.06),
+    0 2px 4px hsl(220 25% 12% / 0.05);
+  --shadow-lg: 0 12px 32px hsl(220 25% 12% / 0.10),
+    0 4px 8px hsl(220 25% 12% / 0.06);
+
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+
+  --background: var(--bg);
+  --foreground: var(--fg);
+}
+
+.dark {
+  --brand-l: 60%;
+  --brand: hsl(var(--brand-h) var(--brand-s) var(--brand-l));
+  --brand-fg: #ffffff;
+  --brand-soft: hsl(var(--brand-h) 60% 18%);
+  --brand-soft-fg: hsl(var(--brand-h) 90% 78%);
+
+  --bg: hsl(220 15% 8%);
+  --surface: hsl(220 14% 11%);
+  --panel: hsl(220 13% 13%);
+  --muted: hsl(220 13% 16%);
+  --border: hsl(220 12% 22%);
+  --hairline: hsl(220 12% 25%);
+  --fg: hsl(220 12% 92%);
+  --fg-muted: hsl(220 8% 70%);
+  --fg-subtle: hsl(220 6% 55%);
+
+  --shadow-sm: 0 1px 2px rgb(0 0 0 / 0.4);
+  --shadow-md: 0 4px 12px rgb(0 0 0 / 0.45), 0 2px 4px rgb(0 0 0 / 0.35);
+  --shadow-lg: 0 12px 32px rgb(0 0 0 / 0.55), 0 4px 8px rgb(0 0 0 / 0.40);
+
+  --background: var(--bg);
+  --foreground: var(--fg);
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
+  --color-background: var(--bg);
+  --color-foreground: var(--fg);
+  --color-surface: var(--surface);
+  --color-panel: var(--panel);
+  --color-muted: var(--muted);
+  --color-border: var(--border);
+  --color-hairline: var(--hairline);
+  --color-fg-muted: var(--fg-muted);
+  --color-fg-subtle: var(--fg-subtle);
+  --color-brand: var(--brand);
+  --color-brand-fg: var(--brand-fg);
+  --color-brand-soft: var(--brand-soft);
+  --color-brand-soft-fg: var(--brand-soft-fg);
+
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  /* 营销 / 古谱页用：Noto Serif SC + 楷体回退 */
-  --font-serif:
-    var(--font-noto-serif-sc), "Songti SC", "Noto Serif CJK SC", STSong, SimSun,
-    serif;
+  --font-serif: var(--font-noto-serif-sc), "Songti SC", "Noto Serif CJK SC",
+    STSong, SimSun, serif;
 }
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+html {
+  /* 防止滚动条出现/消失时引起的版式跳动 */
+  scrollbar-gutter: stable;
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
-    "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+  background: var(--bg);
+  color: var(--fg);
+  font-family:
+    var(--font-geist-sans),
+    -apple-system,
+    BlinkMacSystemFont,
+    "PingFang SC",
+    "Source Han Sans SC",
+    "Microsoft YaHei",
+    Inter,
+    Arial,
+    sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+/* 主题切换时的颜色过渡 —— 仅过渡颜色相关属性，避免影响 transform 等动画 */
+html.theme-transition,
+html.theme-transition *,
+html.theme-transition *::before,
+html.theme-transition *::after {
+  transition: background-color 200ms ease, color 200ms ease,
+    border-color 200ms ease, box-shadow 200ms ease !important;
+  transition-delay: 0 !important;
+}
+
+/* 全站可复用 utility */
+.app-card {
+  background-color: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-sm);
+}
+
+.app-hairline {
+  border-color: var(--hairline);
 }
 
 /* 营销页古风纸纹微动效（不喧宾夺主） */
