@@ -155,6 +155,9 @@ export async function getPaternalAncestors(personId: string): Promise<string[]> 
 /**
  * 当前用户能否写入指定 person。
  * 不抛错，返回布尔；UI / 菜单可见性使用此版本。
+ *
+ * 实际判定逻辑在 lib/auth/subtree.ts:judgeSubtreeWrite —— 与本函数一一对应，
+ * 但使用纯邻接表 + 标记 map 作为输入，便于 vitest 单测覆盖。
  */
 export async function canWriteOnPerson(
   user: SessionUser,
