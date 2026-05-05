@@ -77,11 +77,11 @@ export function PersonInspector({
 
   // 折叠区状态：默认 关系图 + 关系列表 展开，其它折叠
   // "信息"由头部的铅笔图标进入编辑态；不再作为独立的折叠区
+  // "视图"已上提到头部工具栏，不再是 Disclosure
   const [open, setOpen] = useState({
     graph: true,
     relations: true,
     add: false,
-    view: false,
     danger: false,
   });
   const toggle = (k: keyof typeof open) =>
@@ -337,6 +337,44 @@ export function PersonInspector({
             </div>
           )}
 
+          {/* 头部下方常驻工具栏：折叠 / 视图操作（高频，不藏在 Disclosure 里） */}
+          <div className="border-b border-zinc-200 bg-zinc-50/60 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+            <div className="flex flex-wrap gap-1.5">
+              {canCollapse ? (
+                <PillBtn
+                  onClick={() => personId && onToggleCollapsed(personId)}
+                  variant={isCollapsed ? "blue" : "default"}
+                >
+                  {isCollapsed
+                    ? `展开后代（${descendantCount}）`
+                    : `折叠后代（${descendantCount}）`}
+                </PillBtn>
+              ) : (
+                <PillBtn onClick={() => {}} disabled variant="ghost">
+                  无后代可折叠
+                </PillBtn>
+              )}
+              <PillBtn onClick={gotoCenter} variant="ghost">
+                设为中心
+              </PillBtn>
+              <PillBtn onClick={gotoBranchOnly} variant="ghost">
+                仅看此分支
+              </PillBtn>
+              {hasCenter && (
+                <PillBtn onClick={clearCenter} variant="ghost">
+                  展开所有分支
+                </PillBtn>
+              )}
+            </div>
+            {canCollapse && (
+              <p className="mt-1.5 text-[11px] text-zinc-500">
+                {isCollapsed
+                  ? `已折叠 ${descendantCount} 位后代——画布上以 +${descendantCount} 角标提示`
+                  : `直接子女 ${visibleChildCount} 人 · 全部后代 ${descendantCount} 人（双击节点也可折叠）`}
+              </p>
+            )}
+          </div>
+
           {/* 主体：可滚动 */}
           <div className="flex-1 overflow-y-auto">
             {/* 关系图 */}
@@ -444,40 +482,6 @@ export function PersonInspector({
               )}
             </Disclosure>
 
-            {/* 视图操作 */}
-            <Disclosure
-              title="视图"
-              open={open.view}
-              onToggle={() => toggle("view")}
-            >
-              <div className="grid grid-cols-2 gap-1.5">
-                <PillBtn onClick={gotoCenter}>设为中心</PillBtn>
-                <PillBtn onClick={gotoBranchOnly}>仅看此分支</PillBtn>
-                {hasCenter && (
-                  <PillBtn onClick={clearCenter} variant="ghost">
-                    展开所有分支
-                  </PillBtn>
-                )}
-                {/* 折叠 / 展开后代：基于 visibleChildrenOf；无可见子女则按钮禁用 */}
-                {canCollapse && (
-                  <PillBtn
-                    onClick={() => personId && onToggleCollapsed(personId)}
-                    variant={isCollapsed ? "blue" : "ghost"}
-                  >
-                    {isCollapsed
-                      ? `展开后代（${descendantCount}）`
-                      : `折叠后代（${descendantCount}）`}
-                  </PillBtn>
-                )}
-              </div>
-              {canCollapse && (
-                <p className="mt-1.5 text-[11px] text-zinc-500">
-                  {isCollapsed
-                    ? `已折叠 ${descendantCount} 位后代——画布上以 +${descendantCount} 角标提示`
-                    : `直接子女 ${visibleChildCount} 人 / 全部后代 ${descendantCount} 人。也可双击节点折叠。`}
-                </p>
-              )}
-            </Disclosure>
 
             {/* 更多 / 危险 */}
             <Disclosure
