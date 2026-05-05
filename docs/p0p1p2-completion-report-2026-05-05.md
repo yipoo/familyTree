@@ -99,12 +99,29 @@ tests/
 
 ## 已知遗留 / 后续建议
 
+### 本批工程实现侧
+
 1. **P2-A 响应式调优**：仅做了 TreeView 头部 + 详细表 print 态两处静态修复。完整的 Playwright 4-断点截图回归脚本（`scripts/screenshot-ui.ts` 已经在）依赖运行时 DB + `BASE_URL`，需要在真实环境跑一次。建议加一个 `pnpm screenshot:responsive` 脚本，把 4 个断点纳入 CI。
 2. **PDF 异步任务的 worker**：内存队列适合单实例。多实例部署需替换成 BullMQ + Redis；接口（`createJob` / `runJobInline` / `bootstrapQueue`）已抽好，替换面应该收敛在 `lib/services/pdf-queue.ts` 内。
 3. **Undo 的集成测试**：当前 `undo.test.ts` 只是冒烟。具体字段恢复路径需要 DB 接入；建议在 demo 库里写 e2e 用例（`tsx scripts/test-undo.ts`）。
 4. **限流是内存级**：进程重启状态丢失；对单实例部署可接受。如需横向扩展或跨进程共享，把 `lib/rate-limit.ts` 的 Map 换成 Redis 即可（接口未变化）。
 5. **Family 软删的级联**：当前 DELETE 仅写 `Family.deletedAt = now()`；底下的 Person / Marriage / 等子表保留。预期内（数据可恢复），但 UI 不会主动隐藏子表的"个人详情页"——需要在 Person 详情侧用 `family.deletedAt` 守卫。
 6. **子树管理员的 UI 闭环**：`canWriteOnPerson` 已在所有写操作上正确判定（详见 guard.ts），但 UI 上"普通成员看到的编辑按钮"是否消失需要在每个 Person 详情页核对一遍——这需要在真实 DB 里挑两个测试账号验证。
+
+### 与 `gap-analysis-2026-05-05.md` 的差距（本批未覆盖）
+
+本批工作严格按用户提供的 P0/P1/P2 清单执行；与 `docs/gap-analysis-2026-05-05.md` 调研报告里更细粒度的清单对比，以下条目本次**未做**，按优先级标注：
+
+- **P0-D（gap）密码强度 ≥ 8 / ShareLink 密码 ≥ 6**：`app/api/register/route.ts` 与 `share-links` 路由的 Zod 限制可一键改长。**风险评估**：现有 6 位密码在限流（10/min）下暴破成本可接受，但建议 30 分钟内补到 8。
+- **P1-E（gap）xlsx 三 sheet 导入 + Excel 导出对称**：`xlsx-import` 现仅读 worksheets[0]；`exporters.ts` 缺 `toExcel`。改动量较大（需扩 `parseXlsxBuffer` + 加 worker schemas + UI 加 sheet 选择）。
+- **P1-F（gap）lineage-chart 的 `branchId / fromGeneration / toGeneration` 过滤**：仅需在 route 与服务函数里加三个 query 参数 + WHERE 子句。
+- **P1-G（gap）persons 列表 GET（cursor 分页）**：现状是两个 search 路由覆盖了相似能力；补一个最小 GET `/persons?cursor=&limit=` 即可与 04 §1.5 对齐。
+- **P1-H（gap）Person.paperRecord / succession / noteHint 写接口**：在 `persons/[personId]/route.ts` PATCH body 的 Zod schema 里补三个字段即可。本次未碰人物 PATCH 防止扩散。
+- **P1-I（gap）缺索引：`Person(familyId, deletedAt)` partial、`Person.residenceId`**：本次只补了 `Family(deletedAt)` / `Family(isPublic)` 索引；Person 索引未补。建议在下次 schema 变更时合并。
+- **P1-J（gap）OWNER 转让家族**：现有 `members/[userId]` PATCH 注释自称支持但实测未验证；缺独立 `transfer-owner` 路由 + 二次确认 UI。
+- **P1-C（gap）册谱模板系统**：报告里的 P1-C 是"册谱多模板"；本批 P1-C 解读为"补齐文档承诺的小项"，做了 `/api/me` + 04 同步。这是范围理解差异——多模板系统是大改造（约 1-2 天），本批未做。
+
+跳过理由：上述都属于"提升而非红线"，且各自独立、可在后续迭代里逐项补齐；本批优先把用户清单做到上线就绪。
 
 ## git log（仅本批）
 
