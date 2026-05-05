@@ -126,6 +126,15 @@ body {
   -webkit-font-smoothing: antialiased;
 }
 
+/* 树谱节点间距档位切换时，节点位置（transform）平滑过渡。
+ * .react-flow-spacing-anim 由 TreeCanvas 在 spacing 切换时短暂打开，
+ * 完成后移除，避免长期开启 transition 影响拖拽手感。 */
+.react-flow-spacing-anim .react-flow__node,
+.react-flow-spacing-anim .react-flow__edge-path {
+  transition: transform 280ms cubic-bezier(0.22, 0.61, 0.36, 1),
+    d 280ms cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
 /* 主题切换时的颜色过渡 —— 仅过渡颜色相关属性，避免影响 transform 等动画 */
 html.theme-transition,
 html.theme-transition *,

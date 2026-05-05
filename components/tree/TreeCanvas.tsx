@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useEffect, useMemo, useRef } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ReactFlow,
@@ -18,6 +18,7 @@ import { GenerationAxis, type GenerationRow } from "./GenerationAxis";
 import { PositionBar } from "./PositionBar";
 import { TREE_LAYOUT_CONSTS, type LayoutResult } from "@/lib/services/tree-layout";
 import type { LayoutIndex } from "@/lib/services/layout-index";
+import type { ScrollMode } from "./ScrollModeToggle";
 
 const nodeTypes = { person: PersonNode };
 
@@ -38,7 +39,13 @@ export interface TreeCanvasProps {
   /** 居住地映射：personId → 解析结果 */
   residenceByPersonId?: Record<
     string,
-    { fullText: string; short: string; fromPersonId: string; inherited: boolean }
+    {
+      locationId: string;
+      fullText: string;
+      short: string;
+      fromPersonId: string;
+      inherited: boolean;
+    }
   >;
   /** 折叠状态（外部受控）。空集 = 没有节点被折叠 */
   collapsedIds: Set<string>;
@@ -47,6 +54,14 @@ export interface TreeCanvasProps {
   /** 全部折叠 / 全部展开（左下角按钮触发） */
   onCollapseAll: () => void;
   onExpandAll: () => void;
+  /** 不匹配筛选条件的人物 id 集合：淡出（仍渲染）或隐藏（取决于 hideUnmatched） */
+  dimmedIds?: Set<string>;
+  /** true：不匹配的节点真正从 layout 移除（重排）；false（默认）：仅淡出 */
+  hideUnmatched?: boolean;
+  /** 滚轮行为模式：缩放（默认） / 滚动 */
+  scrollMode?: ScrollMode;
+  /** 触发位置过渡动画的 token——切换 spacing 时变更，TreeCanvas 短暂打开 transition */
+  spacingAnimToken?: string;
 }
 
 export function TreeCanvas(props: TreeCanvasProps) {
@@ -69,6 +84,10 @@ function TreeCanvasInner({
   onToggleCollapsed,
   onCollapseAll,
   onExpandAll,
+  dimmedIds,
+  hideUnmatched = false,
+  scrollMode = "zoom",
+  spacingAnimToken,
 }: TreeCanvasProps) {
   // 来自搜索框的临时定位参数：locate=PID + n=NONCE（每次搜索都换 nonce 触发居中）
   const sp = useSearchParams();
@@ -106,11 +125,17 @@ function TreeCanvasInner({
   //
   // 此处禁止读取 performance.now() / Date.now() 等不纯函数（react-hooks/purity）；
   // 原本的耗时日志已移除——开发态可用 React Profiler 替代。
+  const effectiveDimmed = dimmedIds && dimmedIds.size > 0 ? dimmedIds : null;
   const { nodes, edges } = useMemo(() => {
     const ns: Node<PersonNodeData>[] = layout.nodes
-      .filter((n) => !hiddenIds.has(n.id))
+      .filter((n) => {
+        if (hiddenIds.has(n.id)) return false;
+        if (hideUnmatched && effectiveDimmed?.has(n.id)) return false;
+        return true;
+      })
       .map((n) => {
         const r = residenceByPersonId?.[n.id];
+        const dimmed = !hideUnmatched && !!effectiveDimmed?.has(n.id);
         return {
           id: n.id,
           type: "person",
@@ -124,6 +149,7 @@ function TreeCanvasInner({
             isCollapsed: collapsedIds.has(n.id),
             hasChildren: (childrenByParent.get(n.id)?.length ?? 0) > 0,
             descendantCount: descendantCountOf.get(n.id) ?? 0,
+            isDimmed: dimmed,
             residenceShort: r?.short ?? null,
             residenceFull: r?.fullText ?? null,
             residenceInherited: r?.inherited ?? false,
@@ -135,22 +161,33 @@ function TreeCanvasInner({
       });
 
     const es: Edge[] = layout.edges
-      .filter((e) => !e.hidden && !hiddenIds.has(e.source) && !hiddenIds.has(e.target))
-      .map((e) => ({
-        id: e.id,
-        source: e.source,
-        target: e.target,
-        sourceHandle: e.kind === "marriage" ? "right" : "bottom",
-        targetHandle: e.kind === "marriage" ? "left" : "top",
-        type: e.kind === "marriage" ? "straight" : "smoothstep",
-        style:
-          e.kind === "marriage"
-            ? { stroke: "#9ca3af", strokeWidth: 2 }
-            : { stroke: "#94a3b8", strokeWidth: 1.5 },
-      }));
+      .filter((e) => {
+        if (e.hidden) return false;
+        if (hiddenIds.has(e.source) || hiddenIds.has(e.target)) return false;
+        if (hideUnmatched && effectiveDimmed && (effectiveDimmed.has(e.source) || effectiveDimmed.has(e.target))) {
+          return false;
+        }
+        return true;
+      })
+      .map((e) => {
+        const dimmed = !hideUnmatched && !!effectiveDimmed && (effectiveDimmed.has(e.source) || effectiveDimmed.has(e.target));
+        const op = dimmed ? 0.18 : 1;
+        return {
+          id: e.id,
+          source: e.source,
+          target: e.target,
+          sourceHandle: e.kind === "marriage" ? "right" : "bottom",
+          targetHandle: e.kind === "marriage" ? "left" : "top",
+          type: e.kind === "marriage" ? "straight" : "smoothstep",
+          style:
+            e.kind === "marriage"
+              ? { stroke: "#9ca3af", strokeWidth: 2, opacity: op }
+              : { stroke: "#94a3b8", strokeWidth: 1.5, opacity: op },
+        };
+      });
 
     return { nodes: ns, edges: es };
-  }, [layout, hiddenIds, collapsedIds, childrenByParent, descendantCountOf, residenceByPersonId]);
+  }, [layout, hiddenIds, collapsedIds, childrenByParent, descendantCountOf, residenceByPersonId, effectiveDimmed, hideUnmatched]);
 
   const axisRows: GenerationRow[] = useMemo(() => {
     const rows: GenerationRow[] = [];
@@ -215,9 +252,26 @@ function TreeCanvasInner({
   const collapseAll = onCollapseAll;
   const expandAll = onExpandAll;
 
+  // 滚轮模式：
+  //   - zoom（默认）：滚轮缩放（围绕鼠标）；按住空格平移
+  //   - scroll：滚轮平移；Cmd/Ctrl + 滚轮缩放（备用通道）
+  const isScroll = scrollMode === "scroll";
+
+  // spacing 切换时短暂打开 transition——300ms 后关闭，避免长期影响其他交互
+  const [spacingAnimOn, setSpacingAnimOn] = useState(false);
+  const lastSpacingTokenRef = useRef<string | undefined>(spacingAnimToken);
+  useEffect(() => {
+    if (spacingAnimToken === undefined) return;
+    if (lastSpacingTokenRef.current === spacingAnimToken) return;
+    lastSpacingTokenRef.current = spacingAnimToken;
+    setSpacingAnimOn(true);
+    const t = setTimeout(() => setSpacingAnimOn(false), 320);
+    return () => clearTimeout(t);
+  }, [spacingAnimToken]);
+
   return (
     <SelectedIdContext.Provider value={selectedId}>
-    <div className="relative h-full w-full">
+    <div className={`relative h-full w-full ${spacingAnimOn ? "react-flow-spacing-anim" : ""}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
@@ -227,7 +281,9 @@ function TreeCanvasInner({
         minZoom={0.05}
         maxZoom={2}
         panOnDrag
-        panOnScroll
+        panOnScroll={isScroll}
+        zoomOnScroll={!isScroll}
+        zoomActivationKeyCode={isScroll ? ["Meta", "Control"] : null}
         zoomOnPinch
         onNodeClick={handleNodeClick}
         onNodeDoubleClick={handleNodeDoubleClick}

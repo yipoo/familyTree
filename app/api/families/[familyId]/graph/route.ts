@@ -1,6 +1,10 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { layoutPaternalTree } from "@/lib/services/tree-layout";
+import {
+  layoutPaternalTree,
+  isSpacingPreset,
+  DEFAULT_SPACING,
+} from "@/lib/services/tree-layout";
 import { parseLineage } from "@/lib/services/lineage";
 import { authErrorResponse, requireFamilyRole } from "@/lib/auth/guard";
 
@@ -32,6 +36,8 @@ export async function GET(
   const upGenRaw = Number(url.searchParams.get("upGen") ?? "3");
   const upGen = Number.isFinite(upGenRaw) && upGenRaw >= 0 ? Math.min(upGenRaw, 10) : 3;
   const lineage = parseLineage(url.searchParams.get("lineage") ?? undefined);
+  const spacingRaw = url.searchParams.get("spacing");
+  const spacing = isSpacingPreset(spacingRaw) ? spacingRaw : DEFAULT_SPACING;
 
   const [family, persons, marriages, parentChild] = await Promise.all([
     prisma.family.findUnique({
@@ -255,6 +261,7 @@ export async function GET(
       persons: filteredPersons,
       marriages: filteredMarriages,
       parentChild: filteredParentChild,
+      spacing,
     });
   }
 
@@ -322,13 +329,20 @@ export async function GET(
 
   const residenceByPersonId: Record<
     string,
-    { fullText: string; short: string; fromPersonId: string; inherited: boolean }
+    {
+      locationId: string;
+      fullText: string;
+      short: string;
+      fromPersonId: string;
+      inherited: boolean;
+    }
   > = {};
   for (const r of resolved) {
     if (!r.locationId || !r.fromPersonId) continue;
     const l = locById.get(r.locationId);
     if (!l) continue;
     residenceByPersonId[r.personId] = {
+      locationId: l.id,
       fullText: l.fullText,
       short: l.village || l.town || l.county || l.fullText,
       fromPersonId: r.fromPersonId,
