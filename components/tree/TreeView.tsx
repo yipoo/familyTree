@@ -7,6 +7,11 @@ import { PersonInspector } from "@/components/tree/PersonInspector";
 import { LineageTabs } from "@/components/LineageTabs";
 import { TreeHeaderSearch } from "@/components/tree/TreeHeaderSearch";
 import { SpacingControl } from "@/components/tree/SpacingControl";
+import {
+  ScrollModeToggle,
+  isScrollMode,
+  type ScrollMode,
+} from "@/components/tree/ScrollModeToggle";
 import { FilterPanel } from "@/components/tree/FilterPanel";
 import {
   isSpacingPreset,
@@ -49,6 +54,7 @@ interface GraphResponse {
 }
 
 const SPACING_LS_KEY = (familyId: string) => `tree:spacing:${familyId}`;
+const SCROLL_MODE_LS_KEY = "tree:scrollMode";
 
 function readSpacingFromLS(familyId: string): SpacingPreset {
   if (typeof window === "undefined") return DEFAULT_SPACING;
@@ -57,6 +63,16 @@ function readSpacingFromLS(familyId: string): SpacingPreset {
     return isSpacingPreset(v) ? v : DEFAULT_SPACING;
   } catch {
     return DEFAULT_SPACING;
+  }
+}
+
+function readScrollModeFromLS(): ScrollMode {
+  if (typeof window === "undefined") return "zoom";
+  try {
+    const v = window.localStorage.getItem(SCROLL_MODE_LS_KEY);
+    return isScrollMode(v) ? v : "zoom";
+  } catch {
+    return "zoom";
   }
 }
 
@@ -109,6 +125,22 @@ export function TreeView({
     },
     [familyId],
   );
+
+  // 滚轮模式：同样用 render 内派生模式
+  const [scrollMode, setScrollMode] = useState<ScrollMode>("zoom");
+  const [scrollLoaded, setScrollLoaded] = useState(false);
+  if (typeof window !== "undefined" && !scrollLoaded) {
+    setScrollLoaded(true);
+    setScrollMode(readScrollModeFromLS());
+  }
+  const handleScrollModeChange = useCallback((next: ScrollMode) => {
+    setScrollMode(next);
+    try {
+      window.localStorage.setItem(SCROLL_MODE_LS_KEY, next);
+    } catch {
+      // ignore
+    }
+  }, []);
 
   // 筛选：URL 是真相
   const filter = useMemo<TreeFilter>(() => parseFilterFromParams(params), [params]);
@@ -320,6 +352,7 @@ export function TreeView({
           />
           <span className="ml-auto flex items-center gap-3 text-xs text-zinc-500">
             <SpacingControl value={spacing} onChange={handleSpacingChange} />
+            <ScrollModeToggle value={scrollMode} onChange={handleScrollModeChange} />
             {data && (
               <>
                 <span>
@@ -376,6 +409,7 @@ export function TreeView({
               onExpandAll={handleExpandAll}
               dimmedIds={dimmedInfo.dimmed}
               hideUnmatched={filter.hideUnmatched}
+              scrollMode={scrollMode}
               spacingAnimToken={spacing}
             />
           )}

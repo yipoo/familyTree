@@ -18,6 +18,7 @@ import { GenerationAxis, type GenerationRow } from "./GenerationAxis";
 import { PositionBar } from "./PositionBar";
 import { TREE_LAYOUT_CONSTS, type LayoutResult } from "@/lib/services/tree-layout";
 import type { LayoutIndex } from "@/lib/services/layout-index";
+import type { ScrollMode } from "./ScrollModeToggle";
 
 const nodeTypes = { person: PersonNode };
 
@@ -57,6 +58,8 @@ export interface TreeCanvasProps {
   dimmedIds?: Set<string>;
   /** true：不匹配的节点真正从 layout 移除（重排）；false（默认）：仅淡出 */
   hideUnmatched?: boolean;
+  /** 滚轮行为模式：缩放（默认） / 滚动 */
+  scrollMode?: ScrollMode;
   /** 触发位置过渡动画的 token——切换 spacing 时变更，TreeCanvas 短暂打开 transition */
   spacingAnimToken?: string;
 }
@@ -83,6 +86,7 @@ function TreeCanvasInner({
   onExpandAll,
   dimmedIds,
   hideUnmatched = false,
+  scrollMode = "zoom",
   spacingAnimToken,
 }: TreeCanvasProps) {
   // 来自搜索框的临时定位参数：locate=PID + n=NONCE（每次搜索都换 nonce 触发居中）
@@ -248,6 +252,11 @@ function TreeCanvasInner({
   const collapseAll = onCollapseAll;
   const expandAll = onExpandAll;
 
+  // 滚轮模式：
+  //   - zoom（默认）：滚轮缩放（围绕鼠标）；按住空格平移
+  //   - scroll：滚轮平移；Cmd/Ctrl + 滚轮缩放（备用通道）
+  const isScroll = scrollMode === "scroll";
+
   // spacing 切换时短暂打开 transition——300ms 后关闭，避免长期影响其他交互
   const [spacingAnimOn, setSpacingAnimOn] = useState(false);
   const lastSpacingTokenRef = useRef<string | undefined>(spacingAnimToken);
@@ -272,7 +281,9 @@ function TreeCanvasInner({
         minZoom={0.05}
         maxZoom={2}
         panOnDrag
-        panOnScroll
+        panOnScroll={isScroll}
+        zoomOnScroll={!isScroll}
+        zoomActivationKeyCode={isScroll ? ["Meta", "Control"] : null}
         zoomOnPinch
         onNodeClick={handleNodeClick}
         onNodeDoubleClick={handleNodeDoubleClick}
