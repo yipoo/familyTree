@@ -15,6 +15,8 @@ const PUBLIC = (pathname: string) =>
   pathname === "/about" ||
   pathname === "/login" ||
   pathname === "/register" ||
+  pathname === "/discover" ||
+  pathname === "/api/discover" ||
   pathname === "/api/login" ||
   pathname === "/api/login-code" ||
   pathname === "/api/register" ||
