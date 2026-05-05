@@ -42,15 +42,15 @@ export function AuditLogTable({ items }: { items: AuditItem[] }) {
   }
 
   return (
-    <div className="overflow-x-auto">
-      <table className="w-full text-sm">
+    <div className="-mx-4 overflow-x-auto sm:mx-0">
+      <table className="w-full min-w-[680px] text-sm">
         <thead className="text-left text-xs text-zinc-500">
           <tr>
-            <th className="py-2 pr-4 font-medium">时间</th>
-            <th className="py-2 pr-4 font-medium">实体</th>
-            <th className="py-2 pr-4 font-medium">类型</th>
-            <th className="py-2 pr-4 font-medium">操作人</th>
-            <th className="py-2 pr-4 font-medium">详情</th>
+            <th className="py-2 pl-4 pr-4 font-medium whitespace-nowrap sm:pl-0">时间</th>
+            <th className="py-2 pr-4 font-medium whitespace-nowrap">实体</th>
+            <th className="py-2 pr-4 font-medium whitespace-nowrap">类型</th>
+            <th className="py-2 pr-4 font-medium whitespace-nowrap">操作人</th>
+            <th className="py-2 pr-4 font-medium whitespace-nowrap">详情</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800">
@@ -59,7 +59,7 @@ export function AuditLogTable({ items }: { items: AuditItem[] }) {
             return (
               <Fragment key={a.id}>
                 <tr>
-                  <td className="py-2 pr-4 font-mono text-xs text-zinc-500">
+                  <td className="py-2 pl-4 pr-4 font-mono text-xs text-zinc-500 whitespace-nowrap sm:pl-0">
                     {new Date(a.createdAt).toLocaleString("zh-CN", {
                       year: "numeric",
                       month: "2-digit",
@@ -69,7 +69,7 @@ export function AuditLogTable({ items }: { items: AuditItem[] }) {
                       second: "2-digit",
                     })}
                   </td>
-                  <td className="py-2 pr-4">
+                  <td className="py-2 pr-4 whitespace-nowrap">
                     <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs dark:bg-zinc-800">
                       {a.entity}
                     </span>
@@ -77,14 +77,14 @@ export function AuditLogTable({ items }: { items: AuditItem[] }) {
                       #{a.entityId.slice(-6)}
                     </span>
                   </td>
-                  <td className="py-2 pr-4">
+                  <td className="py-2 pr-4 whitespace-nowrap">
                     <span
                       className={`rounded px-1.5 py-0.5 text-xs ${KIND_TONE[a.kind] ?? "bg-zinc-100 text-zinc-700"}`}
                     >
                       {KIND_LABEL[a.kind] ?? a.kind}
                     </span>
                   </td>
-                  <td className="py-2 pr-4 text-xs">
+                  <td className="py-2 pr-4 text-xs whitespace-nowrap">
                     {a.actorName}
                     {a.actorPhone && (
                       <span className="ml-1 font-mono text-zinc-400">
@@ -92,7 +92,7 @@ export function AuditLogTable({ items }: { items: AuditItem[] }) {
                       </span>
                     )}
                   </td>
-                  <td className="py-2 pr-4">
+                  <td className="py-2 pr-4 whitespace-nowrap">
                     <button
                       type="button"
                       onClick={() => setOpenId(open ? null : a.id)}
