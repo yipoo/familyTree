@@ -7,6 +7,7 @@ import { PersonInspector } from "@/components/tree/PersonInspector";
 import { LineageTabs } from "@/components/LineageTabs";
 import { TreeHeaderSearch } from "@/components/tree/TreeHeaderSearch";
 import { SpacingControl } from "@/components/tree/SpacingControl";
+import { FilterPanel } from "@/components/tree/FilterPanel";
 import {
   isSpacingPreset,
   DEFAULT_SPACING,
@@ -14,10 +15,23 @@ import {
   type SpacingPreset,
 } from "@/lib/services/tree-layout";
 import { buildLayoutIndex } from "@/lib/services/layout-index";
+import {
+  filterToQuery,
+  isFilterEmpty,
+  matchesFilter,
+  parseFilterFromParams,
+  type TreeFilter,
+} from "@/lib/services/tree-filter";
 
 export type ResidenceMap = Record<
   string,
-  { fullText: string; short: string; fromPersonId: string; inherited: boolean }
+  {
+    locationId: string;
+    fullText: string;
+    short: string;
+    fromPersonId: string;
+    inherited: boolean;
+  }
 >;
 
 interface GraphResponse {
@@ -94,6 +108,35 @@ export function TreeView({
       }
     },
     [familyId],
+  );
+
+  // 筛选：URL 是真相
+  const filter = useMemo<TreeFilter>(() => parseFilterFromParams(params), [params]);
+  const handleFilterChange = useCallback(
+    (next: TreeFilter) => {
+      const sp = new URLSearchParams(params.toString());
+      // 移除老的 filter 相关 keys
+      for (const k of [
+        "loc",
+        "genChar",
+        "genFrom",
+        "genTo",
+        "sex",
+        "fstatus",
+        "hideUnmatched",
+      ]) {
+        sp.delete(k);
+      }
+      // 写入新值
+      const q = filterToQuery(next);
+      for (const [k, v] of Object.entries(q)) sp.set(k, v);
+      const queryStr = sp.toString();
+      router.replace(
+        `/f/${familyId}/tree${queryStr ? `?${queryStr}` : ""}`,
+        { scroll: false },
+      );
+    },
+    [params, router, familyId],
   );
 
   // 稳定回调，避免每次 render 产生新引用造成 TreeCanvas 内部 effect 重新触发
@@ -194,6 +237,34 @@ export function TreeView({
     };
   }, [familyId, root, focus, lineage, spacing, router]);
 
+  // 计算当前可见集合中"不匹配筛选"的人物 id（dimmedIds）。
+  // 注意：layout.nodes 已经按 lineage / focus / root 过滤过，所以"总数"取这里的长度。
+  const dimmedInfo = useMemo<{ dimmed: Set<string>; matched: number; total: number }>(() => {
+    if (!data?.layout) return { dimmed: new Set(), matched: 0, total: 0 };
+    const total = data.layout.nodes.length;
+    if (isFilterEmpty(filter)) return { dimmed: new Set(), matched: total, total };
+    const dimmed = new Set<string>();
+    let matched = 0;
+    for (const n of data.layout.nodes) {
+      const r = data.residenceByPersonId[n.id];
+      const ok = matchesFilter(
+        {
+          id: n.id,
+          generation: n.person.generation,
+          generationChar: n.person.generationChar,
+          gender: n.person.gender,
+          status: n.person.status,
+        },
+        // 用解析后的 location id 与筛选条件匹配（沿父系上溯继承的也算）
+        r?.locationId ?? null,
+        filter,
+      );
+      if (ok) matched += 1;
+      else dimmed.add(n.id);
+    }
+    return { dimmed, matched, total };
+  }, [data, filter]);
+
   return (
     <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
       <header className="shrink-0 border-b border-zinc-200 bg-white px-3 py-3 dark:border-zinc-800 dark:bg-zinc-900 sm:px-6">
@@ -240,6 +311,13 @@ export function TreeView({
           )}
           <LineageTabs />
           <TreeHeaderSearch familyId={familyId} />
+          <FilterPanel
+            familyId={familyId}
+            filter={filter}
+            onChange={handleFilterChange}
+            matchedCount={dimmedInfo.matched}
+            totalCount={dimmedInfo.total}
+          />
           <span className="ml-auto flex items-center gap-3 text-xs text-zinc-500">
             <SpacingControl value={spacing} onChange={handleSpacingChange} />
             {data && (
@@ -296,6 +374,8 @@ export function TreeView({
               onToggleCollapsed={handleToggleCollapsed}
               onCollapseAll={handleCollapseAll}
               onExpandAll={handleExpandAll}
+              dimmedIds={dimmedInfo.dimmed}
+              hideUnmatched={filter.hideUnmatched}
               spacingAnimToken={spacing}
             />
           )}

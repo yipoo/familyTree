@@ -329,13 +329,20 @@ export async function GET(
 
   const residenceByPersonId: Record<
     string,
-    { fullText: string; short: string; fromPersonId: string; inherited: boolean }
+    {
+      locationId: string;
+      fullText: string;
+      short: string;
+      fromPersonId: string;
+      inherited: boolean;
+    }
   > = {};
   for (const r of resolved) {
     if (!r.locationId || !r.fromPersonId) continue;
     const l = locById.get(r.locationId);
     if (!l) continue;
     residenceByPersonId[r.personId] = {
+      locationId: l.id,
       fullText: l.fullText,
       short: l.village || l.town || l.county || l.fullText,
       fromPersonId: r.fromPersonId,

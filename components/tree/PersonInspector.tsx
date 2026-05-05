@@ -29,7 +29,13 @@ export interface PersonInspectorProps {
   /** 居住地映射，由 TreeView 透传，用于头部显示短名 */
   residenceByPersonId?: Record<
     string,
-    { fullText: string; short: string; fromPersonId: string; inherited: boolean }
+    {
+      locationId: string;
+      fullText: string;
+      short: string;
+      fromPersonId: string;
+      inherited: boolean;
+    }
   >;
   /** 当前折叠状态（外部受控，与 TreeCanvas 共用） */
   collapsedIds: Set<string>;

@@ -15,6 +15,8 @@ export interface PersonNodeData {
   /** 该节点（基于可见父子边）的全部后代数；折叠时显示在角标里 */
   descendantCount?: number;
   isSelected?: boolean;
+  /** 不匹配筛选条件——淡出但仍可见，保留血脉脉络 */
+  isDimmed?: boolean;
   residenceShort?: string | null;
   residenceFull?: string | null;
   residenceInherited?: boolean;
@@ -111,7 +113,11 @@ export function PersonNode({ id, data, selected }: NodeProps) {
 
   return (
     <div
-      style={{ width: NODE_W, height: NODE_H }}
+      style={{
+        width: NODE_W,
+        height: NODE_H,
+        opacity: d.isDimmed && !hit ? 0.18 : 1,
+      }}
       title={residenceTooltip}
       className={`relative flex flex-col items-stretch overflow-hidden rounded-md border-2 ${frameClass} ${
         hit
