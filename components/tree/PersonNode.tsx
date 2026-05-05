@@ -12,6 +12,8 @@ export interface PersonNodeData {
   status: string;
   isCollapsed?: boolean;
   hasChildren?: boolean;
+  /** 该节点（基于可见父子边）的全部后代数；折叠时显示在角标里 */
+  descendantCount?: number;
   isSelected?: boolean;
   residenceShort?: string | null;
   residenceFull?: string | null;
@@ -157,10 +159,13 @@ export function PersonNode({ id, data, selected }: NodeProps) {
       {d.isMarriedIn && (
         <div className="absolute bottom-0.5 left-1 text-[9px] leading-none opacity-70">嫁</div>
       )}
-      {/* 折叠指示器：底部正中显示一个"+"，提示有被隐藏的后代 */}
+      {/* 折叠指示器：底部正中显示 "+N"，N = 被隐藏的后代总数 */}
       {d.isCollapsed && d.hasChildren && (
-        <div className="absolute -bottom-1 left-1/2 flex h-4 w-4 -translate-x-1/2 items-center justify-center rounded-full bg-amber-500 text-[10px] font-bold leading-none text-white shadow ring-1 ring-white">
-          +
+        <div
+          className="absolute -bottom-1 left-1/2 flex h-4 min-w-4 -translate-x-1/2 items-center justify-center rounded-full bg-amber-500 px-1 text-[10px] font-bold leading-none text-white shadow ring-1 ring-white"
+          title={`已折叠 ${d.descendantCount ?? 0} 位后代（双击展开）`}
+        >
+          +{d.descendantCount ?? 0}
         </div>
       )}
 

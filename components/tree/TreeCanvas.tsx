@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ReactFlow,
@@ -17,17 +17,17 @@ import { PersonNode, type PersonNodeData } from "./PersonNode";
 import { GenerationAxis, type GenerationRow } from "./GenerationAxis";
 import { PositionBar } from "./PositionBar";
 import { TREE_LAYOUT_CONSTS, type LayoutResult } from "@/lib/services/tree-layout";
+import type { LayoutIndex } from "@/lib/services/layout-index";
 
 const nodeTypes = { person: PersonNode };
-
-// 复用同一空 Set 以保持对象引用稳定（避免触发依赖 collapsedIds 的 memo 重算）
-const EMPTY_SET: Set<string> = new Set();
 
 /** 当前选中的人物 id；放进 Context，避免每次切换都重建 10K 节点数组 */
 export const SelectedIdContext = createContext<string | null>(null);
 
 export interface TreeCanvasProps {
   layout: LayoutResult;
+  /** 由 TreeView 在 layout 变化时构建一次，传入复用 */
+  layoutIndex: LayoutIndex;
   generationChars: Record<number, string>;
   /** 数据已按此聚焦人物过滤，画布加载后自动居中到该节点 */
   focusPersonId?: string | null;
@@ -40,6 +40,13 @@ export interface TreeCanvasProps {
     string,
     { fullText: string; short: string; fromPersonId: string; inherited: boolean }
   >;
+  /** 折叠状态（外部受控）。空集 = 没有节点被折叠 */
+  collapsedIds: Set<string>;
+  /** 切换某节点折叠（双击触发） */
+  onToggleCollapsed: (id: string) => void;
+  /** 全部折叠 / 全部展开（左下角按钮触发） */
+  onCollapseAll: () => void;
+  onExpandAll: () => void;
 }
 
 export function TreeCanvas(props: TreeCanvasProps) {
@@ -52,40 +59,25 @@ export function TreeCanvas(props: TreeCanvasProps) {
 
 function TreeCanvasInner({
   layout,
+  layoutIndex,
   generationChars,
   focusPersonId,
   selectedId,
   onSelectChange,
   residenceByPersonId,
+  collapsedIds,
+  onToggleCollapsed,
+  onCollapseAll,
+  onExpandAll,
 }: TreeCanvasProps) {
-  // collapsedIds 中存的是"被折叠"的人——其全部后代不渲染（本人仍可见）
-  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(new Set());
   // 来自搜索框的临时定位参数：locate=PID + n=NONCE（每次搜索都换 nonce 触发居中）
   const sp = useSearchParams();
   const locateId = sp.get("locate");
   const locateNonce = sp.get("n");
 
-  // layout 改变时（如重新搜索/聚焦）重置折叠状态为"全部展开"。
-  // React 官方派生模式：track previous prop in render，条件性 setState。
-  // 不能用 useEffect+setState（会被 react-hooks/set-state-in-effect 命中）。
-  // 参考：https://react.dev/reference/react/useState#storing-information-from-previous-renders
-  const [lastLayout, setLastLayout] = useState(layout);
-  if (layout !== lastLayout) {
-    setLastLayout(layout);
-    setCollapsedIds(EMPTY_SET);
-  }
-
-  // 父→子图（仅可见的父子边参与折叠语义）
-  const childrenByParent = useMemo(() => {
-    const map = new Map<string, string[]>();
-    for (const e of layout.edges) {
-      if (e.kind !== "parent-child" || e.hidden) continue;
-      const arr = map.get(e.source) ?? [];
-      if (!arr.includes(e.target)) arr.push(e.target);
-      map.set(e.source, arr);
-    }
-    return map;
-  }, [layout]);
+  // 折叠语义统一用 layoutIndex.visibleChildrenOf（与后代数计数一致）
+  const childrenByParent = layoutIndex.visibleChildrenOf;
+  const descendantCountOf = layoutIndex.descendantCountOf;
 
   // 计算被隐藏的节点 id：从每个折叠点向下 BFS
   const hiddenIds = useMemo(() => {
@@ -125,6 +117,7 @@ function TreeCanvasInner({
             status: n.person.status,
             isCollapsed: collapsedIds.has(n.id),
             hasChildren: (childrenByParent.get(n.id)?.length ?? 0) > 0,
+            descendantCount: descendantCountOf.get(n.id) ?? 0,
             residenceShort: r?.short ?? null,
             residenceFull: r?.fullText ?? null,
             residenceInherited: r?.inherited ?? false,
@@ -151,7 +144,7 @@ function TreeCanvasInner({
       }));
 
     return { nodes: ns, edges: es };
-  }, [layout, hiddenIds, collapsedIds, childrenByParent, residenceByPersonId]);
+  }, [layout, hiddenIds, collapsedIds, childrenByParent, descendantCountOf, residenceByPersonId]);
 
   const axisRows: GenerationRow[] = useMemo(() => {
     const rows: GenerationRow[] = [];
@@ -180,16 +173,14 @@ function TreeCanvasInner({
     [onSelectChange],
   );
 
-  // 双击：切换折叠状态
-  const handleNodeDoubleClick: NodeMouseHandler = useCallback((e, n) => {
-    e.preventDefault?.();
-    setCollapsedIds((prev) => {
-      const next = new Set(prev);
-      if (next.has(n.id)) next.delete(n.id);
-      else next.add(n.id);
-      return next;
-    });
-  }, []);
+  // 双击：切换折叠状态——委托给父级（受控）
+  const handleNodeDoubleClick: NodeMouseHandler = useCallback(
+    (e, n) => {
+      e.preventDefault?.();
+      onToggleCollapsed(n.id);
+    },
+    [onToggleCollapsed],
+  );
 
   // 聚焦 / 定位居中：仅当下列触发源 token 变化时才居中，避免 onSelectChange / layout
   // 引用变化导致回跳，覆盖用户后来的点击。
@@ -214,16 +205,9 @@ function TreeCanvasInner({
     return () => clearTimeout(t);
   }, [trigger, focusPersonId, locateId, layout, rf, onSelectChange]);
 
-  // 全部折叠 / 全部展开
-  function collapseAll() {
-    // 把所有"有子女"的人物加入 collapsedIds
-    const all = new Set<string>();
-    for (const id of childrenByParent.keys()) all.add(id);
-    setCollapsedIds(all);
-  }
-  function expandAll() {
-    setCollapsedIds(new Set());
-  }
+  // 全部折叠 / 全部展开按钮 → 委托外部 actions
+  const collapseAll = onCollapseAll;
+  const expandAll = onExpandAll;
 
   return (
     <SelectedIdContext.Provider value={selectedId}>

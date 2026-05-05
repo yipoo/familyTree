@@ -31,6 +31,10 @@ export interface PersonInspectorProps {
     string,
     { fullText: string; short: string; fromPersonId: string; inherited: boolean }
   >;
+  /** 当前折叠状态（外部受控，与 TreeCanvas 共用） */
+  collapsedIds: Set<string>;
+  /** 切换某节点的折叠状态 */
+  onToggleCollapsed: (id: string) => void;
 }
 
 type Kind = "father" | "mother" | "spouse" | "son" | "daughter" | "brother" | "sister";
@@ -51,6 +55,8 @@ export function PersonInspector({
   layoutIndex,
   onClearSelection,
   residenceByPersonId,
+  collapsedIds,
+  onToggleCollapsed,
 }: PersonInspectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -126,6 +132,16 @@ export function PersonInspector({
   const parents = personId ? layoutIndex?.parentsOf.get(personId) ?? [] : [];
   const spouses = personId ? layoutIndex?.spousesOf.get(personId) ?? [] : [];
   const children = personId ? layoutIndex?.childrenOf.get(personId) ?? [] : [];
+
+  // 折叠语义：可见父子边下的直接子女数与全部后代数；inspector 折叠按钮基于这些
+  const visibleChildCount = personId
+    ? layoutIndex?.visibleChildrenOf.get(personId)?.length ?? 0
+    : 0;
+  const descendantCount = personId
+    ? layoutIndex?.descendantCountOf.get(personId) ?? 0
+    : 0;
+  const isCollapsed = personId ? collapsedIds.has(personId) : false;
+  const canCollapse = visibleChildCount > 0;
 
   function refresh() {
     startTransition(() => router.refresh());
@@ -442,7 +458,25 @@ export function PersonInspector({
                     展开所有分支
                   </PillBtn>
                 )}
+                {/* 折叠 / 展开后代：基于 visibleChildrenOf；无可见子女则按钮禁用 */}
+                {canCollapse && (
+                  <PillBtn
+                    onClick={() => personId && onToggleCollapsed(personId)}
+                    variant={isCollapsed ? "blue" : "ghost"}
+                  >
+                    {isCollapsed
+                      ? `展开后代（${descendantCount}）`
+                      : `折叠后代（${descendantCount}）`}
+                  </PillBtn>
+                )}
               </div>
+              {canCollapse && (
+                <p className="mt-1.5 text-[11px] text-zinc-500">
+                  {isCollapsed
+                    ? `已折叠 ${descendantCount} 位后代——画布上以 +${descendantCount} 角标提示`
+                    : `直接子女 ${visibleChildCount} 人 / 全部后代 ${descendantCount} 人。也可双击节点折叠。`}
+                </p>
+              )}
             </Disclosure>
 
             {/* 更多 / 危险 */}
