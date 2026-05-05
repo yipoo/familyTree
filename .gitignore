@@ -44,3 +44,10 @@ next-env.d.ts
 
 # claude code local
 .claude/
+
+# 沙箱内 FUSE 不能 unlink，把无法删除的旧 .next / 临时文件移到这里
+.trash/
+/.next.old.*
+/.next.stale.*
+/tmp/
+

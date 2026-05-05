@@ -14,21 +14,18 @@
  * - 当前 pathname：从 proxy.ts 写入的 x-pathname header 取
  * - memberships：当前用户的家族列表（family-switcher 用）
  * - canManage / pendingCount：当前家族的管理者徽标
+ *
+ * 实际渲染交给 TopNavView 纯组件 —— 这样 /preview/* 等场景能复用同一个 UI。
  */
 
-import Link from "next/link";
 import { headers } from "next/headers";
 
 import { auth, signOut } from "@/auth";
 import { prisma } from "@/lib/db";
 import { canManageFamily } from "@/app/f/[familyId]/admin/actions";
 
-import { FamilySwitcher, type SwitcherFamily } from "./FamilySwitcher";
-import { ViewTabs, buildFamilyTabs } from "./ViewTabs";
-import { UserMenu } from "./UserMenu";
-import { QuickAddMenu } from "./QuickAddMenu";
-import { ThemeToggle } from "./ThemeToggle";
-import { MobileNav } from "./MobileNav";
+import { TopNavView } from "./TopNavView";
+import type { SwitcherFamily } from "./FamilySwitcher";
 
 const PUBLIC_EXACT = new Set([
   "/",
@@ -110,13 +107,6 @@ export async function TopNav() {
     surname: m.family.surname,
     myRole: m.role,
   }));
-  // 超管在外族 URL 时，把当前家族临时加入列表
-  if (
-    currentFamily &&
-    !switcherList.some((s) => s.id === currentFamily!.id)
-  ) {
-    switcherList.unshift(currentFamily);
-  }
 
   const canManage = currentFamilyId
     ? await canManageFamily(currentFamilyId)
@@ -128,87 +118,15 @@ export async function TopNav() {
       })
     : 0;
 
-  const tabs = currentFamily
-    ? buildFamilyTabs({
-        familyId: currentFamily.id,
-        canManage,
-        pendingCount,
-      })
-    : [];
-
   return (
-    <header className="sticky top-0 z-30 border-b border-border bg-surface/90 backdrop-blur-md print:hidden">
-      <div className="mx-auto flex h-14 max-w-[1440px] items-center gap-2 px-3 sm:px-5 lg:px-6">
-        {/* 移动端汉堡 */}
-        <MobileNav
-          current={currentFamily}
-          memberships={switcherList}
-          tabs={tabs}
-        />
-
-        {/* 品牌 + 家族 */}
-        <Link
-          href="/dashboard"
-          aria-label="回到我的家族"
-          className="flex shrink-0 items-center gap-2 rounded-md px-1.5 py-1 transition hover:bg-muted focus:outline-none focus-visible:ring-2 focus-visible:ring-brand"
-        >
-          <span
-            aria-hidden
-            className="flex h-7 w-7 items-center justify-center rounded-md bg-brand text-[12px] font-semibold text-brand-fg shadow-sm"
-            style={{ fontFamily: "var(--font-serif)" }}
-          >
-            族
-          </span>
-          <span className="hidden text-sm font-semibold text-foreground sm:inline">
-            族谱·家
-          </span>
-        </Link>
-
-        {currentFamily && (
-          <>
-            <span className="hidden text-fg-subtle md:inline">/</span>
-            <div className="hidden md:flex">
-              <FamilySwitcher
-                current={currentFamily}
-                memberships={switcherList}
-              />
-            </div>
-            {/* 移动端简化展示：只显示家族名 */}
-            <span className="md:hidden truncate text-sm font-semibold text-foreground">
-              {currentFamily.name}
-            </span>
-          </>
-        )}
-
-        {/* 中段：视图 Tab */}
-        {currentFamily && (
-          <nav className="ml-2 hidden min-w-0 flex-1 md:block">
-            <ViewTabs tabs={tabs} />
-          </nav>
-        )}
-        {!currentFamily && <div className="flex-1" />}
-
-        {/* 右侧 */}
-        <div className="ml-auto flex shrink-0 items-center gap-1 md:gap-1.5">
-          {!currentFamily && (
-            <Link
-              href="/join"
-              className="hidden rounded-md border border-border px-2.5 py-1.5 text-xs text-fg-muted transition hover:bg-muted hover:text-foreground sm:inline-block"
-            >
-              + 加入家族
-            </Link>
-          )}
-          {currentFamily && canManage && (
-            <QuickAddMenu familyId={currentFamily.id} />
-          )}
-          <ThemeToggle />
-          <UserMenu
-            name={userName}
-            isSuper={isSuper}
-            logoutAction={logoutAction}
-          />
-        </div>
-      </div>
-    </header>
+    <TopNavView
+      userName={userName}
+      isSuper={isSuper}
+      currentFamily={currentFamily}
+      memberships={switcherList}
+      canManage={canManage}
+      pendingCount={pendingCount}
+      logoutAction={logoutAction}
+    />
   );
 }

@@ -14,7 +14,7 @@ import {
   IconClose,
   IconMenu,
 } from "./icons";
-import type { ViewTab } from "./ViewTabs";
+import { resolveIcon, type ViewTab } from "./ViewTabs";
 import type { SwitcherFamily } from "./FamilySwitcher";
 
 export function MobileNav({
@@ -145,7 +145,7 @@ export function MobileNav({
                   <ul>
                     {tabs.map((t) => {
                       const active = isActive(pathname, t.href, t.exact);
-                      const Icon = t.icon;
+                      const Icon = resolveIcon(t.icon);
                       return (
                         <li key={t.href}>
                           <Link

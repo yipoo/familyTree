@@ -1,16 +1,20 @@
 "use client";
 
 /**
- * 顶栏中段：当前家族下的视图切换 Tab。
+ * 顶栏中段：当前家族下的视图切换 Tab（纯展示组件）。
  *
  * - 桌面：横排，icon + 文字 + 激活态下划线
  * - 移动：水平滚动条（不折叠到下拉，避免误触；> 768 才有空间）
  * - tab role + aria-current 提供屏幕阅读器语义
+ *
+ * 数据装配 (`buildFamilyTabs`) 移到了 view-tabs-config.ts，这样 server
+ * 组件也能调用，避免 "Attempted to call ... from the server" 报错。
  */
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
+import type { ViewTab, IconKey } from "./view-tabs-config";
 import {
   IconBook,
   IconHome,
@@ -21,55 +25,21 @@ import {
   IconTable,
   IconTree,
 } from "./icons";
+export type { ViewTab } from "./view-tabs-config";
 
-export interface ViewTab {
-  href: string;
-  label: string;
-  /** 严格匹配 pathname == href */
-  exact?: boolean;
-  /** 角标 */
-  badge?: number;
-  /** 仅当布尔为 true 时才显示——譬如 admin 只有有权限的人能看 */
-  show?: boolean;
-  icon: React.ComponentType<{ size?: number }>;
-}
+const ICON_MAP: Record<IconKey, React.ComponentType<{ size?: number }>> = {
+  home: IconHome,
+  tree: IconTree,
+  table: IconTable,
+  lineage: IconLineage,
+  book: IconBook,
+  search: IconSearch,
+  route: IconRoute,
+  shield: IconShield,
+};
 
-export function buildFamilyTabs({
-  familyId,
-  canManage,
-  pendingCount,
-}: {
-  familyId: string;
-  canManage: boolean;
-  pendingCount: number;
-}): ViewTab[] {
-  const tabs: ViewTab[] = [
-    {
-      href: `/f/${familyId}`,
-      label: "概览",
-      exact: true,
-      icon: IconHome,
-    },
-    { href: `/f/${familyId}/tree`, label: "树谱", icon: IconTree },
-    { href: `/f/${familyId}/table`, label: "详细图", icon: IconTable },
-    { href: `/f/${familyId}/lineage`, label: "吊线图", icon: IconLineage },
-    { href: `/f/${familyId}/album`, label: "册谱", icon: IconBook },
-    { href: `/f/${familyId}/search`, label: "搜索", icon: IconSearch },
-  ];
-  if (canManage) {
-    tabs.push({
-      href: `/f/${familyId}/admin/migrations`,
-      label: "迁徙",
-      icon: IconRoute,
-    });
-    tabs.push({
-      href: `/f/${familyId}/admin`,
-      label: "后台",
-      icon: IconShield,
-      badge: pendingCount > 0 ? pendingCount : undefined,
-    });
-  }
-  return tabs;
+export function resolveIcon(key: IconKey) {
+  return ICON_MAP[key];
 }
 
 export function ViewTabs({ tabs }: { tabs: ViewTab[] }) {
@@ -82,7 +52,7 @@ export function ViewTabs({ tabs }: { tabs: ViewTab[] }) {
     >
       {tabs.map((t) => {
         const active = isActive(pathname, t.href, t.exact);
-        const Icon = t.icon;
+        const Icon = ICON_MAP[t.icon];
         return (
           <Link
             key={t.href}
