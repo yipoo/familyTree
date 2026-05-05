@@ -16,6 +16,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireFamilyRole } from "@/lib/auth/guard";
 import { handleApiError } from "@/lib/api/error";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 import {
   type ExportSnapshot,
   toCsvBundle,
@@ -33,7 +34,7 @@ const ALLOWED_FORMATS = new Set([
   "gedcom",
 ]);
 
-export async function GET(
+async function exportHandler(
   req: Request,
   ctx: { params: Promise<{ familyId: string }> },
 ) {
@@ -175,6 +176,14 @@ export async function GET(
     return handleApiError(e);
   }
 }
+
+// 限流：导出涉及全量扫表，每用户每分钟 10 次足够；IP 桶兜底防匿名滥用。
+export const GET = withRateLimit(exportHandler, {
+  bucket: "export",
+  limit: 10,
+  windowMs: 60_000,
+  withUser: true,
+});
 
 function csvResponse(body: string, filename: string): NextResponse {
   // 加 BOM 让 Excel 正确识别 UTF-8

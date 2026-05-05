@@ -11,8 +11,9 @@ import { requireFamilyRole } from "@/lib/auth/guard";
 import { handleApiError } from "@/lib/api/error";
 import { layoutLineageChart } from "@/lib/services/lineage-chart";
 import { renderLineageChartPdf } from "@/lib/pdf/lineage-chart";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
-export async function GET(
+async function lineageChartPdfHandler(
   req: Request,
   ctx: { params: Promise<{ familyId: string }> },
 ) {
@@ -115,3 +116,11 @@ export async function GET(
     return handleApiError(e);
   }
 }
+
+// 限流：PDF 渲染是计算密集型，每用户每分钟 5 次（异步化后此 GET 仅小家族走）
+export const GET = withRateLimit(lineageChartPdfHandler, {
+  bucket: "pdf-lineage",
+  limit: 5,
+  windowMs: 60_000,
+  withUser: true,
+});

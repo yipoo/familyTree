@@ -19,6 +19,7 @@ import { encode } from "next-auth/jwt";
 
 import { prisma } from "@/lib/db";
 import { normalizePhone, verifyPassword } from "@/lib/auth/password";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const SESSION_COOKIE = "authjs.session-token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
@@ -26,7 +27,7 @@ const SALT = SESSION_COOKIE;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
-export async function POST(req: Request) {
+async function loginHandler(req: Request) {
   const formData = await req.formData();
   const identifier =
     String(formData.get("identifier") ?? formData.get("phone") ?? formData.get("email") ?? "").trim();
@@ -85,3 +86,10 @@ export async function POST(req: Request) {
   });
   return res;
 }
+
+// 限流：单 IP 每分钟最多 10 次登录尝试。登录失败一次也计数。
+export const POST = withRateLimit(loginHandler, {
+  bucket: "login",
+  limit: 10,
+  windowMs: 60_000,
+});
