@@ -6,7 +6,6 @@
  * 服务端 SSR：直接调用算法生成布局，再用 LineageChartSvg 渲染。
  * 提供"打印 / 下载 PDF"按钮（浏览器打印），以及"下载 SVG"链接。
  */
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -123,22 +122,21 @@ export default async function LineageChartPage({
   const rootName = rootId ? persons.find((p) => p.id === rootId)?.name ?? "" : "";
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 print:bg-white">
-      <header className="border-b border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900 sm:px-8 print:hidden">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-center gap-3">
-          <Link
-            href={`/f/${familyId}`}
-            className="text-sm text-zinc-500 hover:underline"
-          >
-            ← 返回家族
-          </Link>
-          <h1 className="text-lg font-semibold">
-            吊线图 · {family.name}
-          </h1>
-          <span className="text-xs text-zinc-500">
-            根 · {rootName || "—"}
-          </span>
-          <div className="ml-auto flex flex-wrap items-center gap-2">
+    <div className="print:bg-white">
+      <header className="border-b border-hairline bg-surface print:hidden">
+        <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-3 px-4 py-5 sm:px-6 lg:px-8">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
+              吊线图
+            </p>
+            <h1 className="mt-1 font-serif text-xl font-semibold text-foreground">
+              {family.name}
+            </h1>
+            <p className="mt-0.5 text-xs text-fg-muted">
+              根 · {rootName || "—"}
+            </p>
+          </div>
+          <div className="flex flex-wrap items-center gap-2">
             <LineageChartActions
               familyId={familyId}
               rootId={rootId ?? ""}
@@ -153,9 +151,9 @@ export default async function LineageChartPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl overflow-x-auto p-4 sm:p-8 print:max-w-none print:p-0">
+      <main className="mx-auto max-w-7xl overflow-x-auto p-4 sm:p-6 lg:p-8 print:max-w-none print:p-0">
         {layout ? (
-          <div className="rounded-lg bg-white p-4 shadow-sm dark:bg-zinc-900 print:p-0 print:shadow-none">
+          <div className="rounded-lg border border-border bg-panel p-4 shadow-sm print:rounded-none print:border-0 print:p-0 print:shadow-none">
             <LineageChartSvg
               layout={layout}
               title={family.name}

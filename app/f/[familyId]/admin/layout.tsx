@@ -28,12 +28,12 @@ export default async function AdminLayout({
   });
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
+    <div>
       <div className="mx-auto flex max-w-7xl gap-6 px-4 py-6 sm:px-6 lg:px-8">
         {/* 左侧菜单 */}
         <aside className="hidden w-56 shrink-0 lg:block">
-          <div className="sticky top-16">
-            <p className="mb-2 px-2 text-xs uppercase tracking-wider text-zinc-400">
+          <div className="sticky top-20">
+            <p className="mb-2 px-2 text-[10px] font-medium uppercase tracking-wider text-fg-subtle">
               {family.name} · 后台
             </p>
             <AdminSidebar familyId={familyId} pendingCount={pendingCount} />
@@ -44,7 +44,9 @@ export default async function AdminLayout({
         <main className="min-w-0 flex-1">
           {/* 移动端横向菜单 */}
           <div className="mb-4 lg:hidden">
-            <h1 className="mb-2 text-lg font-semibold">{family.name} · 后台</h1>
+            <h1 className="mb-2 font-serif text-lg font-semibold text-foreground">
+              {family.name} · 后台
+            </h1>
             <AdminSidebar
               familyId={familyId}
               pendingCount={pendingCount}

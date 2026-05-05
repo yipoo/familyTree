@@ -10,7 +10,6 @@
  *      - 章（按世代）
  *        - 人物条目（传记体文字）
  */
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -52,27 +51,28 @@ export default async function AlbumPage({
   if (!book) notFound();
 
   const pageStyle =
-    "rounded-lg bg-white px-8 py-10 text-zinc-900 shadow-sm dark:bg-zinc-900 dark:text-zinc-100 print:shadow-none print:rounded-none";
+    "rounded-lg border border-border bg-panel px-8 py-10 text-foreground shadow-sm print:border-0 print:bg-white print:text-zinc-900 print:shadow-none print:rounded-none";
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950 print:bg-white">
-      <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/95 px-4 py-3 backdrop-blur dark:border-zinc-800 dark:bg-zinc-900/95 sm:px-8 print:hidden">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-center gap-3">
-          <Link
-            href={`/f/${familyId}`}
-            className="text-sm text-zinc-500 hover:underline"
-          >
-            ← 返回家族
-          </Link>
-          <h1 className="text-base font-semibold">{book.family.name} · 册谱</h1>
-          <span className="ml-auto text-xs text-zinc-500">
-            共 {book.totalPersons} 人 · {book.volumes.length} 卷
-          </span>
+    <div className="print:bg-white">
+      <header className="sticky top-14 z-10 border-b border-hairline bg-surface/90 backdrop-blur print:hidden">
+        <div className="mx-auto flex max-w-3xl flex-wrap items-end justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
+              册谱
+            </p>
+            <h1 className="mt-0.5 font-serif text-lg font-semibold text-foreground">
+              {book.family.name}
+            </h1>
+            <p className="text-[11px] text-fg-subtle">
+              共 {book.totalPersons} 人 · {book.volumes.length} 卷
+            </p>
+          </div>
           <AlbumPrintActions familyId={familyId} />
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-8 print:max-w-none print:p-0">
+      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:p-0">
         {/* 封面 */}
         <section className={`${pageStyle} text-center`}>
           <p className="text-sm text-zinc-500">{book.family.surname} 氏家族</p>

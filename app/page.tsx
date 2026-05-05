@@ -1,13 +1,21 @@
 /**
- * 站点入口 / —— 永远展示营销 Landing。
+ * 站点入口 /
  *
- * 已登录用户在 MarketingNav 上能看到「进入我的家族 →」链接到 /dashboard；
- * 未登录用户看到「登录 / 免费注册」。
+ * - 未登录：营销 Landing 页
+ * - 已登录：直接显示 Dashboard（"我的家族"仪表盘），少一次点 "进入我的家族" 跳转
+ *
+ * 这样符合现代 SaaS 习惯：访问根路径即看到自己的工作面板。
  */
+import { auth } from "@/auth";
+import { Dashboard } from "@/components/Dashboard";
 import { Landing } from "@/components/marketing/Landing";
 
 export const dynamic = "force-dynamic";
 
-export default function Home() {
+export default async function Home() {
+  const session = await auth();
+  if (session?.user?.id) {
+    return <Dashboard />;
+  }
   return <Landing />;
 }

@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { LineageTabs } from "@/components/LineageTabs";
@@ -67,73 +66,43 @@ export default async function FamilyDetailPage({
   const charByGen = new Map(family.generationNames.map((g) => [g.generation, g.character]));
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <header className="border-b border-zinc-200 bg-white px-4 py-5 dark:border-zinc-800 dark:bg-zinc-900 sm:px-8">
-        <div className="mx-auto max-w-5xl">
-          <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-            {family.name}
-          </h1>
-          {family.description && (
-            <p className="mt-1 text-sm text-zinc-500">{family.description}</p>
-          )}
-          <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
-            <span className="text-zinc-600 dark:text-zinc-400">
-              人数 <strong className="text-zinc-900 dark:text-zinc-50">{stats.total}</strong>
+    <div>
+      <header className="border-b border-hairline bg-surface">
+        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-3 px-4 py-6 sm:px-6 lg:px-8">
+          <div className="min-w-0">
+            <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
+              {family.surname} 氏 · 概览
+            </p>
+            <h1 className="mt-1 font-serif text-2xl font-semibold tracking-tight text-foreground sm:text-3xl">
+              {family.name}
+            </h1>
+            {family.description && (
+              <p className="mt-1 max-w-3xl text-sm text-fg-muted">
+                {family.description}
+              </p>
+            )}
+          </div>
+          <div className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
+            <span className="text-fg-muted">
+              人数{" "}
+              <strong className="text-foreground">{stats.total}</strong>
             </span>
-            <span className="text-zinc-600 dark:text-zinc-400">
-              男 <strong className="text-blue-600">{stats.male}</strong>
+            <span className="text-fg-muted">
+              男 <strong className="text-blue-600 dark:text-blue-400">{stats.male}</strong>
             </span>
-            <span className="text-zinc-600 dark:text-zinc-400">
-              女 <strong className="text-pink-600">{stats.female}</strong>
+            <span className="text-fg-muted">
+              女 <strong className="text-pink-600 dark:text-pink-400">{stats.female}</strong>
             </span>
             <LineageTabs />
           </div>
-          <nav className="mt-3 flex flex-wrap gap-2 text-xs">
-            <Link
-              href={`/f/${familyId}/tree`}
-              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-            >
-              树视图
-            </Link>
-            <Link
-              href={`/f/${familyId}/lineage`}
-              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-            >
-              吊线图
-            </Link>
-            <Link
-              href={`/f/${familyId}/album`}
-              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-            >
-              册谱
-            </Link>
-            <Link
-              href={`/f/${familyId}/table`}
-              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-            >
-              详细表
-            </Link>
-            <Link
-              href={`/f/${familyId}/search`}
-              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-            >
-              高级搜索
-            </Link>
-            <Link
-              href={`/f/${familyId}/admin`}
-              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
-            >
-              管理
-            </Link>
-          </nav>
         </div>
       </header>
 
-      <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
+      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
         {/* 视图统计卡片 */}
         {familyStats && (
           <section className="mb-8">
-            <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+            <h2 className="mb-3 text-base font-semibold text-foreground">
               概览
             </h2>
             <StatsCards familyId={familyId} stats={familyStats} />
@@ -142,7 +111,7 @@ export default async function FamilyDetailPage({
 
         {/* 字辈表 */}
         <section className="mb-8">
-          <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="mb-3 text-base font-semibold text-foreground">
             字辈表
           </h2>
           <div className="overflow-x-auto">
@@ -150,10 +119,17 @@ export default async function FamilyDetailPage({
               {family.generationNames.map((g) => (
                 <div
                   key={g.id}
-                  className="flex min-w-[64px] flex-col items-center rounded-md border border-zinc-200 bg-white px-3 py-2 dark:border-zinc-800 dark:bg-zinc-900"
+                  className="flex min-w-[64px] flex-col items-center rounded-md border border-border bg-panel px-3 py-2 shadow-sm"
                 >
-                  <span className="text-xs text-zinc-500">{g.generation} 世</span>
-                  <span className="mt-1 text-lg font-semibold">{g.character}</span>
+                  <span className="text-xs text-fg-subtle">
+                    {g.generation} 世
+                  </span>
+                  <span
+                    className="mt-1 text-lg font-semibold text-foreground"
+                    style={{ fontFamily: "var(--font-serif)" }}
+                  >
+                    {g.character}
+                  </span>
                 </div>
               ))}
             </div>
@@ -162,31 +138,32 @@ export default async function FamilyDetailPage({
 
         {/* 支系 */}
         <section className="mb-8">
-          <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="mb-3 text-base font-semibold text-foreground">
             支系
           </h2>
           <ul className="space-y-3">
             {family.branches.map((b) => (
               <li
                 key={b.id}
-                className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+                className="rounded-lg border border-border bg-panel p-4 shadow-sm"
               >
                 <div className="flex flex-wrap items-baseline gap-x-3">
-                  <strong className="text-zinc-900 dark:text-zinc-50">{b.name}</strong>
-                  <span className="text-xs text-zinc-500">
+                  <strong className="text-foreground">{b.name}</strong>
+                  <span className="text-xs text-fg-subtle">
                     根 · {b.rootPerson.name} ｜ 人数 {b._count.persons}
                   </span>
                 </div>
                 {b.location && (
-                  <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-400">
+                  <p className="mt-1 text-sm text-fg-muted">
                     📍 {b.location.fullText}
                   </p>
                 )}
                 {b.migrations.length > 0 && (
-                  <ul className="mt-2 space-y-1 text-xs text-zinc-500">
+                  <ul className="mt-2 space-y-1 text-xs text-fg-subtle">
                     {b.migrations.map((m) => (
                       <li key={m.id}>
-                        {m.year} · {m.fromLocation?.village} → {m.toLocation?.village}
+                        {m.year} · {m.fromLocation?.village} →{" "}
+                        {m.toLocation?.village}
                         {m.reason && `（${m.reason}）`}
                       </li>
                     ))}
@@ -199,7 +176,7 @@ export default async function FamilyDetailPage({
 
         {/* 人物按世代列表 */}
         <section>
-          <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+          <h2 className="mb-3 text-base font-semibold text-foreground">
             人物（按世代）
           </h2>
           <div className="space-y-4">
@@ -209,18 +186,18 @@ export default async function FamilyDetailPage({
               return (
                 <div
                   key={g}
-                  className="rounded-lg border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
+                  className="rounded-lg border border-border bg-panel p-4 shadow-sm"
                 >
                   <div className="mb-2 flex items-baseline gap-2">
-                    <strong className="text-zinc-900 dark:text-zinc-50">
-                      {g} 世
-                    </strong>
+                    <strong className="text-foreground">{g} 世</strong>
                     {ch && (
-                      <span className="rounded bg-zinc-100 px-1.5 py-0.5 text-xs text-zinc-600 dark:bg-zinc-800 dark:text-zinc-400">
+                      <span className="rounded bg-muted px-1.5 py-0.5 text-xs text-fg-muted">
                         字辈 {ch}
                       </span>
                     )}
-                    <span className="text-xs text-zinc-500">{list.length} 人</span>
+                    <span className="text-xs text-fg-subtle">
+                      {list.length} 人
+                    </span>
                   </div>
                   <ul className="flex flex-wrap gap-2">
                     {list.map((p) => (
@@ -228,15 +205,17 @@ export default async function FamilyDetailPage({
                         key={p.id}
                         className={`rounded px-2.5 py-1 text-sm ${
                           p.gender === "MALE"
-                            ? "bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-200"
+                            ? "bg-blue-50 text-blue-900 dark:bg-blue-950/40 dark:text-blue-200"
                             : p.gender === "FEMALE"
-                              ? "bg-pink-50 text-pink-900 dark:bg-pink-950 dark:text-pink-200"
-                              : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800"
+                            ? "bg-pink-50 text-pink-900 dark:bg-pink-950/40 dark:text-pink-200"
+                            : "bg-muted text-fg-muted"
                         }`}
                       >
                         {p.name}
                         {p.isMarriedIn && (
-                          <span className="ml-1 text-xs opacity-60">(嫁入)</span>
+                          <span className="ml-1 text-xs opacity-60">
+                            (嫁入)
+                          </span>
                         )}
                         {p.status === "DECEASED" && (
                           <span className="ml-1 text-xs opacity-60">†</span>

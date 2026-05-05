@@ -118,12 +118,12 @@ export function AdminSection({
   actions?: ReactNode;
 }) {
   return (
-    <div className="rounded-lg border border-zinc-200 bg-white p-5 dark:border-zinc-800 dark:bg-zinc-900">
+    <div className="rounded-lg border border-border bg-panel p-5 shadow-sm">
       <div className="mb-4 flex items-baseline justify-between gap-2">
         <div>
-          <h2 className="text-base font-semibold">{title}</h2>
+          <h2 className="text-base font-semibold text-foreground">{title}</h2>
           {description && (
-            <p className="mt-0.5 text-xs text-zinc-500">{description}</p>
+            <p className="mt-0.5 text-xs text-fg-muted">{description}</p>
           )}
         </div>
         {actions}
