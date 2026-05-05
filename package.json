@@ -11,9 +11,11 @@
     "test:watch": "vitest",
     "db:migrate": "prisma migrate dev",
     "db:generate": "prisma generate",
-    "db:seed": "tsx prisma/seed.ts",
     "db:studio": "prisma studio",
-    "db:reset": "prisma migrate reset --force && pnpm db:seed"
+    "db:demo:migrate": "DATABASE_URL=\"$DATABASE_URL_DEMO\" prisma migrate deploy",
+    "db:demo:seed": "tsx prisma/seed.ts",
+    "db:demo:reset": "DATABASE_URL=\"$DATABASE_URL_DEMO\" prisma migrate reset --force && pnpm db:demo:seed",
+    "db:demo:studio": "DATABASE_URL=\"$DATABASE_URL_DEMO\" prisma studio"
   },
   "dependencies": {
     "@alicloud/dysmsapi20170525": "^4.5.1",

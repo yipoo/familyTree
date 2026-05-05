@@ -15,7 +15,7 @@ export default async function LoginPage({
   }>;
 }) {
   const sp = await searchParams;
-  const next = sp.next || "/";
+  const next = sp.next || "/dashboard";
   const mode = sp.mode === "code" ? "code" : "password";
 
   // ------- 验证码模式（客户端组件）-------
@@ -87,13 +87,13 @@ export default async function LoginPage({
 
         <div className="mt-4 flex items-center justify-between text-xs">
           <Link
-            href={`/login?mode=code${next !== "/" ? `&next=${encodeURIComponent(next)}` : ""}`}
+            href={`/login?mode=code${next !== "/dashboard" ? `&next=${encodeURIComponent(next)}` : ""}`}
             className="text-blue-600 hover:underline"
           >
             忘记密码？用验证码登录 →
           </Link>
           <Link
-            href={`/register${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}`}
+            href={`/register${next !== "/dashboard" ? `?next=${encodeURIComponent(next)}` : ""}`}
             className="text-zinc-500 hover:underline"
           >
             注册

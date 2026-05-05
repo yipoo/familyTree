@@ -9,6 +9,10 @@ import { NextRequest, NextResponse } from "next/server";
  */
 
 const PUBLIC = (pathname: string) =>
+  pathname === "/" ||
+  pathname === "/pricing" ||
+  pathname === "/features" ||
+  pathname === "/about" ||
   pathname === "/login" ||
   pathname === "/register" ||
   pathname === "/api/login" ||

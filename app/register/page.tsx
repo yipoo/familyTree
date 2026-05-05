@@ -8,7 +8,7 @@ export default async function RegisterPage({
   searchParams: Promise<{ next?: string; error?: string }>;
 }) {
   const { next: nextRaw, error } = await searchParams;
-  const next = nextRaw || "/";
+  const next = nextRaw || "/dashboard";
 
   const errorMessage =
     error === "missing"

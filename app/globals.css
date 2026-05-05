@@ -10,6 +10,10 @@
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+  /* 营销 / 古谱页用：Noto Serif SC + 楷体回退 */
+  --font-serif:
+    var(--font-noto-serif-sc), "Songti SC", "Noto Serif CJK SC", STSong, SimSun,
+    serif;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -22,7 +26,25 @@
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), -apple-system, BlinkMacSystemFont,
+    "PingFang SC", "Microsoft YaHei", Arial, sans-serif;
+}
+
+/* 营销页古风纸纹微动效（不喧宾夺主） */
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-up {
+    animation: fade-up 0.6s ease-out both;
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
 }
 
 /* 打印：吊线图 / 册谱 / 详细图等纯展示页 */

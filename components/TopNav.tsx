@@ -16,7 +16,15 @@ import { canManageFamily } from "@/app/f/[familyId]/admin/actions";
 import { TopNavUserMenu } from "./TopNavUserMenu";
 import { FamilySwitcherSelect } from "./FamilySwitcherSelect";
 
-const PUBLIC_EXACT = new Set(["/login", "/register", "/join"]);
+const PUBLIC_EXACT = new Set([
+  "/",
+  "/pricing",
+  "/features",
+  "/about",
+  "/login",
+  "/register",
+  "/join",
+]);
 const PUBLIC_PREFIXES = ["/share/", "/join/"];
 
 async function logoutAction() {

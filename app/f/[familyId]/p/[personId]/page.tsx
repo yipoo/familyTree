@@ -77,8 +77,8 @@ export default async function PersonDetailPage({
       <div className="mx-auto max-w-2xl p-6 text-center">
         <h1 className="text-lg font-semibold">无权访问</h1>
         <p className="mt-2 text-sm text-zinc-500">该家族不在你的成员列表中。</p>
-        <Link href="/" className="mt-4 inline-block text-blue-600 hover:underline">
-          返回首页
+        <Link href="/dashboard" className="mt-4 inline-block text-blue-600 hover:underline">
+          返回我的家族
         </Link>
       </div>
     );
@@ -242,8 +242,8 @@ export default async function PersonDetailPage({
       <header className="border-b border-zinc-200 bg-white px-4 py-5 dark:border-zinc-800 dark:bg-zinc-900 sm:px-8">
         <div className="mx-auto max-w-4xl">
           <nav className="text-xs text-zinc-500">
-            <Link href="/" className="hover:underline">
-              首页
+            <Link href="/dashboard" className="hover:underline">
+              我的家族
             </Link>
             <span className="mx-1">/</span>
             <Link href={`/f/${familyId}`} className="hover:underline">
