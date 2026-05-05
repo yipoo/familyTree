@@ -74,6 +74,17 @@
   --foreground: var(--fg);
 }
 
+/* 系统字体栈：英文 Inter，中文 PingFang SC / Source Han Sans，serif 用宋体古风。
+ * 通过 CSS 变量暴露给 Tailwind 与组件，下游通过 var(--font-sans) 等使用。 */
+:root {
+  --font-geist-sans: Inter, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    "PingFang SC", "Source Han Sans SC", "Microsoft YaHei", Arial, sans-serif;
+  --font-geist-mono: ui-monospace, SFMono-Regular, Menlo, Consolas,
+    "Liberation Mono", monospace;
+  --font-noto-serif-sc: "Songti SC", "Source Han Serif SC", "Noto Serif CJK SC",
+    STSong, SimSun, "PingFang SC", serif;
+}
+
 @theme inline {
   --color-background: var(--bg);
   --color-foreground: var(--fg);
@@ -91,8 +102,7 @@
 
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-serif: var(--font-noto-serif-sc), "Songti SC", "Noto Serif CJK SC",
-    STSong, SimSun, serif;
+  --font-serif: var(--font-noto-serif-sc);
 }
 
 html {

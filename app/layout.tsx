@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Noto_Serif_SC } from "next/font/google";
 import { cookies } from "next/headers";
 import { Suspense } from "react";
 
@@ -10,22 +9,16 @@ import { THEME_COOKIE, isTheme } from "@/components/layout/theme";
 
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const notoSerifSC = Noto_Serif_SC({
-  variable: "--font-noto-serif-sc",
-  weight: ["400", "500", "600", "700"],
-  subsets: ["latin"],
-  display: "swap",
-});
+/**
+ * 字体策略：完全采用系统字体栈（Inter / -apple-system + PingFang SC /
+ * Source Han Sans SC + Songti SC for serif）。
+ *
+ * 改动原因：
+ * 1. 用户规范明确要求"中文用 PingFang SC / Source Han Sans，英文用 Inter"
+ * 2. 跳过 next/font/google 的运行时下载，构建更稳、首屏更快、不受网络限制
+ * 3. 保留 CSS 变量名 --font-geist-sans / --font-geist-mono / --font-noto-serif-sc
+ *    向下兼容（globals.css 已经把它们映射到系统栈）
+ */
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://zupu.app"),
@@ -81,9 +74,7 @@ export default async function RootLayout({
       lang="zh-CN"
       data-theme={initialTheme}
       data-resolved-theme={initialResolved}
-      className={`${geistSans.variable} ${geistMono.variable} ${notoSerifSC.variable} h-full antialiased ${
-        initialResolved === "dark" ? "dark" : ""
-      }`}
+      className={`h-full antialiased ${initialResolved === "dark" ? "dark" : ""}`}
       style={{ colorScheme: initialResolved }}
     >
       <head>
