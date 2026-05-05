@@ -376,8 +376,9 @@ export function TreeView({
           <span className="ml-auto flex items-center gap-3 text-xs text-zinc-500">
             <SpacingControl value={spacing} onChange={handleSpacingChange} />
             <ScrollModeToggle value={scrollMode} onChange={handleScrollModeChange} />
+            {/* 小屏隐藏统计数字（避免顶栏溢出），≥sm 才显示 */}
             {data && (
-              <>
+              <span className="hidden items-center gap-3 sm:flex">
                 <span>
                   人数{" "}
                   <strong className="text-zinc-900 dark:text-zinc-50">
@@ -390,7 +391,7 @@ export function TreeView({
                 <span>
                   女 <strong className="text-pink-600">{data.stats.female}</strong>
                 </span>
-              </>
+              </span>
             )}
             {loading && <span className="animate-pulse">加载中…</span>}
           </span>
