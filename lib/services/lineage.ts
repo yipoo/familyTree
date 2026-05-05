@@ -16,7 +16,7 @@ export type Lineage = "paternal" | "maternal" | "all";
 export function parseLineage(v: string | string[] | undefined): Lineage {
   const s = Array.isArray(v) ? v[0] : v;
   if (s === "paternal" || s === "maternal" || s === "all") return s;
-  return "paternal"; // 默认父系（与传统家谱一致）
+  return "all"; // 默认"全部"，与顶部 LineageTabs 第一个 tab 对齐
 }
 
 export function lineagePersonWhere(lineage: Lineage): Prisma.PersonWhereInput {

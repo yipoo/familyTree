@@ -78,8 +78,10 @@ function TreeCanvasInner({
   // 折叠语义统一用 layoutIndex.visibleChildrenOf（与后代数计数一致）
   const childrenByParent = layoutIndex.visibleChildrenOf;
   const descendantCountOf = layoutIndex.descendantCountOf;
+  const marriedInSpousesOf = layoutIndex.marriedInSpousesOf;
 
   // 计算被隐藏的节点 id：从每个折叠点向下 BFS
+  // 每收集一个血缘后代时，把他的嫁入配偶也一并隐藏（与 descendantCountOf 算法等价）。
   const hiddenIds = useMemo(() => {
     const hidden = new Set<string>();
     for (const id of collapsedIds) {
@@ -88,12 +90,16 @@ function TreeCanvasInner({
         const cur = queue.shift()!;
         if (hidden.has(cur)) continue;
         hidden.add(cur);
+        // 嫁入配偶跟随血缘节点一起隐藏（不再下钻）
+        for (const sp of marriedInSpousesOf.get(cur) ?? []) {
+          if (!hidden.has(sp)) hidden.add(sp);
+        }
         const next = childrenByParent.get(cur) ?? [];
         for (const n of next) queue.push(n);
       }
     }
     return hidden;
-  }, [collapsedIds, childrenByParent]);
+  }, [collapsedIds, childrenByParent, marriedInSpousesOf]);
 
   // ⚠️ 关键性能：不要把 selectedId 放进 deps，否则每次点击都重建 10K 节点
   // 选中态通过 SelectedIdContext 读取，PersonNode 内自比 id。

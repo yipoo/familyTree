@@ -49,7 +49,7 @@ export function TreeView({
   const params = useSearchParams();
   const root = params.get("root") ?? "";
   const focus = params.get("focus") ?? "";
-  const lineage = params.get("lineage") ?? "paternal";
+  const lineage = params.get("lineage") ?? "all";
 
   // 三态合一的 fetch state：避免在 effect 中同步 setLoading(true)
   const [state, setState] = useState<FetchState>(LOADING);
@@ -118,7 +118,8 @@ export function TreeView({
         const sp = new URLSearchParams();
         if (focus) sp.set("focus", focus);
         else if (root) sp.set("root", root);
-        if (lineage !== "paternal") sp.set("lineage", lineage);
+        // 默认 "all" 与 API 默认对齐——非默认才显式带参，URL 更短
+        if (lineage !== "all") sp.set("lineage", lineage);
         const r = await fetch(`/api/families/${familyId}/graph?${sp}`, {
           signal: ctrl.signal,
         });
@@ -177,7 +178,7 @@ export function TreeView({
               聚焦 · 上 {data.upGen} 代 + 全部后代
               <Link
                 href={`/f/${familyId}/tree${
-                  lineage !== "paternal" ? `?lineage=${lineage}` : ""
+                  lineage !== "all" ? `?lineage=${lineage}` : ""
                 }`}
                 className="ml-2 underline"
               >
@@ -190,7 +191,7 @@ export function TreeView({
               仅看分支 · {data.rootPersonName}
               <Link
                 href={`/f/${familyId}/tree${
-                  lineage !== "paternal" ? `?lineage=${lineage}` : ""
+                  lineage !== "all" ? `?lineage=${lineage}` : ""
                 }`}
                 className="ml-2 underline"
               >
