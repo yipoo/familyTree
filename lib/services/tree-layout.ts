@@ -68,7 +68,24 @@ const NODE_H = 132;
 const SPOUSE_GAP = 4; // 夫妻之间留白：尽量短
 const H_GAP = 22; // 同代不同家庭单元 / 兄弟姐妹 / 同代节点间距
 const V_GAP = 56; // 父子代之间的额外间距
-const ROW_H = NODE_H + V_GAP;
+
+/** 节点间距档位（"紧凑｜适中｜宽松"）。仅缩放间距，不改变节点本身尺寸。 */
+export type SpacingPreset = "compact" | "normal" | "loose";
+
+export const SPACING_PRESETS: Record<
+  SpacingPreset,
+  { x: number; y: number }
+> = {
+  compact: { x: 0.7, y: 0.85 },
+  normal: { x: 1, y: 1 },
+  loose: { x: 1.5, y: 1.2 },
+};
+
+export const DEFAULT_SPACING: SpacingPreset = "normal";
+
+export function isSpacingPreset(v: unknown): v is SpacingPreset {
+  return v === "compact" || v === "normal" || v === "loose";
+}
 
 interface FamilyUnit {
   husband: PersonInput;
@@ -81,7 +98,16 @@ export function layoutPaternalTree(opts: {
   persons: PersonInput[];
   marriages: MarriageInput[];
   parentChild: ParentChildInput[];
+  /** 间距档位（默认 "normal"）。控制 H_GAP / V_GAP / SPOUSE_GAP 的缩放因子。 */
+  spacing?: SpacingPreset;
 }): LayoutResult {
+  const preset = opts.spacing ?? DEFAULT_SPACING;
+  const { x: xScale, y: yScale } = SPACING_PRESETS[preset];
+  // 仅缩放间距，节点尺寸保持不变——这样紧凑档不会让节点重叠
+  const H_GAP_S = H_GAP * xScale;
+  const SPOUSE_GAP_S = SPOUSE_GAP * xScale;
+  const V_GAP_S = V_GAP * yScale;
+  const ROW_H_S = NODE_H + V_GAP_S;
   const personById = new Map(opts.persons.map((p) => [p.id, p]));
 
   // husbandId -> wives 按婚序倒序：order 大的（继配）在前，order 小的（原配）在后；
@@ -144,7 +170,7 @@ export function layoutPaternalTree(opts: {
     // unit 内：以 "夫妻中点（unit 几何中心）" 作为子树水平锚点。
     // 这使父子连线从夫妻中点正下方落下，符合传统家谱排版（参考 1.jpg）。
     const unitWidth =
-      NODE_W * (1 + unit.wives.length) + SPOUSE_GAP * unit.wives.length;
+      NODE_W * (1 + unit.wives.length) + SPOUSE_GAP_S * unit.wives.length;
     const unitLeft = unitWidth / 2;
     const unitRight = unitWidth / 2;
 
@@ -155,7 +181,7 @@ export function layoutPaternalTree(opts: {
     let childrenRowWidth = 0;
     for (let i = 0; i < childSubs.length; i++) {
       childrenRowWidth += childSubs[i].leftExt + childSubs[i].rightExt;
-      if (i > 0) childrenRowWidth += H_GAP;
+      if (i > 0) childrenRowWidth += H_GAP_S;
     }
 
     const childRowLeft = childrenRowWidth / 2;
@@ -168,7 +194,7 @@ export function layoutPaternalTree(opts: {
       leftExt,
       rightExt,
       place: (centerX: number) => {
-        const y = (person.generation - rootGen) * ROW_H;
+        const y = (person.generation - rootGen) * ROW_H_S;
 
         // unit 左边缘（centerX 即 unit 中心）
         const unitLeftEdge = centerX - unitWidth / 2;
@@ -177,7 +203,7 @@ export function layoutPaternalTree(opts: {
         let cursor = unitLeftEdge;
         for (const w of unit.wives) {
           nodes.push({ id: w.id, person: w, x: cursor, y });
-          cursor += NODE_W + SPOUSE_GAP;
+          cursor += NODE_W + SPOUSE_GAP_S;
         }
 
         // 丈夫位于妻子右侧
@@ -218,7 +244,7 @@ export function layoutPaternalTree(opts: {
               hidden: true,
             });
           }
-          childCursor += sub.leftExt + sub.rightExt + H_GAP;
+          childCursor += sub.leftExt + sub.rightExt + H_GAP_S;
         }
       },
     };
@@ -257,4 +283,4 @@ export function layoutPaternalTree(opts: {
   };
 }
 
-export const TREE_LAYOUT_CONSTS = { NODE_W, NODE_H, H_GAP, SPOUSE_GAP, V_GAP, ROW_H };
+export const TREE_LAYOUT_CONSTS = { NODE_W, NODE_H, H_GAP, SPOUSE_GAP, V_GAP };

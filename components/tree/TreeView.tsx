@@ -6,7 +6,13 @@ import { TreeCanvas } from "@/components/tree/TreeCanvas";
 import { PersonInspector } from "@/components/tree/PersonInspector";
 import { LineageTabs } from "@/components/LineageTabs";
 import { TreeHeaderSearch } from "@/components/tree/TreeHeaderSearch";
-import type { LayoutResult } from "@/lib/services/tree-layout";
+import { SpacingControl } from "@/components/tree/SpacingControl";
+import {
+  isSpacingPreset,
+  DEFAULT_SPACING,
+  type LayoutResult,
+  type SpacingPreset,
+} from "@/lib/services/tree-layout";
 import { buildLayoutIndex } from "@/lib/services/layout-index";
 
 export type ResidenceMap = Record<
@@ -26,6 +32,18 @@ interface GraphResponse {
   layout: LayoutResult | null;
   generationChars: Record<string, string>;
   residenceByPersonId: ResidenceMap;
+}
+
+const SPACING_LS_KEY = (familyId: string) => `tree:spacing:${familyId}`;
+
+function readSpacingFromLS(familyId: string): SpacingPreset {
+  if (typeof window === "undefined") return DEFAULT_SPACING;
+  try {
+    const v = window.localStorage.getItem(SPACING_LS_KEY(familyId));
+    return isSpacingPreset(v) ? v : DEFAULT_SPACING;
+  } catch {
+    return DEFAULT_SPACING;
+  }
 }
 
 type FetchState =
@@ -57,6 +75,26 @@ export function TreeView({
   // 折叠状态由 TreeView 持有，TreeCanvas 与 PersonInspector 共用——这样 inspector 也能
   // "在选中节点上直接点折叠"，且双击节点折叠后 inspector 立刻同步显示后代数。
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(EMPTY_SET);
+
+  // 间距档位：先 SSR 安全默认，挂载后从 localStorage 读取（避免 hydration mismatch）。
+  // 使用"render 内 track previous + 条件 setState"派生模式，避免 effect 中同步 setState。
+  const [spacing, setSpacing] = useState<SpacingPreset>(DEFAULT_SPACING);
+  const [lsSpacingFamily, setLsSpacingFamily] = useState<string | null>(null);
+  if (typeof window !== "undefined" && lsSpacingFamily !== familyId) {
+    setLsSpacingFamily(familyId);
+    setSpacing(readSpacingFromLS(familyId));
+  }
+  const handleSpacingChange = useCallback(
+    (next: SpacingPreset) => {
+      setSpacing(next);
+      try {
+        window.localStorage.setItem(SPACING_LS_KEY(familyId), next);
+      } catch {
+        // ignore
+      }
+    },
+    [familyId],
+  );
 
   // 稳定回调，避免每次 render 产生新引用造成 TreeCanvas 内部 effect 重新触发
   const handleSelectChange = useCallback((id: string | null) => {
@@ -99,9 +137,9 @@ export function TreeView({
     setCollapsedIds(EMPTY_SET);
   }, []);
 
-  // 路由参数变化（不同 family / root / focus / lineage）→ 重置回 loading + 清空折叠：
+  // 路由参数变化（不同 family / root / focus / lineage / spacing）→ 重置回 loading + 清空折叠：
   // 用 React 官方"render 内 track previous + 条件 setState"派生模式，避免 effect 中同步 setState。
-  const requestKey = `${familyId}|${root}|${focus}|${lineage}`;
+  const requestKey = `${familyId}|${root}|${focus}|${lineage}|${spacing}`;
   const [lastRequestKey, setLastRequestKey] = useState(requestKey);
   if (lastRequestKey !== requestKey) {
     setLastRequestKey(requestKey);
@@ -120,6 +158,7 @@ export function TreeView({
         else if (root) sp.set("root", root);
         // 默认 "all" 与 API 默认对齐——非默认才显式带参，URL 更短
         if (lineage !== "all") sp.set("lineage", lineage);
+        if (spacing !== DEFAULT_SPACING) sp.set("spacing", spacing);
         const r = await fetch(`/api/families/${familyId}/graph?${sp}`, {
           signal: ctrl.signal,
         });
@@ -153,7 +192,7 @@ export function TreeView({
       cancelled = true;
       ctrl.abort();
     };
-  }, [familyId, root, focus, lineage, router]);
+  }, [familyId, root, focus, lineage, spacing, router]);
 
   return (
     <div className="flex h-screen flex-col bg-zinc-50 dark:bg-zinc-950">
@@ -202,6 +241,7 @@ export function TreeView({
           <LineageTabs />
           <TreeHeaderSearch familyId={familyId} />
           <span className="ml-auto flex items-center gap-3 text-xs text-zinc-500">
+            <SpacingControl value={spacing} onChange={handleSpacingChange} />
             {data && (
               <>
                 <span>
@@ -256,6 +296,7 @@ export function TreeView({
               onToggleCollapsed={handleToggleCollapsed}
               onCollapseAll={handleCollapseAll}
               onExpandAll={handleExpandAll}
+              spacingAnimToken={spacing}
             />
           )}
 

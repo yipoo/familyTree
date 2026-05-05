@@ -1,5 +1,5 @@
 "use client";
-import { createContext, useCallback, useEffect, useMemo, useRef } from "react";
+import { createContext, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import {
   ReactFlow,
@@ -47,6 +47,8 @@ export interface TreeCanvasProps {
   /** 全部折叠 / 全部展开（左下角按钮触发） */
   onCollapseAll: () => void;
   onExpandAll: () => void;
+  /** 触发位置过渡动画的 token——切换 spacing 时变更，TreeCanvas 短暂打开 transition */
+  spacingAnimToken?: string;
 }
 
 export function TreeCanvas(props: TreeCanvasProps) {
@@ -69,6 +71,7 @@ function TreeCanvasInner({
   onToggleCollapsed,
   onCollapseAll,
   onExpandAll,
+  spacingAnimToken,
 }: TreeCanvasProps) {
   // 来自搜索框的临时定位参数：locate=PID + n=NONCE（每次搜索都换 nonce 触发居中）
   const sp = useSearchParams();
@@ -215,9 +218,21 @@ function TreeCanvasInner({
   const collapseAll = onCollapseAll;
   const expandAll = onExpandAll;
 
+  // spacing 切换时短暂打开 transition——300ms 后关闭，避免长期影响其他交互
+  const [spacingAnimOn, setSpacingAnimOn] = useState(false);
+  const lastSpacingTokenRef = useRef<string | undefined>(spacingAnimToken);
+  useEffect(() => {
+    if (spacingAnimToken === undefined) return;
+    if (lastSpacingTokenRef.current === spacingAnimToken) return;
+    lastSpacingTokenRef.current = spacingAnimToken;
+    setSpacingAnimOn(true);
+    const t = setTimeout(() => setSpacingAnimOn(false), 320);
+    return () => clearTimeout(t);
+  }, [spacingAnimToken]);
+
   return (
     <SelectedIdContext.Provider value={selectedId}>
-    <div className="relative h-full w-full">
+    <div className={`relative h-full w-full ${spacingAnimOn ? "react-flow-spacing-anim" : ""}`}>
       <ReactFlow
         nodes={nodes}
         edges={edges}
