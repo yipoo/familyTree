@@ -3,6 +3,8 @@
 import { Fragment, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 
+import { readNow } from "../_shared";
+
 interface AuditItem {
   id: string;
   entity: string;
@@ -56,6 +58,15 @@ export function AuditLogTable({
   const [, startTransition] = useTransition();
   const [busyId, setBusyId] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  // 客户端挂载后固定 nowMs，避免 render 期间调用 Date.now（react-hooks/purity）。
+  // 用 render 内 "条件 setState 一次性派生" 的官方推荐模式（与 TreeView.tsx 同款），
+  // 避免 effect 内同步 setState 触发的 react-hooks/set-state-in-effect。
+  const [nowMs, setNowMs] = useState(0);
+  const [nowReady, setNowReady] = useState(false);
+  if (typeof window !== "undefined" && !nowReady) {
+    setNowReady(true);
+    setNowMs(readNow());
+  }
 
   async function handleUndo(id: string) {
     if (!confirm("确认撤回此操作？这会把对应数据恢复到此次写入之前。")) return;
@@ -164,6 +175,7 @@ export function AuditLogTable({
                       <UndoCell
                         item={a}
                         busy={busyId === a.id}
+                        nowMs={nowMs}
                         onUndo={() => handleUndo(a.id)}
                       />
                     </td>
@@ -191,14 +203,16 @@ export function AuditLogTable({
 function UndoCell({
   item,
   busy,
+  nowMs,
   onUndo,
 }: {
   item: AuditItem;
   busy: boolean;
+  nowMs: number;
   onUndo: () => void;
 }) {
   // 仅当满足 entity / kind / 24 小时窗口时启用
-  const ageMs = Date.now() - new Date(item.createdAt).getTime();
+  const ageMs = nowMs - new Date(item.createdAt).getTime();
   const inWindow = ageMs <= UNDO_WINDOW_MS;
   const supported =
     UNDOABLE_ENTITIES.has(item.entity) && UNDOABLE_KINDS.has(item.kind);

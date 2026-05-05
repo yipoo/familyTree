@@ -160,7 +160,9 @@ async function applyUndo(
   }
   // UPDATE：恢复字段为 before
   if (!before) throw new Error("缺少 before 快照，无法恢复");
-  await restoreFieldsByEntity(entity, entityId, before, after ?? {});
+  await restoreFieldsByEntity(entity, entityId, before);
+  // after 在这里没有用——恢复期间我们只关心 before。保留参数留作未来"差异化合并"扩展。
+  void after;
 }
 
 async function deleteByEntity(entity: string, id: string) {
@@ -241,7 +243,6 @@ async function restoreFieldsByEntity(
   entity: string,
   id: string,
   before: Record<string, unknown>,
-  _after: Record<string, unknown>,
 ) {
   // 字段集合：取 before 的标量字段（去掉 createdAt / updatedAt / id）。
   const data = stripImmutable(before);
