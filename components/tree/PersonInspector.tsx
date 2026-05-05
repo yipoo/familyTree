@@ -369,8 +369,8 @@ export function PersonInspector({
             {canCollapse && (
               <p className="mt-1.5 text-[11px] text-zinc-500">
                 {isCollapsed
-                  ? `已折叠 ${descendantCount} 位后代——画布上以 +${descendantCount} 角标提示`
-                  : `直接子女 ${visibleChildCount} 人 · 全部后代 ${descendantCount} 人（双击节点也可折叠）`}
+                  ? `已折叠：${descendantCount} 人被隐藏（含嫁入配偶）——节点上以 +${descendantCount} 角标提示`
+                  : `直接子女 ${visibleChildCount} 人 · 折叠将隐藏 ${descendantCount} 人（含嫁入配偶；可双击节点折叠）`}
               </p>
             )}
           </div>

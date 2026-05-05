@@ -3,16 +3,16 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { useMemo } from "react";
 
-const TABS: { key: "paternal" | "maternal" | "all"; label: string }[] = [
+const TABS: { key: "all" | "paternal" | "maternal"; label: string }[] = [
+  { key: "all", label: "全部" },
   { key: "paternal", label: "父系" },
   { key: "maternal", label: "母系" },
-  { key: "all", label: "全部" },
 ];
 
 export function LineageTabs() {
   const pathname = usePathname();
   const params = useSearchParams();
-  const current = (params.get("lineage") as "paternal" | "maternal" | "all") ?? "paternal";
+  const current = (params.get("lineage") as "all" | "paternal" | "maternal") ?? "all";
 
   const make = useMemo(
     () =>
