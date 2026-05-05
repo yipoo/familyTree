@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { ParentRelation } from "@/lib/generated/prisma/enums";
 import { authErrorResponse, requireWriteOnPerson } from "@/lib/auth/guard";
+import { writeAudit } from "@/lib/services/audit";
 
 interface Body {
   fatherId?: string | null;
@@ -17,8 +18,10 @@ export async function PATCH(
   ctx: { params: Promise<{ familyId: string; personId: string }> },
 ) {
   const { familyId, personId } = await ctx.params;
+  let actorId: string;
   try {
-    await requireWriteOnPerson(familyId, personId);
+    const c = await requireWriteOnPerson(familyId, personId);
+    actorId = c.user.id;
   } catch (e) {
     return authErrorResponse(e);
   }
@@ -83,5 +86,18 @@ export async function PATCH(
     }
   });
 
+  await writeAudit({
+    familyId,
+    actorId,
+    kind: "UPDATE",
+    entity: "Person",
+    entityId: personId,
+    after: {
+      replacedParents: {
+        fatherId: body.fatherId ?? null,
+        motherId: body.motherId ?? null,
+      },
+    },
+  });
   return NextResponse.json({ data: { id: personId, updated: true } });
 }

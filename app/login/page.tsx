@@ -34,9 +34,9 @@ export default async function LoginPage({
   // ------- 密码模式（默认，纯 SSR）-------
   const errorMessage =
     sp.error === "invalid"
-      ? "手机号或密码错误"
+      ? "手机号 / 邮箱 或密码错误"
       : sp.error === "missing"
-        ? "请填写手机号和密码"
+        ? "请填写手机号 / 邮箱和密码"
         : null;
 
   return (
@@ -48,15 +48,15 @@ export default async function LoginPage({
       >
         <input type="hidden" name="next" value={next} />
         <h1 className="mb-1 text-xl font-semibold">登录</h1>
-        <p className="mb-5 text-sm text-zinc-500">使用手机号 + 密码登录</p>
+        <p className="mb-5 text-sm text-zinc-500">手机号或邮箱 + 密码</p>
 
         <label className="mb-3 block">
-          <span className="mb-1 block text-xs text-zinc-500">手机号</span>
+          <span className="mb-1 block text-xs text-zinc-500">手机号或邮箱</span>
           <input
-            type="tel"
-            name="phone"
-            autoComplete="tel"
-            placeholder="13800138000"
+            type="text"
+            name="identifier"
+            autoComplete="username"
+            placeholder="13800138000 或 me@example.com"
             className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
             required
           />

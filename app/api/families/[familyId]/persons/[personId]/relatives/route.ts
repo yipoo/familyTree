@@ -7,6 +7,7 @@ import {
   ParentRelation,
 } from "@/lib/generated/prisma/enums";
 import { authErrorResponse, requireWriteOnPerson } from "@/lib/auth/guard";
+import { writeAudit } from "@/lib/services/audit";
 
 /**
  * 一键添加亲属：根据 kind 自动建立必要的 Person + 关系记录。
@@ -48,8 +49,10 @@ export async function POST(
   ctx: { params: Promise<{ familyId: string; personId: string }> },
 ) {
   const { familyId, personId } = await ctx.params;
+  let actorId: string;
   try {
-    await requireWriteOnPerson(familyId, personId);
+    const c = await requireWriteOnPerson(familyId, personId);
+    actorId = c.user.id;
   } catch (e) {
     return authErrorResponse(e);
   }
@@ -271,5 +274,13 @@ export async function POST(
     return newPerson;
   });
 
+  await writeAudit({
+    familyId,
+    actorId,
+    kind: "CREATE",
+    entity: "Person",
+    entityId: result.id,
+    after: { kind: body.kind, sourcePersonId: personId, ...result },
+  });
   return NextResponse.json({ data: result }, { status: 201 });
 }

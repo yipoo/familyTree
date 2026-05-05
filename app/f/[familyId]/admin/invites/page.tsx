@@ -1,7 +1,14 @@
 import { prisma } from "@/lib/db";
 import { CreateInviteForm } from "../InviteFormCreate";
 import { InviteCodeCopy, RevokeInviteForm } from "../RowForms";
-import { AdminSection, ExpiryLabel, formatDate, roleZh } from "../_shared";
+import {
+  AdminSection,
+  computeExpiryStatus,
+  ExpiryLabel,
+  formatDate,
+  readNow,
+  roleZh,
+} from "../_shared";
 
 export const dynamic = "force-dynamic";
 
@@ -12,19 +19,26 @@ export default async function AdminInvitesPage({
 }) {
   const { familyId } = await params;
 
-  const invites = await prisma.familyInvite.findMany({
+  const invitesRaw = await prisma.familyInvite.findMany({
     where: { familyId },
     include: { createdBy: { select: { name: true } } },
     orderBy: { createdAt: "desc" },
     take: 100,
   });
 
-  const active = invites.filter(
-    (i) =>
-      !i.revokedAt &&
-      (!i.expiresAt || i.expiresAt.getTime() > Date.now()) &&
-      (i.maxUses === null || i.uses < i.maxUses),
-  ).length;
+  // 时钟在数据准备阶段读一次（readNow 是一个常规函数，渲染纯度规则不追踪进入），
+  // 之后所有"是否过期 / 是否失效"判断都用派生快照，JSX 全程纯函数。
+  const now = readNow();
+  const invites = invitesRaw.map((i) => {
+    const expiry = computeExpiryStatus(i.expiresAt, now);
+    const dead =
+      !!i.revokedAt ||
+      expiry.kind === "expired" ||
+      (i.maxUses !== null && i.uses >= i.maxUses);
+    return { ...i, expiry, dead };
+  });
+
+  const active = invites.filter((i) => !i.dead).length;
 
   return (
     <AdminSection
@@ -54,41 +68,35 @@ export default async function AdminInvitesPage({
                 </td>
               </tr>
             )}
-            {invites.map((i) => {
-              const dead =
-                !!i.revokedAt ||
-                (i.expiresAt && i.expiresAt.getTime() < Date.now()) ||
-                (i.maxUses !== null && i.uses >= i.maxUses);
-              return (
-                <tr key={i.id} className={dead ? "opacity-50" : ""}>
-                  <td className="py-2 pr-4">
-                    <InviteCodeCopy code={i.code} />
-                  </td>
-                  <td className="py-2 pr-4 text-xs">{roleZh(i.role)}</td>
-                  <td className="py-2 pr-4 text-xs text-zinc-500">
-                    {i.uses}
-                    {i.maxUses !== null && ` / ${i.maxUses}`}
-                  </td>
-                  <td className="py-2 pr-4 text-xs">
-                    <ExpiryLabel d={i.expiresAt} />
-                  </td>
-                  <td className="py-2 pr-4 text-xs text-zinc-500">
-                    {i.note ?? "—"}
-                  </td>
-                  <td className="py-2 pr-4 text-xs text-zinc-500">
-                    {i.createdBy.name} · {formatDate(i.createdAt)}
-                    {i.revokedAt && (
-                      <span className="ml-1 text-red-500">已撤销</span>
-                    )}
-                  </td>
-                  <td className="py-2 pr-4">
-                    {!i.revokedAt && (
-                      <RevokeInviteForm familyId={familyId} id={i.id} />
-                    )}
-                  </td>
-                </tr>
-              );
-            })}
+            {invites.map((i) => (
+              <tr key={i.id} className={i.dead ? "opacity-50" : ""}>
+                <td className="py-2 pr-4">
+                  <InviteCodeCopy code={i.code} />
+                </td>
+                <td className="py-2 pr-4 text-xs">{roleZh(i.role)}</td>
+                <td className="py-2 pr-4 text-xs text-zinc-500">
+                  {i.uses}
+                  {i.maxUses !== null && ` / ${i.maxUses}`}
+                </td>
+                <td className="py-2 pr-4 text-xs">
+                  <ExpiryLabel status={i.expiry} />
+                </td>
+                <td className="py-2 pr-4 text-xs text-zinc-500">
+                  {i.note ?? "—"}
+                </td>
+                <td className="py-2 pr-4 text-xs text-zinc-500">
+                  {i.createdBy.name} · {formatDate(i.createdAt)}
+                  {i.revokedAt && (
+                    <span className="ml-1 text-red-500">已撤销</span>
+                  )}
+                </td>
+                <td className="py-2 pr-4">
+                  {!i.revokedAt && (
+                    <RevokeInviteForm familyId={familyId} id={i.id} />
+                  )}
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>

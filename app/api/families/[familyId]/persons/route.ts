@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { Gender, LifeStatus } from "@/lib/generated/prisma/enums";
 import { authErrorResponse, requireFamilyRole } from "@/lib/auth/guard";
+import { writeAudit } from "@/lib/services/audit";
 
 interface CreateBody {
   name: string;
@@ -22,8 +23,10 @@ export async function POST(
   ctx: { params: Promise<{ familyId: string }> },
 ) {
   const { familyId } = await ctx.params;
+  let actorId: string;
   try {
-    await requireFamilyRole(familyId, "ADMIN");
+    const c = await requireFamilyRole(familyId, "ADMIN");
+    actorId = c.user.id;
   } catch (e) {
     return authErrorResponse(e);
   }
@@ -62,6 +65,14 @@ export async function POST(
       biography: body.biography ?? null,
       note: body.note ?? null,
     },
+  });
+  await writeAudit({
+    familyId,
+    actorId,
+    kind: "CREATE",
+    entity: "Person",
+    entityId: person.id,
+    after: person,
   });
   return NextResponse.json({ data: person }, { status: 201 });
 }

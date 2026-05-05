@@ -54,7 +54,7 @@ export async function GET(
   });
 
   // 解析每条结果的居住地短名（村名优先），便于 UI 区分同名人物
-  let residenceShortById: Map<string, string | null> = new Map();
+  const residenceShortById: Map<string, string | null> = new Map();
   if (persons.length > 0) {
     const resolver = await buildResidenceResolver(familyId);
     const locIds = new Set<string>();

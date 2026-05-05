@@ -25,14 +25,21 @@ type ResidenceData = {
 };
 
 /**
- * 居住地字段。展示形态：
+ * 用 discriminated union 统一管理"加载中 / 已加载 / 出错"——避免独立的
+ * loading / data / error 三个 state，再避免 effect 中同步 setLoading(true)。
+ */
+type FetchState =
+  | { kind: "loading" }
+  | { kind: "loaded"; data: ResidenceData }
+  | { kind: "error"; message: string };
+
+const LOADING: FetchState = { kind: "loading" };
+
+/**
+ * 居住地字段。
  *
  *   读：短名（村名为主）+ 继承/自身角标 + ✏️ 编辑
  *   编辑：ResidencePicker 单输入 + 自动补全；保存或取消
- *
- *   长地址不再要求用户拆 6 段填写：
- *   - 选已有地点 → 直接复用（保留 province/city 等）
- *   - 输入新名 → 仅作为 village 保存
  */
 export function ResidenceField({
   familyId,
@@ -48,43 +55,64 @@ export function ResidenceField({
   defaultEditing?: boolean;
   onEditingChange?: (editing: boolean) => void;
 }) {
-  const [data, setData] = useState<ResidenceData | null>(null);
-  const [loading, setLoading] = useState(true);
+  // [familyId, personId] 变化时通过 reloadKey 触发 effect 重拉。
+  const [reloadKey, setReloadKey] = useState(0);
+  const [state, setState] = useState<FetchState>(LOADING);
+
+  // 编辑态："track previous prop 在 render 中条件性 setState" 的官方派生模式：
+  //   defaultEditing 改变 → 重置内部 editing；
+  //   用户点 "改 / 填" → 内部 setEditing(true)。
   const [editing, setEditingState] = useState(!!defaultEditing);
+  const [lastDefault, setLastDefault] = useState<boolean | undefined>(defaultEditing);
+  if (defaultEditing !== lastDefault) {
+    setLastDefault(defaultEditing);
+    setEditingState(!!defaultEditing);
+  }
+
   const [saving, setSaving] = useState(false);
-  const [err, setErr] = useState<string | null>(null);
+  const [saveErr, setSaveErr] = useState<string | null>(null);
 
   function setEditing(v: boolean) {
     setEditingState(v);
     onEditingChange?.(v);
   }
 
-  async function load() {
-    setLoading(true);
-    setErr(null);
-    try {
-      const res = await fetch(
-        `/api/families/${familyId}/persons/${personId}/residence`,
-        { cache: "no-store" },
-      );
-      if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      const j = (await res.json()) as { data: ResidenceData };
-      setData(j.data);
-    } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
-    } finally {
-      setLoading(false);
-    }
+  // 数据拉取：effect 仅做异步流程；setState 全部发生在 await 之后
+  useEffect(() => {
+    let cancelled = false;
+    const ctrl = new AbortController();
+    (async () => {
+      try {
+        const res = await fetch(
+          `/api/families/${familyId}/persons/${personId}/residence`,
+          { cache: "no-store", signal: ctrl.signal },
+        );
+        if (cancelled) return;
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        const j = (await res.json()) as { data: ResidenceData };
+        if (cancelled) return;
+        setState({ kind: "loaded", data: j.data });
+      } catch (e) {
+        if (cancelled) return;
+        if ((e as Error).name === "AbortError") return;
+        setState({
+          kind: "error",
+          message: e instanceof Error ? e.message : String(e),
+        });
+      }
+    })();
+    return () => {
+      cancelled = true;
+      ctrl.abort();
+    };
+  }, [familyId, personId, reloadKey]);
+
+  function reload() {
+    // 触发 effect 重跑——loading 视图由 state.kind === "loading" 表现，
+    // 通过事件处理器（用户点击保存/清除）调用，setState 在事件处理器内合规。
+    setState(LOADING);
+    setReloadKey((k) => k + 1);
   }
-
-  useEffect(() => {
-    load();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [familyId, personId]);
-
-  useEffect(() => {
-    if (defaultEditing !== undefined) setEditingState(defaultEditing);
-  }, [defaultEditing]);
 
   async function save(payload: {
     province?: string | null;
@@ -95,7 +123,7 @@ export function ResidenceField({
     detail?: string | null;
   }) {
     setSaving(true);
-    setErr(null);
+    setSaveErr(null);
     try {
       const res = await fetch(
         `/api/families/${familyId}/persons/${personId}/residence`,
@@ -110,9 +138,9 @@ export function ResidenceField({
         throw new Error(j?.error?.message ?? `HTTP ${res.status}`);
       }
       setEditing(false);
-      await load();
+      reload();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
+      setSaveErr(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
     }
@@ -121,16 +149,16 @@ export function ResidenceField({
   async function clearExplicit() {
     if (!confirm("将该人物住地恢复为「沿父系/夫继承」？")) return;
     setSaving(true);
-    setErr(null);
+    setSaveErr(null);
     try {
       const res = await fetch(
         `/api/families/${familyId}/persons/${personId}/residence`,
         { method: "DELETE" },
       );
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      await load();
+      reload();
     } catch (e) {
-      setErr(e instanceof Error ? e.message : String(e));
+      setSaveErr(e instanceof Error ? e.message : String(e));
     } finally {
       setSaving(false);
     }
@@ -138,19 +166,24 @@ export function ResidenceField({
 
   function onPick(opt: LocationOption | { newVillage: string }) {
     if ("id" in opt) {
-      // 已有地点：用其各字段直接保存
-      // 这里没存 location 全字段，所以借后端 fullText 拆解；最简单复用：
-      // 直接发 village = opt.short（若 short 是 village 字段）
-      // 更准的做法是再 fetch 一次 location detail，这里取个折衷：
+      // 已有地点：用其 short 作为 village 字段提交（保持原行为）
       save({ village: opt.short });
     } else {
       save({ village: opt.newVillage });
     }
   }
 
-  const eff = data?.effective;
-  const explicit = data?.explicit;
-  const inherited = data?.source.inherited ?? false;
+  if (state.kind === "loading") {
+    return <Row label="居住地" value="加载中…" />;
+  }
+  if (state.kind === "error") {
+    return <Row label="居住地" value={`加载失败：${state.message}`} />;
+  }
+
+  const data = state.data;
+  const eff = data.effective;
+  const explicit = data.explicit;
+  const inherited = data.source.inherited;
   const short =
     explicit?.village ||
     explicit?.town ||
@@ -162,10 +195,6 @@ export function ResidenceField({
     eff?.city ||
     null;
   const fullText = (explicit ?? eff)?.fullText ?? null;
-
-  if (loading) {
-    return <Row label="居住地" value="加载中…" />;
-  }
 
   if (editing) {
     return (
@@ -179,8 +208,8 @@ export function ResidenceField({
           onCancel={() => setEditing(false)}
           busy={saving}
         />
-        {err && <div className="text-xs text-red-600">{err}</div>}
-        {data?.explicit && (
+        {saveErr && <div className="text-xs text-red-600">{saveErr}</div>}
+        {data.explicit && (
           <button
             onClick={clearExplicit}
             disabled={saving}
@@ -211,7 +240,7 @@ export function ResidenceField({
         ) : (
           <span className="text-zinc-400">未填写</span>
         )}
-        {inherited && data?.source.fromPerson && (
+        {inherited && data.source.fromPerson && (
           <span className="rounded bg-zinc-100 px-1 text-[10px] text-zinc-500 dark:bg-zinc-800">
             继承自 {data.source.fromPerson.name}
           </span>
@@ -225,7 +254,7 @@ export function ResidenceField({
           </button>
         )}
       </div>
-      {err && <div className="ml-auto text-xs text-red-600">{err}</div>}
+      {saveErr && <div className="ml-auto text-xs text-red-600">{saveErr}</div>}
     </div>
   );
 }

@@ -12,14 +12,16 @@ export default async function RegisterPage({
 
   const errorMessage =
     error === "missing"
-      ? "请填写完整信息"
+      ? "请填写完整信息（手机号 / 邮箱至少填一项）"
       : error === "short"
         ? "密码至少 6 位"
         : error === "taken"
-          ? "该手机号已注册"
-          : error === "regfail"
-            ? "注册失败，请稍后重试"
-            : null;
+          ? "该手机号或邮箱已注册"
+          : error === "invalid_email"
+            ? "邮箱格式不正确"
+            : error === "regfail"
+              ? "注册失败，请稍后重试"
+              : null;
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
@@ -30,7 +32,9 @@ export default async function RegisterPage({
       >
         <input type="hidden" name="next" value={next} />
         <h1 className="mb-1 text-xl font-semibold">注册</h1>
-        <p className="mb-5 text-sm text-zinc-500">手机号 + 密码 + 昵称</p>
+        <p className="mb-5 text-sm text-zinc-500">
+          手机号 或 邮箱（至少一项）+ 密码 + 昵称
+        </p>
 
         <label className="mb-3 block">
           <span className="mb-1 block text-xs text-zinc-500">手机号</span>
@@ -38,9 +42,18 @@ export default async function RegisterPage({
             type="tel"
             name="phone"
             autoComplete="tel"
-            placeholder="13800138000"
+            placeholder="13800138000（可空）"
             className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
-            required
+          />
+        </label>
+        <label className="mb-3 block">
+          <span className="mb-1 block text-xs text-zinc-500">邮箱</span>
+          <input
+            type="email"
+            name="email"
+            autoComplete="email"
+            placeholder="me@example.com（可空）"
+            className="w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500 dark:border-zinc-700 dark:bg-zinc-900"
           />
         </label>
         <label className="mb-3 block">

@@ -1,6 +1,12 @@
 /**
- * 注册路由：复用 /api/auth/register 创建用户，再手动签发 session cookie + 303 跳转。
- * 与 /api/login 同样思路，避开 server action 的 redirect 报错。
+ * 注册路由：手机号或邮箱 + 密码 + 昵称。
+ *
+ * 入参：
+ *   - phone      （二选一）
+ *   - email      （二选一）
+ *   - password   密码（≥6 位）
+ *   - name       昵称
+ *   - next       注册成功后跳转
  */
 import { NextResponse } from "next/server";
 import { encode } from "next-auth/jwt";
@@ -12,34 +18,51 @@ const SESSION_COOKIE = "authjs.session-token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
 const SALT = SESSION_COOKIE;
 
+const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
 export async function POST(req: Request) {
   const formData = await req.formData();
   const phoneRaw = String(formData.get("phone") ?? "").trim();
+  const emailRaw = String(formData.get("email") ?? "").trim();
   const password = String(formData.get("password") ?? "");
   const name = String(formData.get("name") ?? "").trim();
   const next = String(formData.get("next") ?? "/") || "/";
 
-  const fail = (code: "missing" | "short" | "taken" | "regfail") =>
+  const fail = (code: "missing" | "short" | "taken" | "regfail" | "invalid_email") =>
     NextResponse.redirect(
       new URL(`/register?error=${code}&next=${encodeURIComponent(next)}`, req.url),
       303,
     );
 
-  if (!phoneRaw || !password || !name) return fail("missing");
+  if (!password || !name) return fail("missing");
   if (password.length < 6) return fail("short");
+  if (!phoneRaw && !emailRaw) return fail("missing");
 
-  const phone = normalizePhone(phoneRaw);
-  if (!phone) return fail("regfail");
+  let phone: string | null = null;
+  let email: string | null = null;
+  if (phoneRaw) {
+    phone = normalizePhone(phoneRaw);
+    if (!phone) return fail("regfail");
+  }
+  if (emailRaw) {
+    if (!EMAIL_RE.test(emailRaw)) return fail("invalid_email");
+    email = emailRaw.toLowerCase();
+  }
 
-  const exists = await prisma.user.findUnique({ where: { phone } });
-  if (exists) return fail("taken");
+  // 唯一性
+  if (phone) {
+    const exists = await prisma.user.findUnique({ where: { phone } });
+    if (exists) return fail("taken");
+  }
+  if (email) {
+    const exists = await prisma.user.findUnique({ where: { email } });
+    if (exists) return fail("taken");
+  }
 
   const passwordHash = await hashPassword(password);
   const user = await prisma.user.create({
-    data: { phone, passwordHash, name },
+    data: { phone, email, passwordHash, name },
   });
-
-  // 新用户仅创建平台账号，不自动加入任何家族；登录后凭邀请码加入。
 
   const secret = process.env.AUTH_SECRET;
   if (!secret) throw new Error("AUTH_SECRET is not configured");

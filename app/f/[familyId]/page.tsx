@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { LineageTabs } from "@/components/LineageTabs";
 import { lineagePersonWhere, parseLineage } from "@/lib/services/lineage";
+import { StatsCards } from "@/components/stats/StatsCards";
+import { computeFamilyStats } from "@/lib/services/family-stats";
 
 export const dynamic = "force-dynamic";
 
@@ -36,6 +38,8 @@ export default async function FamilyDetailPage({
   });
 
   if (!family) notFound();
+
+  const familyStats = await computeFamilyStats(familyId);
 
   const persons = await prisma.person.findMany({
     where: {
@@ -84,10 +88,58 @@ export default async function FamilyDetailPage({
             </span>
             <LineageTabs />
           </div>
+          <nav className="mt-3 flex flex-wrap gap-2 text-xs">
+            <Link
+              href={`/f/${familyId}/tree`}
+              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            >
+              树视图
+            </Link>
+            <Link
+              href={`/f/${familyId}/lineage`}
+              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            >
+              吊线图
+            </Link>
+            <Link
+              href={`/f/${familyId}/album`}
+              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            >
+              册谱
+            </Link>
+            <Link
+              href={`/f/${familyId}/table`}
+              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            >
+              详细表
+            </Link>
+            <Link
+              href={`/f/${familyId}/search`}
+              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            >
+              高级搜索
+            </Link>
+            <Link
+              href={`/f/${familyId}/admin`}
+              className="rounded border border-zinc-200 bg-white px-2 py-1 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:hover:bg-zinc-800"
+            >
+              管理
+            </Link>
+          </nav>
         </div>
       </header>
 
       <main className="mx-auto max-w-5xl px-4 py-6 sm:px-8">
+        {/* 视图统计卡片 */}
+        {familyStats && (
+          <section className="mb-8">
+            <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">
+              概览
+            </h2>
+            <StatsCards familyId={familyId} stats={familyStats} />
+          </section>
+        )}
+
         {/* 字辈表 */}
         <section className="mb-8">
           <h2 className="mb-3 text-base font-semibold text-zinc-900 dark:text-zinc-50">

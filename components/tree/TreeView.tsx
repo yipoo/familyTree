@@ -28,6 +28,16 @@ interface GraphResponse {
   residenceByPersonId: ResidenceMap;
 }
 
+type FetchState =
+  | { kind: "loading" }
+  | { kind: "loaded"; data: GraphResponse }
+  | { kind: "error"; message: string };
+
+const LOADING: FetchState = { kind: "loading" };
+
+// 复用同一空 Set——保持 collapsedIds 在"全部展开"时引用稳定，避免下游 memo 假失效
+const EMPTY_SET: Set<string> = new Set();
+
 export function TreeView({
   familyId,
   familyName,
@@ -41,56 +51,106 @@ export function TreeView({
   const focus = params.get("focus") ?? "";
   const lineage = params.get("lineage") ?? "paternal";
 
-  const [data, setData] = useState<GraphResponse | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  // 三态合一的 fetch state：避免在 effect 中同步 setLoading(true)
+  const [state, setState] = useState<FetchState>(LOADING);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // 折叠状态由 TreeView 持有，TreeCanvas 与 PersonInspector 共用——这样 inspector 也能
+  // "在选中节点上直接点折叠"，且双击节点折叠后 inspector 立刻同步显示后代数。
+  const [collapsedIds, setCollapsedIds] = useState<Set<string>>(EMPTY_SET);
 
   // 稳定回调，避免每次 render 产生新引用造成 TreeCanvas 内部 effect 重新触发
   const handleSelectChange = useCallback((id: string | null) => {
     setSelectedId(id);
   }, []);
 
+  const handleToggleCollapsed = useCallback((id: string) => {
+    setCollapsedIds((prev) => {
+      const next = new Set(prev);
+      if (next.has(id)) next.delete(id);
+      else next.add(id);
+      return next;
+    });
+  }, []);
+
   // selectedId 是 inspector 打开/关闭的唯一信号
   const inspectorOpen = !!selectedId;
 
-  // 关系索引：layout 变化时构建一次，inspector / 关系图 O(1) 查询
+  const data = state.kind === "loaded" ? state.data : null;
+  const loading = state.kind === "loading";
+  const error = state.kind === "error" ? state.message : null;
+
+  // 把 data?.layout 提到本地 const——React Compiler 才能把 useMemo 的 inferred dep
+  // 与手写的 [layout] 对齐；否则它推断成 data，与手写不匹配会跳过编译。
+  const layout = data?.layout ?? null;
   const layoutIndex = useMemo(
-    () => (data?.layout ? buildLayoutIndex(data.layout) : null),
-    [data?.layout],
+    () => (layout ? buildLayoutIndex(layout) : null),
+    [layout],
   );
 
+  // collapseAll：把所有"有可见子女"的节点都加入 collapsedIds
+  const handleCollapseAll = useCallback(() => {
+    if (!layoutIndex) return;
+    const all = new Set<string>();
+    for (const id of layoutIndex.visibleChildrenOf.keys()) all.add(id);
+    setCollapsedIds(all);
+  }, [layoutIndex]);
+
+  const handleExpandAll = useCallback(() => {
+    setCollapsedIds(EMPTY_SET);
+  }, []);
+
+  // 路由参数变化（不同 family / root / focus / lineage）→ 重置回 loading + 清空折叠：
+  // 用 React 官方"render 内 track previous + 条件 setState"派生模式，避免 effect 中同步 setState。
+  const requestKey = `${familyId}|${root}|${focus}|${lineage}`;
+  const [lastRequestKey, setLastRequestKey] = useState(requestKey);
+  if (lastRequestKey !== requestKey) {
+    setLastRequestKey(requestKey);
+    setState(LOADING);
+    setCollapsedIds(EMPTY_SET);
+  }
+
+  // 数据拉取：effect 仅做 fetch + await + setState（await 之后 setState 不算 sync-in-effect）
   useEffect(() => {
-    let abort = false;
-    setLoading(true);
-    setError(null);
-    const sp = new URLSearchParams();
-    if (focus) sp.set("focus", focus);
-    else if (root) sp.set("root", root);
-    if (lineage !== "paternal") sp.set("lineage", lineage);
-    fetch(`/api/families/${familyId}/graph?${sp}`)
-      .then(async (r) => {
+    let cancelled = false;
+    const ctrl = new AbortController();
+    (async () => {
+      try {
+        const sp = new URLSearchParams();
+        if (focus) sp.set("focus", focus);
+        else if (root) sp.set("root", root);
+        if (lineage !== "paternal") sp.set("lineage", lineage);
+        const r = await fetch(`/api/families/${familyId}/graph?${sp}`, {
+          signal: ctrl.signal,
+        });
+        if (cancelled) return;
         if (r.status === 401) {
-          // 未登录 → 跳到登录页，登录完成后回到当前 URL
-          const next = encodeURIComponent(window.location.pathname + window.location.search);
+          const next = encodeURIComponent(
+            window.location.pathname + window.location.search,
+          );
           router.replace(`/login?next=${next}`);
           return;
         }
         if (r.status === 403) {
-          throw new Error("无权访问该家族（请联系管理员或注册账号自动加入 demo 家族）");
+          throw new Error(
+            "无权访问该家族（请联系管理员或注册账号自动加入 demo 家族）",
+          );
         }
         if (!r.ok) throw new Error(`HTTP ${r.status}`);
         const json = (await r.json()) as { data: GraphResponse };
-        if (!abort) setData(json.data);
-      })
-      .catch((e) => {
-        if (!abort) setError(e instanceof Error ? e.message : String(e));
-      })
-      .finally(() => {
-        if (!abort) setLoading(false);
-      });
+        if (cancelled) return;
+        setState({ kind: "loaded", data: json.data });
+      } catch (e) {
+        if (cancelled) return;
+        if ((e as Error).name === "AbortError") return;
+        setState({
+          kind: "error",
+          message: e instanceof Error ? e.message : String(e),
+        });
+      }
+    })();
     return () => {
-      abort = true;
+      cancelled = true;
+      ctrl.abort();
     };
   }, [familyId, root, focus, lineage, router]);
 
@@ -176,13 +236,14 @@ export function TreeView({
                 <div>正在加载树谱数据…</div>
               </div>
             </div>
-          ) : !data.layout ? (
+          ) : !data.layout || !layoutIndex ? (
             <div className="flex h-full items-center justify-center text-sm text-zinc-500">
               无可显示数据（请尝试切换谱系或清除聚焦）
             </div>
           ) : (
             <TreeCanvas
               layout={data.layout}
+              layoutIndex={layoutIndex}
               generationChars={Object.fromEntries(
                 Object.entries(data.generationChars).map(([k, v]) => [Number(k), v]),
               )}
@@ -190,6 +251,10 @@ export function TreeView({
               selectedId={selectedId}
               onSelectChange={handleSelectChange}
               residenceByPersonId={data.residenceByPersonId}
+              collapsedIds={collapsedIds}
+              onToggleCollapsed={handleToggleCollapsed}
+              onCollapseAll={handleCollapseAll}
+              onExpandAll={handleExpandAll}
             />
           )}
 
@@ -205,10 +270,11 @@ export function TreeView({
             <PersonInspector
               familyId={familyId}
               personId={selectedId}
-              layout={data.layout}
               layoutIndex={layoutIndex}
               residenceByPersonId={data.residenceByPersonId}
               onClearSelection={() => setSelectedId(null)}
+              collapsedIds={collapsedIds}
+              onToggleCollapsed={handleToggleCollapsed}
             />
           )}
         </div>
@@ -224,10 +290,11 @@ export function TreeView({
               <PersonInspector
                 familyId={familyId}
                 personId={selectedId}
-                layout={data.layout}
                 layoutIndex={layoutIndex}
                 residenceByPersonId={data.residenceByPersonId}
                 onClearSelection={() => setSelectedId(null)}
+                collapsedIds={collapsedIds}
+                onToggleCollapsed={handleToggleCollapsed}
               />
             </div>
           </>

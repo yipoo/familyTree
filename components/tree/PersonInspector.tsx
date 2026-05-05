@@ -1,7 +1,6 @@
 "use client";
 import { useEffect, useState, useTransition } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import type { LayoutNode, LayoutEdge } from "@/lib/services/tree-layout";
 import type { LayoutIndex } from "@/lib/services/layout-index";
 import { PersonSearch, type SearchResult } from "@/components/PersonSearch";
 import { ResidenceField } from "@/components/tree/ResidenceField";
@@ -23,7 +22,6 @@ export interface PopupPerson {
 export interface PersonInspectorProps {
   familyId: string;
   personId: string | null;
-  layout: { nodes: LayoutNode[]; edges: LayoutEdge[] };
   /** O(1) 查询关系索引（TreeView 在 layout 变化时构建一次） */
   layoutIndex: LayoutIndex | null;
   /** 删除人物或显式取消选择时回调，用于清除外部 selectedId */
@@ -33,6 +31,10 @@ export interface PersonInspectorProps {
     string,
     { fullText: string; short: string; fromPersonId: string; inherited: boolean }
   >;
+  /** 当前折叠状态（外部受控，与 TreeCanvas 共用） */
+  collapsedIds: Set<string>;
+  /** 切换某节点的折叠状态 */
+  onToggleCollapsed: (id: string) => void;
 }
 
 type Kind = "father" | "mother" | "spouse" | "son" | "daughter" | "brother" | "sister";
@@ -50,10 +52,11 @@ const KIND_LABEL: Record<Kind, string> = {
 export function PersonInspector({
   familyId,
   personId,
-  layout,
   layoutIndex,
   onClearSelection,
   residenceByPersonId,
+  collapsedIds,
+  onToggleCollapsed,
 }: PersonInspectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -74,21 +77,31 @@ export function PersonInspector({
 
   // 折叠区状态：默认 关系图 + 关系列表 展开，其它折叠
   // "信息"由头部的铅笔图标进入编辑态；不再作为独立的折叠区
+  // "视图"已上提到头部工具栏，不再是 Disclosure
   const [open, setOpen] = useState({
     graph: true,
     relations: true,
     add: false,
-    view: false,
     danger: false,
   });
   const toggle = (k: keyof typeof open) =>
     setOpen((prev) => ({ ...prev, [k]: !prev[k] }));
 
-  // 关系图延迟挂载：先把其它信息渲染出来，让 inspector 立刻可见
+  // 关系图延迟挂载：先把其它信息渲染出来，让 inspector 立刻可见。
+  //
+  // 切换 personId 时把 graphReady 立刻重置为 false——用 React 官方
+  // "track previous prop in render + 条件 setState" 派生模式（不在 effect 里同步 setState）。
+  // 参考：https://react.dev/reference/react/useState#storing-information-from-previous-renders
   const [graphReady, setGraphReady] = useState(false);
-  useEffect(() => {
+  const [lastPersonId, setLastPersonId] = useState(personId);
+  if (lastPersonId !== personId) {
+    setLastPersonId(personId);
     setGraphReady(false);
+  }
+  useEffect(() => {
     if (!personId) return;
+    // 用 requestIdleCallback / setTimeout 调度——回调内的 setState 是真正异步的，
+    // 不违反 react-hooks/set-state-in-effect。
     type IdleId = number;
     type IdleAPI = {
       requestIdleCallback?: (cb: () => void, opts?: { timeout: number }) => IdleId;
@@ -119,6 +132,16 @@ export function PersonInspector({
   const parents = personId ? layoutIndex?.parentsOf.get(personId) ?? [] : [];
   const spouses = personId ? layoutIndex?.spousesOf.get(personId) ?? [] : [];
   const children = personId ? layoutIndex?.childrenOf.get(personId) ?? [] : [];
+
+  // 折叠语义：可见父子边下的直接子女数与全部后代数；inspector 折叠按钮基于这些
+  const visibleChildCount = personId
+    ? layoutIndex?.visibleChildrenOf.get(personId)?.length ?? 0
+    : 0;
+  const descendantCount = personId
+    ? layoutIndex?.descendantCountOf.get(personId) ?? 0
+    : 0;
+  const isCollapsed = personId ? collapsedIds.has(personId) : false;
+  const canCollapse = visibleChildCount > 0;
 
   function refresh() {
     startTransition(() => router.refresh());
@@ -314,6 +337,44 @@ export function PersonInspector({
             </div>
           )}
 
+          {/* 头部下方常驻工具栏：折叠 / 视图操作（高频，不藏在 Disclosure 里） */}
+          <div className="border-b border-zinc-200 bg-zinc-50/60 px-4 py-2 dark:border-zinc-800 dark:bg-zinc-900/40">
+            <div className="flex flex-wrap gap-1.5">
+              {canCollapse ? (
+                <PillBtn
+                  onClick={() => personId && onToggleCollapsed(personId)}
+                  variant={isCollapsed ? "blue" : "default"}
+                >
+                  {isCollapsed
+                    ? `展开后代（${descendantCount}）`
+                    : `折叠后代（${descendantCount}）`}
+                </PillBtn>
+              ) : (
+                <PillBtn onClick={() => {}} disabled variant="ghost">
+                  无后代可折叠
+                </PillBtn>
+              )}
+              <PillBtn onClick={gotoCenter} variant="ghost">
+                设为中心
+              </PillBtn>
+              <PillBtn onClick={gotoBranchOnly} variant="ghost">
+                仅看此分支
+              </PillBtn>
+              {hasCenter && (
+                <PillBtn onClick={clearCenter} variant="ghost">
+                  展开所有分支
+                </PillBtn>
+              )}
+            </div>
+            {canCollapse && (
+              <p className="mt-1.5 text-[11px] text-zinc-500">
+                {isCollapsed
+                  ? `已折叠 ${descendantCount} 位后代——画布上以 +${descendantCount} 角标提示`
+                  : `直接子女 ${visibleChildCount} 人 · 全部后代 ${descendantCount} 人（双击节点也可折叠）`}
+              </p>
+            )}
+          </div>
+
           {/* 主体：可滚动 */}
           <div className="flex-1 overflow-y-auto">
             {/* 关系图 */}
@@ -421,22 +482,6 @@ export function PersonInspector({
               )}
             </Disclosure>
 
-            {/* 视图操作 */}
-            <Disclosure
-              title="视图"
-              open={open.view}
-              onToggle={() => toggle("view")}
-            >
-              <div className="grid grid-cols-2 gap-1.5">
-                <PillBtn onClick={gotoCenter}>设为中心</PillBtn>
-                <PillBtn onClick={gotoBranchOnly}>仅看此分支</PillBtn>
-                {hasCenter && (
-                  <PillBtn onClick={clearCenter} variant="ghost">
-                    展开所有分支
-                  </PillBtn>
-                )}
-              </div>
-            </Disclosure>
 
             {/* 更多 / 危险 */}
             <Disclosure
@@ -526,15 +571,6 @@ function Disclosure({
       </div>
       {open && <div className="px-4 pb-3">{children}</div>}
     </section>
-  );
-}
-
-function RowKV({ k, v }: { k: string; v: string }) {
-  return (
-    <div className="flex items-baseline gap-3">
-      <span className="w-12 shrink-0 text-xs text-zinc-500">{k}</span>
-      <span className="text-zinc-900 dark:text-zinc-100">{v}</span>
-    </div>
   );
 }
 
@@ -669,96 +705,6 @@ function PinIcon() {
       <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1 1 18 0Z" />
       <circle cx="12" cy="10" r="3" />
     </svg>
-  );
-}
-
-function Tag({ color, children }: { color: "blue" | "pink" | "zinc" | "amber"; children: React.ReactNode }) {
-  const cls = {
-    blue: "bg-blue-100 text-blue-800 dark:bg-blue-950 dark:text-blue-200",
-    pink: "bg-pink-100 text-pink-800 dark:bg-pink-950 dark:text-pink-200",
-    zinc: "bg-zinc-100 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300",
-    amber: "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-200",
-  }[color];
-  return <span className={`rounded-full px-2 py-0.5 text-[11px] ${cls}`}>{children}</span>;
-}
-
-function Field({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="flex items-baseline gap-2">
-      <span className="w-12 text-xs text-zinc-500">{label}</span>
-      <span className="font-medium">{value}</span>
-    </div>
-  );
-}
-
-function ActionBtn({
-  label,
-  onClick,
-  disabled,
-  variant = "default",
-}: {
-  label: string;
-  onClick: () => void;
-  disabled?: boolean;
-  variant?: "default" | "danger" | "blue" | "pink" | "ghost";
-}) {
-  const cls = {
-    default: "bg-zinc-100 text-zinc-700 hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700",
-    danger: "bg-red-50 text-red-700 hover:bg-red-100 dark:bg-red-950 dark:text-red-200",
-    blue: "bg-blue-50 text-blue-700 hover:bg-blue-100 dark:bg-blue-950 dark:text-blue-200",
-    pink: "bg-pink-50 text-pink-700 hover:bg-pink-100 dark:bg-pink-950 dark:text-pink-200",
-    ghost:
-      "border border-zinc-300 bg-white text-zinc-600 hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-400 dark:hover:bg-zinc-800",
-  }[variant];
-  return (
-    <button
-      onClick={onClick}
-      disabled={disabled}
-      className={`rounded-md px-2 py-2 text-xs font-medium transition disabled:opacity-40 ${cls}`}
-    >
-      {label}
-    </button>
-  );
-}
-
-function Section({
-  title,
-  items,
-  onJump,
-}: {
-  title: string;
-  items: { id: string; person: { name: string; gender: string; status: string } }[];
-  onJump?: (id: string) => void;
-}) {
-  if (items.length === 0)
-    return (
-      <div>
-        <h4 className="mb-1 text-xs font-medium uppercase tracking-wide text-zinc-500">{title}</h4>
-        <p className="text-xs text-zinc-400">—</p>
-      </div>
-    );
-  return (
-    <div>
-      <h4 className="mb-1.5 text-xs font-medium uppercase tracking-wide text-zinc-500">{title}</h4>
-      <div className="flex flex-wrap gap-1.5">
-        {items.map((it) => (
-          <button
-            key={it.id}
-            onClick={() => onJump?.(it.id)}
-            className={`rounded-md px-2.5 py-1 text-sm transition hover:opacity-80 ${
-              it.person.gender === "MALE"
-                ? "bg-blue-50 text-blue-900 dark:bg-blue-950 dark:text-blue-200"
-                : it.person.gender === "FEMALE"
-                  ? "bg-pink-50 text-pink-900 dark:bg-pink-950 dark:text-pink-200"
-                  : "bg-zinc-100 text-zinc-700 dark:bg-zinc-800"
-            }`}
-          >
-            {it.person.name}
-            {it.person.status === "DECEASED" && <span className="ml-1 opacity-60">†</span>}
-          </button>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -1223,48 +1169,3 @@ function RadioRow({
   );
 }
 
-function SelectGender({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <label className="flex items-baseline gap-2">
-      <span className="w-14 text-xs text-zinc-500">性别</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="flex-1 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      >
-        <option value="MALE">男</option>
-        <option value="FEMALE">女</option>
-        <option value="UNKNOWN">未知</option>
-      </select>
-    </label>
-  );
-}
-function SelectStatus({
-  value,
-  onChange,
-}: {
-  value: string;
-  onChange: (v: string) => void;
-}) {
-  return (
-    <label className="flex items-baseline gap-2">
-      <span className="w-14 text-xs text-zinc-500">状态</span>
-      <select
-        value={value}
-        onChange={(e) => onChange(e.target.value)}
-        className="flex-1 rounded-md border border-zinc-300 bg-white px-2 py-1 text-sm dark:border-zinc-700 dark:bg-zinc-900"
-      >
-        <option value="ALIVE">在世</option>
-        <option value="DECEASED">已故</option>
-        <option value="LOST">失联</option>
-        <option value="UNKNOWN">未知</option>
-      </select>
-    </label>
-  );
-}

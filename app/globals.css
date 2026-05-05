@@ -24,3 +24,33 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* 打印：吊线图 / 册谱 / 详细图等纯展示页 */
+@media print {
+  html,
+  body {
+    background: #ffffff !important;
+    color: #000 !important;
+  }
+  /* Tailwind: print:hidden 已可隐藏，但保险起见把 header.print:hidden 放在最高优先级 */
+  .print\:hidden {
+    display: none !important;
+  }
+  .print\:bg-white {
+    background: #ffffff !important;
+  }
+  .print\:p-0 {
+    padding: 0 !important;
+  }
+  .print\:max-w-none {
+    max-width: none !important;
+  }
+  .print\:shadow-none {
+    box-shadow: none !important;
+  }
+  /* 避免 SVG 表格内换页中断 */
+  svg,
+  table {
+    page-break-inside: avoid;
+  }
+}

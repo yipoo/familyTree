@@ -6,6 +6,7 @@ import {
   requireFamilyRole,
   requireWriteOnPerson,
 } from "@/lib/auth/guard";
+import { writeAudit } from "@/lib/services/audit";
 
 interface PatchBody {
   name?: string;
@@ -47,8 +48,10 @@ export async function PATCH(
   ctx: { params: Promise<{ familyId: string; personId: string }> },
 ) {
   const { familyId, personId } = await ctx.params;
+  let actorId: string;
   try {
-    await requireWriteOnPerson(familyId, personId);
+    const c = await requireWriteOnPerson(familyId, personId);
+    actorId = c.user.id;
   } catch (e) {
     return authErrorResponse(e);
   }
@@ -66,17 +69,28 @@ export async function PATCH(
   if (body.note !== undefined) data.note = body.note;
   if (body.isMarriedIn !== undefined) data.isMarriedIn = body.isMarriedIn;
 
-  const updated = await prisma.person.updateMany({
+  const before = await prisma.person.findFirst({
     where: { id: personId, familyId, deletedAt: null },
-    data,
   });
-  if (updated.count === 0) {
+  if (!before) {
     return NextResponse.json(
       { error: { code: "NOT_FOUND", message: "未找到" } },
       { status: 404 },
     );
   }
-  const after = await prisma.person.findUnique({ where: { id: personId } });
+  const after = await prisma.person.update({
+    where: { id: personId },
+    data,
+  });
+  await writeAudit({
+    familyId,
+    actorId,
+    kind: "UPDATE",
+    entity: "Person",
+    entityId: personId,
+    before,
+    after,
+  });
   return NextResponse.json({ data: after });
 }
 
@@ -85,20 +99,33 @@ export async function DELETE(
   ctx: { params: Promise<{ familyId: string; personId: string }> },
 ) {
   const { familyId, personId } = await ctx.params;
+  let actorId: string;
   try {
-    await requireWriteOnPerson(familyId, personId);
+    const c = await requireWriteOnPerson(familyId, personId);
+    actorId = c.user.id;
   } catch (e) {
     return authErrorResponse(e);
   }
-  const result = await prisma.person.updateMany({
+  const before = await prisma.person.findFirst({
     where: { id: personId, familyId, deletedAt: null },
-    data: { deletedAt: new Date() },
   });
-  if (result.count === 0) {
+  if (!before) {
     return NextResponse.json(
       { error: { code: "NOT_FOUND", message: "未找到" } },
       { status: 404 },
     );
   }
+  await prisma.person.update({
+    where: { id: personId },
+    data: { deletedAt: new Date() },
+  });
+  await writeAudit({
+    familyId,
+    actorId,
+    kind: "DELETE",
+    entity: "Person",
+    entityId: personId,
+    before,
+  });
   return NextResponse.json({ data: { id: personId, deleted: true } });
 }

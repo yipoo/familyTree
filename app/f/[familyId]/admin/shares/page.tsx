@@ -1,7 +1,13 @@
 import { prisma } from "@/lib/db";
 import { CreateShareForm } from "../ShareForm";
 import { RevokeShareForm, ShareTokenCopy } from "../RowForms";
-import { AdminSection, ExpiryLabel, formatDate } from "../_shared";
+import {
+  AdminSection,
+  computeExpiryStatus,
+  ExpiryLabel,
+  formatDate,
+  readNow,
+} from "../_shared";
 
 export const dynamic = "force-dynamic";
 
@@ -11,10 +17,16 @@ export default async function AdminSharesPage({
   params: Promise<{ familyId: string }>;
 }) {
   const { familyId } = await params;
-  const shareLinks = await prisma.shareLink.findMany({
+  const shareLinksRaw = await prisma.shareLink.findMany({
     where: { familyId },
     orderBy: { createdAt: "desc" },
   });
+
+  const now = readNow();
+  const shareLinks = shareLinksRaw.map((s) => ({
+    ...s,
+    expiry: computeExpiryStatus(s.expiresAt, now),
+  }));
 
   return (
     <AdminSection
@@ -47,7 +59,7 @@ export default async function AdminSharesPage({
                   <ShareTokenCopy token={s.token} />
                 </td>
                 <td className="py-2 pr-4 text-xs">
-                  <ExpiryLabel d={s.expiresAt} />
+                  <ExpiryLabel status={s.expiry} />
                 </td>
                 <td className="py-2 pr-4 text-xs text-zinc-500">
                   {formatDate(s.createdAt)}
