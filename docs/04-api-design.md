@@ -230,12 +230,18 @@ GET /api/families/:fid/graph
 
 ## 11. 册谱与导出
 
+实际实现路径（已落地）：
+
 | 方法 | 路径 | 描述 |
 |---|---|---|
-| GET | `/api/families/:fid/book/templates` | 模板列表 |
-| POST | `/api/families/:fid/book/render` | 触发渲染（同步返回 PDF 流，远期改异步） |
-| GET | `/api/families/:fid/export?format=json\|excel\|gedcom` | 导出 |
-| POST | `/api/families/:fid/import` | 导入（multipart/form-data） |
+| GET | `/api/families/:fid/album/pdf` | 册谱 PDF（小家族同步生成；≥ 300 人转异步任务，202 + jobId） |
+| GET | `/api/families/:fid/lineage-chart/pdf?root=PID` | 吊线图 PDF（同上策略） |
+| POST | `/api/families/:fid/pdf-jobs` | 直接创建 PDF 异步任务（type=ALBUM\|LINEAGE_CHART） |
+| GET | `/api/families/:fid/pdf-jobs` | 任务列表（成员看自己 / 管理员看全部） |
+| GET / DELETE | `/api/families/:fid/pdf-jobs/:id` | 状态 / 取消 |
+| GET | `/api/families/:fid/pdf-jobs/:id/download` | 下载 |
+| GET | `/api/families/:fid/export?format=json\|csv\|gedcom` | 导出（CSV 含分片格式） |
+| POST | `/api/families/:fid/import/xlsx` | Excel 导入（multipart/form-data；mode=dry\|apply） |
 
 渲染请求体：
 ```json
@@ -280,19 +286,41 @@ GET /api/families/:fid/graph
 
 | 方法 | 路径 | 描述 |
 |---|---|---|
-| GET | `/api/families/:fid/audit-logs?cursor=&entity=&actorId=` | Owner/Admin 查看变更历史 |
+| GET | `/api/families/:fid/audit?cursor=&entity=&actorId=` | Owner/Admin 查看变更历史（注：实际路径用 `/audit` 单数） |
+| POST | `/api/families/:fid/audit/:id/undo` | 撤回某条 24 小时内的写操作（OWNER/ADMIN，详见 P2-B） |
 
 ---
 
-## 15. 限流与配额（远期）
+## 15. 限流（已落地，详见 lib/rate-limit.ts + lib/rate-limit-middleware.ts）
 
-- 写接口：60 次 / 分钟 / 用户
-- 导出与渲染：5 次 / 小时 / 家族
-- 超限返回 `429` + `RATE_LIMITED`
+内存级 token bucket，按 IP（+ 已登录端点 user）双键限流：
+
+| 桶 | 窗口 | 上限 | 路径 |
+|---|---|---|---|
+| login | 60s | 10 | POST /api/login |
+| login-code | 60s | 10 | POST /api/login-code |
+| register | 60s | 5 | POST /api/register |
+| sms-send | 60s | 5 | POST /api/sms/send-code |
+| export | 60s | 10 | GET /api/families/.../export |
+| import-xlsx | 60s | 5 | POST /api/families/.../import/xlsx |
+| pdf-lineage / pdf-album | 60s | 5 | 老 GET /pdf 路径 |
+| pdf-job-create | 60s | 5 | POST /api/families/.../pdf-jobs |
+
+超限：返回 `429 RATE_LIMITED` + `Retry-After` 秒数 + `X-RateLimit-Bucket` 头。
 
 ---
 
-## 16. 版本与兼容
+## 16. 发现 / 跨家族（公开）
+
+| 方法 | 路径 | 描述 |
+|---|---|---|
+| GET | `/api/discover?q=` | 列出所有 `Family.isPublic = true` 的家族（用于 /discover 页） |
+
+`isPublic` 由家族 OWNER / ADMIN 在 PATCH `/api/families/:fid` 切换。
+
+---
+
+## 17. 版本与兼容
 
 - API 版本通过路径 `/api/v1/...` 引入（一期暂用 `/api/...`，二期对外开放前再迁移）
 - 字段新增视为非破坏性，删除/重命名需新版本
