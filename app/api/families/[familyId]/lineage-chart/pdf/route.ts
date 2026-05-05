@@ -1,8 +1,11 @@
 /**
  * GET /api/families/[familyId]/lineage-chart/pdf?root=PID
  *
- * 服务端生成吊线图 PDF（@react-pdf/renderer 渲染原生 SVG）。
- * 输出 application/pdf 流，浏览器直接下载。
+ * 兼容老链接：
+ *   - 家族人数 < SYNC_PERSON_THRESHOLD：同步生成（原行为）
+ *   - 否则：创建异步 PdfJob 并 303 跳转到 /pdf-jobs/<id> 状态页（前端可识别）
+ *
+ * 推荐新调用方走 POST /api/families/[fid]/pdf-jobs。
  */
 import { NextResponse } from "next/server";
 
@@ -12,6 +15,11 @@ import { handleApiError } from "@/lib/api/error";
 import { layoutLineageChart } from "@/lib/services/lineage-chart";
 import { renderLineageChartPdf } from "@/lib/pdf/lineage-chart";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  createJob,
+  familyPersonCount,
+  SYNC_PERSON_THRESHOLD,
+} from "@/lib/services/pdf-queue";
 
 async function lineageChartPdfHandler(
   req: Request,
@@ -19,9 +27,31 @@ async function lineageChartPdfHandler(
 ) {
   const { familyId } = await ctx.params;
   try {
-    await requireFamilyRole(familyId, "MEMBER");
+    const auth = await requireFamilyRole(familyId, "MEMBER");
     const url = new URL(req.url);
     const rootParam = url.searchParams.get("root");
+
+    // 大家族：同步生成不靠谱，转异步队列。
+    const count = await familyPersonCount(familyId);
+    if (count >= SYNC_PERSON_THRESHOLD) {
+      const job = await createJob({
+        familyId,
+        type: "LINEAGE_CHART",
+        requestedById: auth.user.id,
+        params: rootParam ? { root: rootParam } : {},
+      });
+      return NextResponse.json(
+        {
+          data: {
+            jobId: job.id,
+            status: job.status,
+            statusUrl: `/api/families/${familyId}/pdf-jobs/${job.id}`,
+            downloadUrl: `/api/families/${familyId}/pdf-jobs/${job.id}/download`,
+          },
+        },
+        { status: 202 },
+      );
+    }
 
     const [family, persons, marriages, parentChild] = await Promise.all([
       prisma.family.findUnique({

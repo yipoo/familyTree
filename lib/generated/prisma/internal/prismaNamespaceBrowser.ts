@@ -68,7 +68,8 @@ export const ModelName = {
   SubtreeAdmin: 'SubtreeAdmin',
   FamilyInvite: 'FamilyInvite',
   FamilyInviteUse: 'FamilyInviteUse',
-  VerificationCode: 'VerificationCode'
+  VerificationCode: 'VerificationCode',
+  PdfJob: 'PdfJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -109,6 +110,7 @@ export const FamilyScalarFieldEnum = {
   founderName: 'founderName',
   description: 'description',
   ownerId: 'ownerId',
+  isPublic: 'isPublic',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -352,6 +354,26 @@ export const VerificationCodeScalarFieldEnum = {
 } as const
 
 export type VerificationCodeScalarFieldEnum = (typeof VerificationCodeScalarFieldEnum)[keyof typeof VerificationCodeScalarFieldEnum]
+
+
+export const PdfJobScalarFieldEnum = {
+  id: 'id',
+  familyId: 'familyId',
+  type: 'type',
+  status: 'status',
+  progress: 'progress',
+  params: 'params',
+  outputBytes: 'outputBytes',
+  outputName: 'outputName',
+  error: 'error',
+  requestedById: 'requestedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type PdfJobScalarFieldEnum = (typeof PdfJobScalarFieldEnum)[keyof typeof PdfJobScalarFieldEnum]
 
 
 export const SortOrder = {

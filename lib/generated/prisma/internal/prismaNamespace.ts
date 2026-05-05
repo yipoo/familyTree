@@ -401,7 +401,8 @@ export const ModelName = {
   SubtreeAdmin: 'SubtreeAdmin',
   FamilyInvite: 'FamilyInvite',
   FamilyInviteUse: 'FamilyInviteUse',
-  VerificationCode: 'VerificationCode'
+  VerificationCode: 'VerificationCode',
+  PdfJob: 'PdfJob'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -417,7 +418,7 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
     omit: GlobalOmitOptions
   }
   meta: {
-    modelProps: "user" | "family" | "familyMember" | "generationName" | "person" | "marriage" | "parentChild" | "branch" | "location" | "personLocation" | "migration" | "shareLink" | "auditLog" | "pendingSubmission" | "subtreeAdmin" | "familyInvite" | "familyInviteUse" | "verificationCode"
+    modelProps: "user" | "family" | "familyMember" | "generationName" | "person" | "marriage" | "parentChild" | "branch" | "location" | "personLocation" | "migration" | "shareLink" | "auditLog" | "pendingSubmission" | "subtreeAdmin" | "familyInvite" | "familyInviteUse" | "verificationCode" | "pdfJob"
     txIsolationLevel: TransactionIsolationLevel
   }
   model: {
@@ -1753,6 +1754,80 @@ export type TypeMap<ExtArgs extends runtime.Types.Extensions.InternalArgs = runt
         }
       }
     }
+    PdfJob: {
+      payload: Prisma.$PdfJobPayload<ExtArgs>
+      fields: Prisma.PdfJobFieldRefs
+      operations: {
+        findUnique: {
+          args: Prisma.PdfJobFindUniqueArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload> | null
+        }
+        findUniqueOrThrow: {
+          args: Prisma.PdfJobFindUniqueOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>
+        }
+        findFirst: {
+          args: Prisma.PdfJobFindFirstArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload> | null
+        }
+        findFirstOrThrow: {
+          args: Prisma.PdfJobFindFirstOrThrowArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>
+        }
+        findMany: {
+          args: Prisma.PdfJobFindManyArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>[]
+        }
+        create: {
+          args: Prisma.PdfJobCreateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>
+        }
+        createMany: {
+          args: Prisma.PdfJobCreateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        createManyAndReturn: {
+          args: Prisma.PdfJobCreateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>[]
+        }
+        delete: {
+          args: Prisma.PdfJobDeleteArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>
+        }
+        update: {
+          args: Prisma.PdfJobUpdateArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>
+        }
+        deleteMany: {
+          args: Prisma.PdfJobDeleteManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateMany: {
+          args: Prisma.PdfJobUpdateManyArgs<ExtArgs>
+          result: BatchPayload
+        }
+        updateManyAndReturn: {
+          args: Prisma.PdfJobUpdateManyAndReturnArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>[]
+        }
+        upsert: {
+          args: Prisma.PdfJobUpsertArgs<ExtArgs>
+          result: runtime.Types.Utils.PayloadToResult<Prisma.$PdfJobPayload>
+        }
+        aggregate: {
+          args: Prisma.PdfJobAggregateArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.AggregatePdfJob>
+        }
+        groupBy: {
+          args: Prisma.PdfJobGroupByArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PdfJobGroupByOutputType>[]
+        }
+        count: {
+          args: Prisma.PdfJobCountArgs<ExtArgs>
+          result: runtime.Types.Utils.Optional<Prisma.PdfJobCountAggregateOutputType> | number
+        }
+      }
+    }
   }
 } & {
   other: {
@@ -1814,6 +1889,7 @@ export const FamilyScalarFieldEnum = {
   founderName: 'founderName',
   description: 'description',
   ownerId: 'ownerId',
+  isPublic: 'isPublic',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -2059,6 +2135,26 @@ export const VerificationCodeScalarFieldEnum = {
 export type VerificationCodeScalarFieldEnum = (typeof VerificationCodeScalarFieldEnum)[keyof typeof VerificationCodeScalarFieldEnum]
 
 
+export const PdfJobScalarFieldEnum = {
+  id: 'id',
+  familyId: 'familyId',
+  type: 'type',
+  status: 'status',
+  progress: 'progress',
+  params: 'params',
+  outputBytes: 'outputBytes',
+  outputName: 'outputName',
+  error: 'error',
+  requestedById: 'requestedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type PdfJobScalarFieldEnum = (typeof PdfJobScalarFieldEnum)[keyof typeof PdfJobScalarFieldEnum]
+
+
 export const SortOrder = {
   asc: 'asc',
   desc: 'desc'
@@ -2156,6 +2252,13 @@ export type ListDateTimeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaM
 
 
 /**
+ * Reference to a field of type 'Boolean'
+ */
+export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
+    
+
+
+/**
  * Reference to a field of type 'FamilyRole'
  */
 export type EnumFamilyRoleFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'FamilyRole'>
@@ -2180,13 +2283,6 @@ export type IntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'In
  * Reference to a field of type 'Int[]'
  */
 export type ListIntFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Int[]'>
-    
-
-
-/**
- * Reference to a field of type 'Boolean'
- */
-export type BooleanFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Boolean'>
     
 
 
@@ -2313,6 +2409,48 @@ export type EnumVerificationPurposeFieldRefInput<$PrismaModel> = FieldRefInputTy
  * Reference to a field of type 'VerificationPurpose[]'
  */
 export type ListEnumVerificationPurposeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'VerificationPurpose[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PdfJobType'
+ */
+export type EnumPdfJobTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PdfJobType'>
+    
+
+
+/**
+ * Reference to a field of type 'PdfJobType[]'
+ */
+export type ListEnumPdfJobTypeFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PdfJobType[]'>
+    
+
+
+/**
+ * Reference to a field of type 'PdfJobStatus'
+ */
+export type EnumPdfJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PdfJobStatus'>
+    
+
+
+/**
+ * Reference to a field of type 'PdfJobStatus[]'
+ */
+export type ListEnumPdfJobStatusFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'PdfJobStatus[]'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes'
+ */
+export type BytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes'>
+    
+
+
+/**
+ * Reference to a field of type 'Bytes[]'
+ */
+export type ListBytesFieldRefInput<$PrismaModel> = FieldRefInputType<$PrismaModel, 'Bytes[]'>
     
 
 
@@ -2457,6 +2595,7 @@ export type GlobalOmitConfig = {
   familyInvite?: Prisma.FamilyInviteOmit
   familyInviteUse?: Prisma.FamilyInviteUseOmit
   verificationCode?: Prisma.VerificationCodeOmit
+  pdfJob?: Prisma.PdfJobOmit
 }
 
 /* Types for Logging */

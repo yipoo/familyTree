@@ -131,3 +131,8 @@ export type FamilyInviteUse = Prisma.FamilyInviteUseModel
  * 
  */
 export type VerificationCode = Prisma.VerificationCodeModel
+/**
+ * Model PdfJob
+ * 
+ */
+export type PdfJob = Prisma.PdfJobModel

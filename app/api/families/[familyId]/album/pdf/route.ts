@@ -1,7 +1,9 @@
 /**
  * GET /api/families/[familyId]/album/pdf
  *
- * 服务端生成册谱 PDF（@react-pdf/renderer）。
+ * 兼容老链接：
+ *   - 小家族：同步渲染并下载（原行为）
+ *   - 大家族：创建异步 PdfJob，202 + 状态/下载 URL
  */
 import { NextResponse } from "next/server";
 
@@ -10,6 +12,11 @@ import { handleApiError } from "@/lib/api/error";
 import { buildAlbumBook } from "@/lib/services/album";
 import { renderAlbumPdf } from "@/lib/pdf/album";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import {
+  createJob,
+  familyPersonCount,
+  SYNC_PERSON_THRESHOLD,
+} from "@/lib/services/pdf-queue";
 
 async function albumPdfHandler(
   _req: Request,
@@ -17,7 +24,29 @@ async function albumPdfHandler(
 ) {
   const { familyId } = await ctx.params;
   try {
-    await requireFamilyRole(familyId, "MEMBER");
+    const auth = await requireFamilyRole(familyId, "MEMBER");
+
+    const count = await familyPersonCount(familyId);
+    if (count >= SYNC_PERSON_THRESHOLD) {
+      const job = await createJob({
+        familyId,
+        type: "ALBUM",
+        requestedById: auth.user.id,
+        params: {},
+      });
+      return NextResponse.json(
+        {
+          data: {
+            jobId: job.id,
+            status: job.status,
+            statusUrl: `/api/families/${familyId}/pdf-jobs/${job.id}`,
+            downloadUrl: `/api/families/${familyId}/pdf-jobs/${job.id}/download`,
+          },
+        },
+        { status: 202 },
+      );
+    }
+
     const book = await buildAlbumBook(familyId);
     if (!book) {
       return NextResponse.json(

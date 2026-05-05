@@ -31,6 +31,7 @@ export type FamilyMinAggregateOutputType = {
   founderName: string | null
   description: string | null
   ownerId: string | null
+  isPublic: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -43,6 +44,7 @@ export type FamilyMaxAggregateOutputType = {
   founderName: string | null
   description: string | null
   ownerId: string | null
+  isPublic: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -55,6 +57,7 @@ export type FamilyCountAggregateOutputType = {
   founderName: number
   description: number
   ownerId: number
+  isPublic: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -69,6 +72,7 @@ export type FamilyMinAggregateInputType = {
   founderName?: true
   description?: true
   ownerId?: true
+  isPublic?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -81,6 +85,7 @@ export type FamilyMaxAggregateInputType = {
   founderName?: true
   description?: true
   ownerId?: true
+  isPublic?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -93,6 +98,7 @@ export type FamilyCountAggregateInputType = {
   founderName?: true
   description?: true
   ownerId?: true
+  isPublic?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -178,6 +184,7 @@ export type FamilyGroupByOutputType = {
   founderName: string | null
   description: string | null
   ownerId: string
+  isPublic: boolean
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -211,6 +218,7 @@ export type FamilyWhereInput = {
   founderName?: Prisma.StringNullableFilter<"Family"> | string | null
   description?: Prisma.StringNullableFilter<"Family"> | string | null
   ownerId?: Prisma.StringFilter<"Family"> | string
+  isPublic?: Prisma.BoolFilter<"Family"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Family"> | Date | string | null
@@ -226,6 +234,7 @@ export type FamilyWhereInput = {
   subtreeAdmins?: Prisma.SubtreeAdminListRelationFilter
   invites?: Prisma.FamilyInviteListRelationFilter
   submissions?: Prisma.PendingSubmissionListRelationFilter
+  pdfJobs?: Prisma.PdfJobListRelationFilter
 }
 
 export type FamilyOrderByWithRelationInput = {
@@ -235,6 +244,7 @@ export type FamilyOrderByWithRelationInput = {
   founderName?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -250,6 +260,7 @@ export type FamilyOrderByWithRelationInput = {
   subtreeAdmins?: Prisma.SubtreeAdminOrderByRelationAggregateInput
   invites?: Prisma.FamilyInviteOrderByRelationAggregateInput
   submissions?: Prisma.PendingSubmissionOrderByRelationAggregateInput
+  pdfJobs?: Prisma.PdfJobOrderByRelationAggregateInput
 }
 
 export type FamilyWhereUniqueInput = Prisma.AtLeast<{
@@ -262,6 +273,7 @@ export type FamilyWhereUniqueInput = Prisma.AtLeast<{
   founderName?: Prisma.StringNullableFilter<"Family"> | string | null
   description?: Prisma.StringNullableFilter<"Family"> | string | null
   ownerId?: Prisma.StringFilter<"Family"> | string
+  isPublic?: Prisma.BoolFilter<"Family"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Family"> | Date | string | null
@@ -277,6 +289,7 @@ export type FamilyWhereUniqueInput = Prisma.AtLeast<{
   subtreeAdmins?: Prisma.SubtreeAdminListRelationFilter
   invites?: Prisma.FamilyInviteListRelationFilter
   submissions?: Prisma.PendingSubmissionListRelationFilter
+  pdfJobs?: Prisma.PdfJobListRelationFilter
 }, "id">
 
 export type FamilyOrderByWithAggregationInput = {
@@ -286,6 +299,7 @@ export type FamilyOrderByWithAggregationInput = {
   founderName?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -304,6 +318,7 @@ export type FamilyScalarWhereWithAggregatesInput = {
   founderName?: Prisma.StringNullableWithAggregatesFilter<"Family"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Family"> | string | null
   ownerId?: Prisma.StringWithAggregatesFilter<"Family"> | string
+  isPublic?: Prisma.BoolWithAggregatesFilter<"Family"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Family"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Family"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Family"> | Date | string | null
@@ -316,6 +331,7 @@ export type FamilyCreateInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -331,6 +347,7 @@ export type FamilyCreateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateInput = {
@@ -340,6 +357,7 @@ export type FamilyUncheckedCreateInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -355,6 +373,7 @@ export type FamilyUncheckedCreateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUpdateInput = {
@@ -364,6 +383,7 @@ export type FamilyUpdateInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -379,6 +399,7 @@ export type FamilyUpdateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateInput = {
@@ -388,6 +409,7 @@ export type FamilyUncheckedUpdateInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -403,6 +425,7 @@ export type FamilyUncheckedUpdateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateManyInput = {
@@ -412,6 +435,7 @@ export type FamilyCreateManyInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -424,6 +448,7 @@ export type FamilyUpdateManyMutationInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -436,6 +461,7 @@ export type FamilyUncheckedUpdateManyInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -448,6 +474,7 @@ export type FamilyCountOrderByAggregateInput = {
   founderName?: Prisma.SortOrder
   description?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -460,6 +487,7 @@ export type FamilyMaxOrderByAggregateInput = {
   founderName?: Prisma.SortOrder
   description?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -472,6 +500,7 @@ export type FamilyMinOrderByAggregateInput = {
   founderName?: Prisma.SortOrder
   description?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -480,6 +509,10 @@ export type FamilyMinOrderByAggregateInput = {
 export type FamilyScalarRelationFilter = {
   is?: Prisma.FamilyWhereInput
   isNot?: Prisma.FamilyWhereInput
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -654,6 +687,20 @@ export type FamilyUpdateOneRequiredWithoutInvitesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutInvitesInput, Prisma.FamilyUpdateWithoutInvitesInput>, Prisma.FamilyUncheckedUpdateWithoutInvitesInput>
 }
 
+export type FamilyCreateNestedOneWithoutPdfJobsInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutPdfJobsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+}
+
+export type FamilyUpdateOneRequiredWithoutPdfJobsNestedInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutPdfJobsInput
+  upsert?: Prisma.FamilyUpsertWithoutPdfJobsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutPdfJobsInput, Prisma.FamilyUpdateWithoutPdfJobsInput>, Prisma.FamilyUncheckedUpdateWithoutPdfJobsInput>
+}
+
 export type FamilyCreateWithoutMembersInput = {
   id?: string
   surname: string
@@ -661,6 +708,7 @@ export type FamilyCreateWithoutMembersInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -675,6 +723,7 @@ export type FamilyCreateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutMembersInput = {
@@ -684,6 +733,7 @@ export type FamilyUncheckedCreateWithoutMembersInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -698,6 +748,7 @@ export type FamilyUncheckedCreateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutMembersInput = {
@@ -723,6 +774,7 @@ export type FamilyUpdateWithoutMembersInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -737,6 +789,7 @@ export type FamilyUpdateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutMembersInput = {
@@ -746,6 +799,7 @@ export type FamilyUncheckedUpdateWithoutMembersInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -760,6 +814,7 @@ export type FamilyUncheckedUpdateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutGenerationNamesInput = {
@@ -769,6 +824,7 @@ export type FamilyCreateWithoutGenerationNamesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -783,6 +839,7 @@ export type FamilyCreateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutGenerationNamesInput = {
@@ -792,6 +849,7 @@ export type FamilyUncheckedCreateWithoutGenerationNamesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -806,6 +864,7 @@ export type FamilyUncheckedCreateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutGenerationNamesInput = {
@@ -831,6 +890,7 @@ export type FamilyUpdateWithoutGenerationNamesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -845,6 +905,7 @@ export type FamilyUpdateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutGenerationNamesInput = {
@@ -854,6 +915,7 @@ export type FamilyUncheckedUpdateWithoutGenerationNamesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -868,6 +930,7 @@ export type FamilyUncheckedUpdateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutPersonsInput = {
@@ -877,6 +940,7 @@ export type FamilyCreateWithoutPersonsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -891,6 +955,7 @@ export type FamilyCreateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutPersonsInput = {
@@ -900,6 +965,7 @@ export type FamilyUncheckedCreateWithoutPersonsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -914,6 +980,7 @@ export type FamilyUncheckedCreateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutPersonsInput = {
@@ -939,6 +1006,7 @@ export type FamilyUpdateWithoutPersonsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -953,6 +1021,7 @@ export type FamilyUpdateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutPersonsInput = {
@@ -962,6 +1031,7 @@ export type FamilyUncheckedUpdateWithoutPersonsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -976,6 +1046,7 @@ export type FamilyUncheckedUpdateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutMarriagesInput = {
@@ -985,6 +1056,7 @@ export type FamilyCreateWithoutMarriagesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -999,6 +1071,7 @@ export type FamilyCreateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutMarriagesInput = {
@@ -1008,6 +1081,7 @@ export type FamilyUncheckedCreateWithoutMarriagesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1022,6 +1096,7 @@ export type FamilyUncheckedCreateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutMarriagesInput = {
@@ -1047,6 +1122,7 @@ export type FamilyUpdateWithoutMarriagesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1061,6 +1137,7 @@ export type FamilyUpdateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutMarriagesInput = {
@@ -1070,6 +1147,7 @@ export type FamilyUncheckedUpdateWithoutMarriagesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1084,6 +1162,7 @@ export type FamilyUncheckedUpdateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutParentChildInput = {
@@ -1093,6 +1172,7 @@ export type FamilyCreateWithoutParentChildInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1107,6 +1187,7 @@ export type FamilyCreateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutParentChildInput = {
@@ -1116,6 +1197,7 @@ export type FamilyUncheckedCreateWithoutParentChildInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1130,6 +1212,7 @@ export type FamilyUncheckedCreateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutParentChildInput = {
@@ -1155,6 +1238,7 @@ export type FamilyUpdateWithoutParentChildInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1169,6 +1253,7 @@ export type FamilyUpdateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutParentChildInput = {
@@ -1178,6 +1263,7 @@ export type FamilyUncheckedUpdateWithoutParentChildInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1192,6 +1278,7 @@ export type FamilyUncheckedUpdateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutBranchesInput = {
@@ -1201,6 +1288,7 @@ export type FamilyCreateWithoutBranchesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1215,6 +1303,7 @@ export type FamilyCreateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutBranchesInput = {
@@ -1224,6 +1313,7 @@ export type FamilyUncheckedCreateWithoutBranchesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1238,6 +1328,7 @@ export type FamilyUncheckedCreateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutBranchesInput = {
@@ -1263,6 +1354,7 @@ export type FamilyUpdateWithoutBranchesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1277,6 +1369,7 @@ export type FamilyUpdateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutBranchesInput = {
@@ -1286,6 +1379,7 @@ export type FamilyUncheckedUpdateWithoutBranchesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1300,6 +1394,7 @@ export type FamilyUncheckedUpdateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutMigrationsInput = {
@@ -1309,6 +1404,7 @@ export type FamilyCreateWithoutMigrationsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1323,6 +1419,7 @@ export type FamilyCreateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutMigrationsInput = {
@@ -1332,6 +1429,7 @@ export type FamilyUncheckedCreateWithoutMigrationsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1346,6 +1444,7 @@ export type FamilyUncheckedCreateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutMigrationsInput = {
@@ -1371,6 +1470,7 @@ export type FamilyUpdateWithoutMigrationsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1385,6 +1485,7 @@ export type FamilyUpdateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutMigrationsInput = {
@@ -1394,6 +1495,7 @@ export type FamilyUncheckedUpdateWithoutMigrationsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1408,6 +1510,7 @@ export type FamilyUncheckedUpdateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutShareLinksInput = {
@@ -1417,6 +1520,7 @@ export type FamilyCreateWithoutShareLinksInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1431,6 +1535,7 @@ export type FamilyCreateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutShareLinksInput = {
@@ -1440,6 +1545,7 @@ export type FamilyUncheckedCreateWithoutShareLinksInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1454,6 +1560,7 @@ export type FamilyUncheckedCreateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutShareLinksInput = {
@@ -1479,6 +1586,7 @@ export type FamilyUpdateWithoutShareLinksInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1493,6 +1601,7 @@ export type FamilyUpdateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutShareLinksInput = {
@@ -1502,6 +1611,7 @@ export type FamilyUncheckedUpdateWithoutShareLinksInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1516,6 +1626,7 @@ export type FamilyUncheckedUpdateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutAuditLogsInput = {
@@ -1525,6 +1636,7 @@ export type FamilyCreateWithoutAuditLogsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1539,6 +1651,7 @@ export type FamilyCreateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutAuditLogsInput = {
@@ -1548,6 +1661,7 @@ export type FamilyUncheckedCreateWithoutAuditLogsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1562,6 +1676,7 @@ export type FamilyUncheckedCreateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutAuditLogsInput = {
@@ -1587,6 +1702,7 @@ export type FamilyUpdateWithoutAuditLogsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1601,6 +1717,7 @@ export type FamilyUpdateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutAuditLogsInput = {
@@ -1610,6 +1727,7 @@ export type FamilyUncheckedUpdateWithoutAuditLogsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1624,6 +1742,7 @@ export type FamilyUncheckedUpdateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutSubmissionsInput = {
@@ -1633,6 +1752,7 @@ export type FamilyCreateWithoutSubmissionsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1647,6 +1767,7 @@ export type FamilyCreateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutSubmissionsInput = {
@@ -1656,6 +1777,7 @@ export type FamilyUncheckedCreateWithoutSubmissionsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1670,6 +1792,7 @@ export type FamilyUncheckedCreateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutSubmissionsInput = {
@@ -1695,6 +1818,7 @@ export type FamilyUpdateWithoutSubmissionsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1709,6 +1833,7 @@ export type FamilyUpdateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutSubmissionsInput = {
@@ -1718,6 +1843,7 @@ export type FamilyUncheckedUpdateWithoutSubmissionsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1732,6 +1858,7 @@ export type FamilyUncheckedUpdateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutSubtreeAdminsInput = {
@@ -1741,6 +1868,7 @@ export type FamilyCreateWithoutSubtreeAdminsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1755,6 +1883,7 @@ export type FamilyCreateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutSubtreeAdminsInput = {
@@ -1764,6 +1893,7 @@ export type FamilyUncheckedCreateWithoutSubtreeAdminsInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1778,6 +1908,7 @@ export type FamilyUncheckedCreateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutSubtreeAdminsInput = {
@@ -1803,6 +1934,7 @@ export type FamilyUpdateWithoutSubtreeAdminsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1817,6 +1949,7 @@ export type FamilyUpdateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutSubtreeAdminsInput = {
@@ -1826,6 +1959,7 @@ export type FamilyUncheckedUpdateWithoutSubtreeAdminsInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1840,6 +1974,7 @@ export type FamilyUncheckedUpdateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutInvitesInput = {
@@ -1849,6 +1984,7 @@ export type FamilyCreateWithoutInvitesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1863,6 +1999,7 @@ export type FamilyCreateWithoutInvitesInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutInvitesInput = {
@@ -1872,6 +2009,7 @@ export type FamilyUncheckedCreateWithoutInvitesInput = {
   founderName?: string | null
   description?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1886,6 +2024,7 @@ export type FamilyUncheckedCreateWithoutInvitesInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutInvitesInput = {
@@ -1911,6 +2050,7 @@ export type FamilyUpdateWithoutInvitesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1925,6 +2065,7 @@ export type FamilyUpdateWithoutInvitesInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutInvitesInput = {
@@ -1934,6 +2075,7 @@ export type FamilyUncheckedUpdateWithoutInvitesInput = {
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1947,6 +2089,123 @@ export type FamilyUncheckedUpdateWithoutInvitesInput = {
   shareLinks?: Prisma.ShareLinkUncheckedUpdateManyWithoutFamilyNestedInput
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyCreateWithoutPdfJobsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyUncheckedCreateWithoutPdfJobsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameUncheckedCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonUncheckedCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageUncheckedCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildUncheckedCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkUncheckedCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyCreateOrConnectWithoutPdfJobsInput = {
+  where: Prisma.FamilyWhereUniqueInput
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+}
+
+export type FamilyUpsertWithoutPdfJobsInput = {
+  update: Prisma.XOR<Prisma.FamilyUpdateWithoutPdfJobsInput, Prisma.FamilyUncheckedUpdateWithoutPdfJobsInput>
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+  where?: Prisma.FamilyWhereInput
+}
+
+export type FamilyUpdateToOneWithWhereWithoutPdfJobsInput = {
+  where?: Prisma.FamilyWhereInput
+  data: Prisma.XOR<Prisma.FamilyUpdateWithoutPdfJobsInput, Prisma.FamilyUncheckedUpdateWithoutPdfJobsInput>
+}
+
+export type FamilyUpdateWithoutPdfJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyUncheckedUpdateWithoutPdfJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUncheckedUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUncheckedUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUncheckedUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUncheckedUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
@@ -1968,6 +2227,7 @@ export type FamilyCountOutputType = {
   subtreeAdmins: number
   invites: number
   submissions: number
+  pdfJobs: number
 }
 
 export type FamilyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1983,6 +2243,7 @@ export type FamilyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   subtreeAdmins?: boolean | FamilyCountOutputTypeCountSubtreeAdminsArgs
   invites?: boolean | FamilyCountOutputTypeCountInvitesArgs
   submissions?: boolean | FamilyCountOutputTypeCountSubmissionsArgs
+  pdfJobs?: boolean | FamilyCountOutputTypeCountPdfJobsArgs
 }
 
 /**
@@ -2079,6 +2340,13 @@ export type FamilyCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.PendingSubmissionWhereInput
 }
 
+/**
+ * FamilyCountOutputType without action
+ */
+export type FamilyCountOutputTypeCountPdfJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PdfJobWhereInput
+}
+
 
 export type FamilySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2087,6 +2355,7 @@ export type FamilySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   founderName?: boolean
   description?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -2102,6 +2371,7 @@ export type FamilySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   subtreeAdmins?: boolean | Prisma.Family$subtreeAdminsArgs<ExtArgs>
   invites?: boolean | Prisma.Family$invitesArgs<ExtArgs>
   submissions?: boolean | Prisma.Family$submissionsArgs<ExtArgs>
+  pdfJobs?: boolean | Prisma.Family$pdfJobsArgs<ExtArgs>
   _count?: boolean | Prisma.FamilyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["family"]>
 
@@ -2112,6 +2382,7 @@ export type FamilySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   founderName?: boolean
   description?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -2124,6 +2395,7 @@ export type FamilySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   founderName?: boolean
   description?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -2136,12 +2408,13 @@ export type FamilySelectScalar = {
   founderName?: boolean
   description?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type FamilyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "surname" | "name" | "founderName" | "description" | "ownerId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["family"]>
+export type FamilyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "surname" | "name" | "founderName" | "description" | "ownerId" | "isPublic" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["family"]>
 export type FamilyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Family$membersArgs<ExtArgs>
   generationNames?: boolean | Prisma.Family$generationNamesArgs<ExtArgs>
@@ -2155,6 +2428,7 @@ export type FamilyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   subtreeAdmins?: boolean | Prisma.Family$subtreeAdminsArgs<ExtArgs>
   invites?: boolean | Prisma.Family$invitesArgs<ExtArgs>
   submissions?: boolean | Prisma.Family$submissionsArgs<ExtArgs>
+  pdfJobs?: boolean | Prisma.Family$pdfJobsArgs<ExtArgs>
   _count?: boolean | Prisma.FamilyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FamilyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2175,6 +2449,7 @@ export type $FamilyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     subtreeAdmins: Prisma.$SubtreeAdminPayload<ExtArgs>[]
     invites: Prisma.$FamilyInvitePayload<ExtArgs>[]
     submissions: Prisma.$PendingSubmissionPayload<ExtArgs>[]
+    pdfJobs: Prisma.$PdfJobPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2183,6 +2458,7 @@ export type $FamilyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     founderName: string | null
     description: string | null
     ownerId: string
+    isPublic: boolean
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -2592,6 +2868,7 @@ export interface Prisma__FamilyClient<T, Null = never, ExtArgs extends runtime.T
   subtreeAdmins<T extends Prisma.Family$subtreeAdminsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$subtreeAdminsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubtreeAdminPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invites<T extends Prisma.Family$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamilyInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.Family$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PendingSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pdfJobs<T extends Prisma.Family$pdfJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$pdfJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PdfJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2627,6 +2904,7 @@ export interface FamilyFieldRefs {
   readonly founderName: Prisma.FieldRef<"Family", 'String'>
   readonly description: Prisma.FieldRef<"Family", 'String'>
   readonly ownerId: Prisma.FieldRef<"Family", 'String'>
+  readonly isPublic: Prisma.FieldRef<"Family", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Family", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Family", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Family", 'DateTime'>
@@ -3308,6 +3586,30 @@ export type Family$submissionsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.PendingSubmissionScalarFieldEnum | Prisma.PendingSubmissionScalarFieldEnum[]
+}
+
+/**
+ * Family.pdfJobs
+ */
+export type Family$pdfJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PdfJob
+   */
+  select?: Prisma.PdfJobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PdfJob
+   */
+  omit?: Prisma.PdfJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PdfJobInclude<ExtArgs> | null
+  where?: Prisma.PdfJobWhereInput
+  orderBy?: Prisma.PdfJobOrderByWithRelationInput | Prisma.PdfJobOrderByWithRelationInput[]
+  cursor?: Prisma.PdfJobWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PdfJobScalarFieldEnum | Prisma.PdfJobScalarFieldEnum[]
 }
 
 /**
