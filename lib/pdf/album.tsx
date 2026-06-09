@@ -2,8 +2,9 @@
  * 用 @react-pdf/renderer 渲染册谱 PDF（数据驱动）。
  *
  * A4 竖版：封面 → 前置章节（按 book.sections 的 order）→ 各卷世系传（牒记行传）。
- * 前置章节文本/模板/自定义/字辈与屏幕端共享同一份数据与文案（lib/services/album-templates.ts、
- * lib/markdown）。修谱人员 / 世系图录 / 像赞依赖成员/头像/树数据，暂不在此渲染（P2 补齐）。
+ * 前置章节文本/模板/自定义/字辈/修谱人员/像赞与屏幕端共享同一份数据与文案
+ * （lib/services/album-templates.ts、lib/markdown、book.members/portraits）。
+ * 仅「世系图录（吊线图）」依赖树数据 + SVG，PDF 端暂不渲染（后续）。
  */
 import * as React from "react";
 import {
@@ -312,14 +313,68 @@ function renderSectionContent(
       ) : (
         <Text style={styles.note}>（图片格式 PDF 不支持，请改用 JPG / PNG）</Text>
       );
-    // 数据驱动章节依赖成员/头像/树数据，PDF 端暂不渲染（P2）
     case AlbumSectionKind.COMPILERS:
-    case AlbumSectionKind.TULU:
+      return book.members.length > 0 ? (
+        <View>
+          <Text style={styles.note}>本族续修，赖如下族人共襄此举，谨录其名以志：</Text>
+          {book.members.map((m, i) => (
+            <View key={i} style={styles.compilerRow} wrap={false}>
+              <Text style={styles.compilerName}>{m.name}</Text>
+              <Text style={styles.compilerRole}>{roleLabel(m.role)}</Text>
+              <Text style={styles.compilerDate}>
+                入修 {m.joinedAt.toLocaleDateString("zh-CN")}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null;
     case AlbumSectionKind.PORTRAITS:
+      return book.portraits.length > 0 ? (
+        <>
+          {book.portraits.map((p) => (
+            <View key={p.id} style={styles.portrait} wrap={false}>
+              <Text style={styles.portraitTitle}>{p.name} 像赞</Text>
+              <View style={styles.portraitBody}>
+                {isPdfSafeImage(p.avatarUrl) ? (
+                  // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf <Image> 无 alt 属性
+                  <Image src={p.avatarUrl} style={styles.portraitImg} />
+                ) : (
+                  <Text style={styles.note}>（头像格式 PDF 不支持）</Text>
+                )}
+                <View style={styles.portraitText}>
+                  <Text style={styles.subtle}>
+                    第 {p.generation} 世{p.generationChar ? ` · ${p.generationChar}` : ""}
+                  </Text>
+                  {p.biography ? (
+                    <Text style={styles.body}>{p.biography}</Text>
+                  ) : (
+                    <Text style={styles.subtle}>（暂无传略）</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+          ))}
+        </>
+      ) : null;
+    // 世系图录（吊线图）依赖树数据 + SVG，PDF 端暂不渲染（后续）
+    case AlbumSectionKind.TULU:
     case AlbumSectionKind.CUSTOM_TEXT: // 无 body 的自定义章节不出页
     case AlbumSectionKind.COVER:
     default:
       return null;
+  }
+}
+
+function roleLabel(role: string): string {
+  switch (role) {
+    case "OWNER":
+      return "主修";
+    case "ADMIN":
+      return "协修";
+    case "MEMBER":
+      return "采访";
+    default:
+      return "助修";
   }
 }
 
@@ -332,12 +387,19 @@ function Header({ title, fontFamily }: { title: string; fontFamily: string }) {
   );
 }
 
+/** A4 竖版高度（pt）。全册所有 <Page> 都用 size="A4"，故页脚定位可据此常量计算。 */
+const A4_HEIGHT_PT = 841.89;
+
 function Footer() {
   return (
     <Text
       style={{
         position: "absolute",
-        bottom: 24,
+        // 关键：用 top 定位而非 bottom。带 render 的动态页脚会触发 react-pdf 对
+        // 每页做 relayout，而分页中的「下一页」box.height 被 omit 成 auto 高度；
+        // 此时 bottom 锚点会据未定义的页高算出垃圾坐标（unsupported number:
+        // -9.44e+21）并整本崩溃。改用从页顶固定偏移即可规避（页高恒为 A4）。
+        top: A4_HEIGHT_PT - 32,
         left: 0,
         right: 0,
         textAlign: "center",
@@ -465,5 +527,44 @@ function makeStyles(fontFamily: string) {
     imageWrap: { alignItems: "center", marginTop: 8 },
     sectionImage: { maxWidth: "100%", maxHeight: 560, objectFit: "contain" },
     caption: { marginTop: 6, fontSize: 9, color: "#64748b", textAlign: "center", fontFamily },
+
+    // 修谱人员
+    compilerRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      gap: 8,
+      marginBottom: 6,
+      borderBottomWidth: 0.5,
+      borderBottomColor: "#e2e8f0",
+      paddingBottom: 4,
+    },
+    compilerName: { fontSize: 11, fontWeight: 700, color: "#0f172a", fontFamily },
+    compilerRole: {
+      fontSize: 8,
+      color: "#475569",
+      backgroundColor: "#f1f5f9",
+      paddingHorizontal: 4,
+      paddingVertical: 1,
+      borderRadius: 2,
+      fontFamily,
+    },
+    compilerDate: { marginLeft: "auto", fontSize: 8, color: "#94a3b8", fontFamily },
+
+    // 像赞
+    portrait: { marginBottom: 18 },
+    portraitTitle: {
+      fontSize: 12,
+      fontWeight: 700,
+      textAlign: "center",
+      marginBottom: 6,
+      paddingBottom: 2,
+      borderBottomWidth: 0.5,
+      borderBottomColor: "#cbd5e1",
+      color: "#0f172a",
+      fontFamily,
+    },
+    portraitBody: { flexDirection: "row", gap: 12 },
+    portraitImg: { width: 120, height: 150, objectFit: "cover", borderRadius: 2 },
+    portraitText: { flex: 1 },
   });
 }

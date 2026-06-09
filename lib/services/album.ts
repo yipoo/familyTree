@@ -75,6 +75,23 @@ export interface AlbumVolume {
   chapters: AlbumChapter[];
 }
 
+/** 修谱人员（族长 / 管理员），供「修谱人员名录」章节两端渲染。 */
+export interface AlbumCompiler {
+  name: string;
+  role: "OWNER" | "ADMIN" | "MEMBER" | "GUEST";
+  joinedAt: Date;
+}
+
+/** 像赞条目（含头像与传略的族人），avatarUrl 已签名。 */
+export interface AlbumPortrait {
+  id: string;
+  name: string;
+  generation: number;
+  generationChar: string | null;
+  avatarUrl: string;
+  biography: string | null;
+}
+
 export interface AlbumBook {
   family: {
     id: string;
@@ -97,8 +114,12 @@ export interface AlbumBook {
    * 合编本渲染器（HTML + PDF）按此 order 遍历分派。
    */
   sections: ResolvedSection[];
-  /** 修谱人员数（族长 / 管理员），供凡例等文案在两端复用（PDF 端无完整成员数据）。 */
+  /** 修谱人员名录（族长 / 管理员）。 */
+  members: AlbumCompiler[];
+  /** 修谱人员数 = members.length，供凡例等文案复用。 */
   compilerCount: number;
+  /** 像赞（含头像与传略的族人，avatarUrl 已签名）。 */
+  portraits: AlbumPortrait[];
   generatedAt: string;
   totalPersons: number;
 }
@@ -148,10 +169,43 @@ export async function buildAlbumBook(
     s.imageUrl ? { ...s, imageUrl: ossSignIfOurs(s.imageUrl) } : s,
   );
 
-  // 修谱人员数（族长 / 管理员）——供两端凡例文案复用
-  const compilerCount = await prisma.familyMember.count({
-    where: { familyId, role: { in: ["OWNER", "ADMIN"] } },
-  });
+  // 修谱人员名录（族长 / 管理员）+ 像赞（含头像族人）——并入 book，供 HTML 与 PDF 共用
+  const [memberRows, portraitPersons] = await Promise.all([
+    prisma.familyMember.findMany({
+      where: { familyId, role: { in: ["OWNER", "ADMIN"] } },
+      include: { user: { select: { name: true } } },
+      orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
+    }),
+    prisma.person.findMany({
+      where: { familyId, deletedAt: null, avatarUrl: { not: null } },
+      select: {
+        id: true,
+        name: true,
+        generation: true,
+        generationChar: true,
+        avatarUrl: true,
+        biography: true,
+      },
+      orderBy: [{ generation: "asc" }, { birthOrder: "asc" }],
+      take: 60,
+    }),
+  ]);
+  const members: AlbumCompiler[] = memberRows.map((m) => ({
+    name: m.user.name,
+    role: m.role as AlbumCompiler["role"],
+    joinedAt: m.joinedAt,
+  }));
+  const compilerCount = members.length;
+  const portraits: AlbumPortrait[] = portraitPersons
+    .filter((p): p is typeof p & { avatarUrl: string } => !!p.avatarUrl)
+    .map((p) => ({
+      id: p.id,
+      name: p.name,
+      generation: p.generation,
+      generationChar: p.generationChar,
+      avatarUrl: ossSignIfOurs(p.avatarUrl),
+      biography: p.biography,
+    }));
 
   const personById = new Map(persons.map((p) => [p.id, p]));
 
@@ -279,7 +333,9 @@ export async function buildAlbumBook(
     })),
     volumes,
     sections,
+    members,
     compilerCount,
+    portraits,
     generatedAt: new Date().toISOString(),
     totalPersons: filtered.length,
   };

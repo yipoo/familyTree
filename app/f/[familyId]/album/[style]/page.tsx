@@ -19,8 +19,6 @@ import { buildPagodaPages } from "@/components/album/PagodaPages";
 import {
   buildCompletePages,
   buildFrontMatterPages,
-  type ComplianceMember,
-  type PortraitEntry,
 } from "@/components/album/CompletePages";
 import { offsetIndex, type AlbumBuild } from "@/components/album/album-index";
 import { AlbumPrintActions } from "../AlbumPrintActions";
@@ -104,47 +102,12 @@ export default async function AlbumStylePage({
     else if (style === "su") build = buildSuPages(treeInput);
     else if (style === "pagoda") build = buildPagodaPages(treeInput);
     else {
-      // 合编本：再多查"修谱人员"与"含头像 / 传略的人物"
-      const [memberRows, portraitPersons] = await Promise.all([
-        prisma.familyMember.findMany({
-          where: { familyId, role: { in: ["OWNER", "ADMIN"] } },
-          include: { user: { select: { name: true } } },
-          orderBy: [{ role: "asc" }, { joinedAt: "asc" }],
-        }),
-        prisma.person.findMany({
-          where: {
-            familyId,
-            deletedAt: null,
-            avatarUrl: { not: null },
-          },
-          select: {
-            id: true,
-            name: true,
-            generation: true,
-            generationChar: true,
-            avatarUrl: true,
-            biography: true,
-          },
-          orderBy: [{ generation: "asc" }, { birthOrder: "asc" }],
-          take: 60,
-        }),
-      ]);
-      const members: ComplianceMember[] = memberRows.map((m) => ({
-        name: m.user.name,
-        role: m.role as ComplianceMember["role"],
-        joinedAt: m.joinedAt,
-      }));
-      const portraits: PortraitEntry[] = portraitPersons
-        .filter((p): p is typeof p & { avatarUrl: string } => !!p.avatarUrl)
-        .map((p) => ({
-          id: p.id,
-          name: p.name,
-          generation: p.generation,
-          generationChar: p.generationChar,
-          avatarUrl: p.avatarUrl,
-          biography: p.biography,
-        }));
-      build = buildCompletePages({ ...treeInput, members, portraits });
+      // 合编本：修谱人员与像赞已并入 book（buildAlbumBook），直接复用
+      build = buildCompletePages({
+        ...treeInput,
+        members: book.members,
+        portraits: book.portraits,
+      });
     }
   }
 
