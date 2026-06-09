@@ -18,10 +18,15 @@ import {
   type DocumentProps,
 } from "@react-pdf/renderer";
 
-import { type AlbumBook, formatPersonEntryText } from "@/lib/services/album";
+import {
+  type AlbumBook,
+  formatPersonEntryText,
+  paginateVolume,
+} from "@/lib/services/album";
 import { ensureCjkFont } from "@/lib/pdf/fonts";
 import { parseMarkdown } from "@/lib/markdown/parse";
 import { MarkdownPdf } from "@/lib/pdf/markdown-pdf";
+import { AlbumLineageChart } from "@/lib/pdf/album-lineage";
 import { defaultTitleForKind, type ResolvedSection } from "@/lib/services/album-sections";
 import {
   fanliItems,
@@ -30,13 +35,21 @@ import {
 } from "@/lib/services/album-templates";
 import { AlbumSectionKind } from "@/lib/generated/prisma/enums";
 
+/**
+ * 每个世系传 <Page> 元素最多容纳的人物条目数。把整卷切成多个 <Page>，
+ * 避免单个超大 <Page wrap> 触发 react-pdf O(n²) 分页（见 paginateVolume）。
+ * 取值兼顾渲染速度与版面留白：偏小更快但卷末/页元素交界留白略多。
+ */
+const MAX_ENTRIES_PER_PAGE_ELEM = 300;
+
 export async function renderAlbumPdf(book: AlbumBook): Promise<Buffer> {
   const fontFamily = ensureCjkFont();
   try {
     return await renderDoc(<AlbumDocument book={book} fontFamily={fontFamily} />);
   } catch (e) {
-    // 防御性兜底：理论上世系传已扁平化分页（见 AlbumDocument），不应再触发
-    // react-pdf 的"超高可换行 View"布局崩溃；保留此回退以防未知边界。
+    // 防御性兜底：超大族谱崩溃根因（动态 bottom 页脚 + 超高 View）已修复
+    // （见 Footer 用 top 锚点、AlbumDocument 扁平化 + paginateVolume 分页），
+    // 正常不应再触发；保留此回退以防未知边界，仍产出可用 PDF 而非整本失败。
     console.error("[pdf] 完整册谱渲染失败，回退到仅前置内容版：", e);
     return await renderDoc(
       <AlbumDocument
@@ -129,16 +142,46 @@ function AlbumDocument({
         </View>
       </Page>
 
-      {/* 前置章节（按 order） */}
-      {active.map((sec, i) => (
-        <SectionPage
-          key={sec.id ?? `sec-${i}`}
-          sec={sec}
-          book={book}
-          styles={styles}
-          fontFamily={fontFamily}
-        />
-      ))}
+      {/* 前置章节（按 order）。世系图录特殊：一块吊线图一页（缩放填 A4 竖版）。 */}
+      {active.flatMap((sec, i) => {
+        if (sec.kind === AlbumSectionKind.TULU) {
+          if (book.lineageChunks.length === 0) return [];
+          const genChars: Record<string, string> = Object.fromEntries(
+            book.generationNames.map((g) => [String(g.generation), g.character]),
+          );
+          return book.lineageChunks.map((chunk, ci) => (
+            <Page key={`tulu-${ci}`} size="A4" style={styles.page} wrap>
+              <Header title={book.family.name} fontFamily={fontFamily} />
+              <Text style={styles.secTitle}>
+                {(sec.title?.trim() || "世系图录")} 之{ci + 1}
+              </Text>
+              <Text style={styles.subtitle}>
+                {chunk.rootName} 公一支 · 第 {chunk.startGen} 世起
+                {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接` : ""}
+              </Text>
+              <View style={{ marginTop: 8 }}>
+                <AlbumLineageChart
+                  layout={chunk.layout}
+                  generationChars={genChars}
+                  fontFamily={fontFamily}
+                  contentW={483}
+                  contentH={610}
+                />
+              </View>
+              <Footer />
+            </Page>
+          ));
+        }
+        return [
+          <SectionPage
+            key={sec.id ?? `sec-${i}`}
+            sec={sec}
+            book={book}
+            styles={styles}
+            fontFamily={fontFamily}
+          />,
+        ];
+      })}
 
       {/* 兜底模式说明页 */}
       {degraded && (
@@ -153,43 +196,70 @@ function AlbumDocument({
         </Page>
       )}
 
-      {/* 各卷·世系传（牒记行传） */}
-      {book.volumes.map((vol, vi) => (
-        <Page key={vol.branchId ?? `__no_${vi}`} size="A4" style={styles.page} wrap>
-          <Header title={book.family.name} fontFamily={fontFamily} />
-          <Text style={styles.h2}>
-            卷之{titleZh[vi] ?? vi + 1}　{vol.branchName}
-          </Text>
-          <Text style={styles.subtitle}>收录 {vol.count} 人</Text>
-          {vol.chapters.map((ch) => (
-            // 关键：不要用「每代一个 <View wrap> 包裹标题 + 全部条目」。当某代人数
-            // 极多、该 View 高于一页时，react-pdf 分页这个「超高且可换行的 View」会
-            // 算出垃圾坐标并整本崩溃（unsupported number: -9.44e+21）。改用 Fragment
-            // 把「世标题 + 各条目」作为 <Page> 的直接同级子节点，交给 react-pdf 自然
-            // 流式分页——每个条目是 wrap={false} 的小 View，跨页时整体下移到下一页。
-            <React.Fragment key={ch.generation}>
-              {/* 世标题：minPresenceAhead 保证标题后至少留约一个条目的高度，
-                  否则把标题推到下一页，避免标题孤儿落在页脚处。 */}
-              <Text style={styles.h3} minPresenceAhead={48} wrap={false}>
-                第 {ch.generation} 世{ch.generationChar ? `·${ch.generationChar}` : ""}
-                <Text style={styles.subtle}>　 {ch.entries.length} 人</Text>
-              </Text>
-              {ch.entries.map((e, ei) => (
-                <View key={e.id} style={styles.entry} wrap={false}>
+      {/* 各卷·世系传（牒记行传）。
+          两点关键修复，缺一不可：
+          1）不用「每代一个 <View wrap> 包裹标题 + 全部条目」——超高可换行 View 会被
+             react-pdf 分页算出垃圾坐标。改由 paginateVolume 扁平成条目序列，世标题与
+             条目作为 <Page> 直接子节点自然流式分页。
+          2）不把整卷塞进一个 <Page wrap>——react-pdf 单页分页是 O(n²)，万人家族需
+             ~170s。paginateVolume 按条目数切成多个 <Page>，把单页分页代价钳制住。
+          （真正触发崩溃的是页脚，见 Footer：动态页脚改用 top 锚点定位。） */}
+      {book.volumes.flatMap((vol, vi) =>
+        paginateVolume(vol, MAX_ENTRIES_PER_PAGE_ELEM).map((items, pi) => (
+          <Page
+            key={`${vol.branchId ?? `__no_${vi}`}-${pi}`}
+            size="A4"
+            style={styles.page}
+            wrap
+          >
+            <Header title={book.family.name} fontFamily={fontFamily} />
+            {pi === 0 && (
+              <>
+                <Text style={styles.h2}>
+                  卷之{titleZh[vi] ?? vi + 1}　{vol.branchName}
+                </Text>
+                <Text style={styles.subtitle}>收录 {vol.count} 人</Text>
+              </>
+            )}
+            {items.map((it, k) => {
+              if (it.kind === "heading") {
+                // 世标题：minPresenceAhead 保证标题后至少留约一条的高度，否则推到
+                // 下一物理页，避免标题孤儿落在页脚处。
+                return (
+                  <Text
+                    key={`h-${it.chapter.generation}-${k}`}
+                    style={styles.h3}
+                    minPresenceAhead={48}
+                    wrap={false}
+                  >
+                    第 {it.chapter.generation} 世
+                    {it.chapter.generationChar ? `·${it.chapter.generationChar}` : ""}
+                    <Text style={styles.subtle}>
+                      {it.continued ? "（续）" : `　 ${it.chapter.entries.length} 人`}
+                    </Text>
+                  </Text>
+                );
+              }
+              if (it.kind === "empty") {
+                return (
+                  <Text key={`e-${it.chapter.generation}-${k}`} style={styles.subtle}>
+                    本世暂无
+                  </Text>
+                );
+              }
+              return (
+                <View key={it.entry.id} style={styles.entry} wrap={false}>
                   <Text style={styles.body}>
-                    <Text style={styles.entryNum}>{ei + 1}. </Text>
-                    {formatPersonEntryText(e)}
+                    <Text style={styles.entryNum}>{it.entryNo}. </Text>
+                    {formatPersonEntryText(it.entry)}
                   </Text>
                 </View>
-              ))}
-              {ch.entries.length === 0 && (
-                <Text style={styles.subtle}>本世暂无</Text>
-              )}
-            </React.Fragment>
-          ))}
-          <Footer />
-        </Page>
-      ))}
+              );
+            })}
+            <Footer />
+          </Page>
+        )),
+      )}
     </Document>
   );
 }

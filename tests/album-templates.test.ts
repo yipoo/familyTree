@@ -29,6 +29,7 @@ function mkBook(
     members: [],
     compilerCount: 3,
     portraits: [],
+    lineageChunks: [],
     generatedAt: "2026-06-09T00:00:00.000Z",
     totalPersons: 100,
     ...rest,

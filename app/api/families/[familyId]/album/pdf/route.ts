@@ -47,7 +47,7 @@ async function albumPdfHandler(
       );
     }
 
-    const book = await buildAlbumBook(familyId);
+    const book = await buildAlbumBook(familyId, { withLineage: true });
     if (!book) {
       return NextResponse.json(
         { error: { code: "NOT_FOUND", message: "Family not found" } },

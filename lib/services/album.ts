@@ -16,6 +16,12 @@ import {
   type ResolvedSection,
 } from "@/lib/services/album-sections";
 import { ossSignIfOurs } from "@/lib/services/oss";
+import {
+  buildTreeData,
+  chunkLineage,
+  toLineageInputs,
+  type LineageChunk,
+} from "@/lib/services/lineage-chunks";
 
 export interface AlbumSpouse {
   name: string;
@@ -75,6 +81,67 @@ export interface AlbumVolume {
   chapters: AlbumChapter[];
 }
 
+/** 册谱「世系传」分页时的渲染项（世标题 / 人物条目 / 空代占位）。 */
+export type AlbumPageItem =
+  | { kind: "heading"; chapter: AlbumChapter; continued?: boolean }
+  | { kind: "entry"; chapter: AlbumChapter; entry: AlbumPersonEntry; entryNo: number }
+  | { kind: "empty"; chapter: AlbumChapter };
+
+/**
+ * 把一卷世系传按条目数切成多个「页元素」（每个对应一个 <Page wrap>）。
+ *
+ * 为什么要切：react-pdf 对单个 <Page wrap> 的分页是 O(n²)（每分一页都要把剩余
+ * 全部子节点重新做一次 Yoga + 文本排版）。万人家族塞进一个 <Page> 需 ~170s。
+ * 切成每页至多 maxEntries 条后，单页分页代价被钳制，整册渲染降到 ~20-30s。
+ *
+ * 切分规则（只在条目之间断页，保证版面正确）：
+ *   - 世标题（heading）永远与其后至少一条同处一个页元素，不会落在页元素末尾成孤儿；
+ *   - 一代条目数超过 maxEntries 时跨多个页元素，后续页元素开头补「（续）」标题；
+ *   - 空代渲染一条占位项。
+ *
+ * 返回的每个数组即一个页元素的渲染项序列。纯函数，可单测。
+ */
+export function paginateVolume(
+  vol: AlbumVolume,
+  maxEntries: number,
+): AlbumPageItem[][] {
+  const limit = Math.max(1, Math.floor(maxEntries));
+  const pages: AlbumPageItem[][] = [];
+  let cur: AlbumPageItem[] = [];
+  let entryCount = 0;
+
+  const flush = () => {
+    if (cur.length > 0) {
+      pages.push(cur);
+      cur = [];
+      entryCount = 0;
+    }
+  };
+
+  for (const chapter of vol.chapters) {
+    // 章首：当前页已满则先断页，让世标题从新页起（标题与首条不分离）。
+    if (entryCount >= limit) flush();
+    cur.push({ kind: "heading", chapter });
+
+    if (chapter.entries.length === 0) {
+      cur.push({ kind: "empty", chapter });
+      continue;
+    }
+
+    chapter.entries.forEach((entry, i) => {
+      // 页元素装满后，在「条目之间」断页，并在新页补一个「（续）」世标题。
+      if (entryCount >= limit) {
+        flush();
+        cur.push({ kind: "heading", chapter, continued: true });
+      }
+      cur.push({ kind: "entry", chapter, entry, entryNo: i + 1 });
+      entryCount += 1;
+    });
+  }
+  flush();
+  return pages;
+}
+
 /** 修谱人员（族长 / 管理员），供「修谱人员名录」章节两端渲染。 */
 export interface AlbumCompiler {
   name: string;
@@ -120,6 +187,8 @@ export interface AlbumBook {
   compilerCount: number;
   /** 像赞（含头像与传略的族人，avatarUrl 已签名）。 */
   portraits: AlbumPortrait[];
+  /** 世系图录吊线图分块（仅 opts.withLineage 时计算，供 PDF 渲染；否则空数组）。 */
+  lineageChunks: LineageChunk[];
   generatedAt: string;
   totalPersons: number;
 }
@@ -129,6 +198,11 @@ interface BuildOptions {
   paternalOnly?: boolean;
   /** 仅 inserted 进册的支系；空表示全部 */
   branchIds?: string[];
+  /**
+   * 是否计算「世系图录」吊线图分块（lineageChunks）。默认 false：分块 + 各图布局
+   * 有成本，普通 album 页面不需要；仅 PDF 导出（需把吊线图画进 PDF）时传 true。
+   */
+  withLineage?: boolean;
 }
 
 export async function buildAlbumBook(
@@ -316,6 +390,14 @@ export async function buildAlbumBook(
     });
   }
 
+  // 世系图录吊线图分块（仅 PDF 需要；普通页面不付出成本）
+  const lineageChunks: LineageChunk[] = opts.withLineage
+    ? chunkLineage({
+        tree: buildTreeData({ persons, parentChild, marriages }),
+        ...toLineageInputs({ persons, parentChild, marriages }),
+      })
+    : [];
+
   return {
     family: {
       id: family.id,
@@ -336,6 +418,7 @@ export async function buildAlbumBook(
     members,
     compilerCount,
     portraits,
+    lineageChunks,
     generatedAt: new Date().toISOString(),
     totalPersons: filtered.length,
   };

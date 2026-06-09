@@ -154,7 +154,7 @@ async function renderJob(
 ): Promise<{ bytes: Uint8Array; name: string }> {
   if (type === "ALBUM") {
     await onProgress(15);
-    const book = await buildAlbumBook(familyId);
+    const book = await buildAlbumBook(familyId, { withLineage: true });
     if (!book) throw new Error("Family not found");
     await onProgress(40);
     const buf = await renderAlbumPdf(book);
