@@ -198,6 +198,25 @@ export const IconLineage = (p: IconProps) => (
   </Svg>
 );
 
+export const IconWufu = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="2" />
+    <circle cx="12" cy="12" r="5.5" />
+    <circle cx="12" cy="12" r="9" />
+  </Svg>
+);
+
+export const IconCircle = (p: IconProps) => (
+  <Svg {...p}>
+    <circle cx="12" cy="12" r="9" />
+    <circle cx="12" cy="12" r="1.6" />
+    <path d="M12 3v4" />
+    <path d="M12 17v4" />
+    <path d="M3 12h4" />
+    <path d="M17 12h4" />
+  </Svg>
+);
+
 export const IconBook = (p: IconProps) => (
   <Svg {...p}>
     <path d="M4 4.5A2.5 2.5 0 0 1 6.5 2H20v17H6.5a2.5 2.5 0 0 0 0 5H20" />

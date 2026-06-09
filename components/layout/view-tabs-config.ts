@@ -11,6 +11,8 @@ export type IconKey =
   | "tree"
   | "table"
   | "lineage"
+  | "wufu"
+  | "circle"
   | "book"
   | "search"
   | "route"
@@ -24,6 +26,8 @@ export interface ViewTab {
   /** 角标 */
   badge?: number;
   icon: IconKey;
+  /** 同组的标签在桌面端顶栏会折叠进一个下拉（避免标签过多）。chart = 图谱视图 */
+  group?: "chart";
 }
 
 export function buildFamilyTabs({
@@ -42,9 +46,11 @@ export function buildFamilyTabs({
       exact: true,
       icon: "home",
     },
-    { href: `/f/${familyId}/tree`, label: "树谱", icon: "tree" },
-    { href: `/f/${familyId}/table`, label: "详细图", icon: "table" },
-    { href: `/f/${familyId}/lineage`, label: "吊线图", icon: "lineage" },
+    { href: `/f/${familyId}/tree`, label: "树谱", icon: "tree", group: "chart" },
+    { href: `/f/${familyId}/table`, label: "详细图", icon: "table", group: "chart" },
+    { href: `/f/${familyId}/lineage`, label: "吊线图", icon: "lineage", group: "chart" },
+    { href: `/f/${familyId}/wufu`, label: "五服图", icon: "wufu", group: "chart" },
+    { href: `/f/${familyId}/circle`, label: "族谱圆", icon: "circle", group: "chart" },
     { href: `/f/${familyId}/album`, label: "册谱", icon: "book" },
     { href: `/f/${familyId}/search`, label: "搜索", icon: "search" },
   ];

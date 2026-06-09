@@ -124,7 +124,7 @@ export default async function LineageChartPage({
   return (
     <div className="print:bg-white">
       <header className="border-b border-hairline bg-surface print:hidden">
-        <div className="mx-auto flex max-w-7xl flex-wrap items-end justify-between gap-3 px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-3 px-3 py-5 sm:px-5 lg:px-6">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
               吊线图
@@ -151,9 +151,11 @@ export default async function LineageChartPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-7xl overflow-x-auto p-4 sm:p-6 lg:p-8 print:max-w-none print:p-0">
+      <main className="mx-auto max-w-[1440px] p-3 sm:p-5 lg:p-6 print:max-w-none print:p-0">
         {layout ? (
-          <div className="rounded-lg border border-border bg-panel p-4 shadow-sm print:rounded-none print:border-0 print:p-0 print:shadow-none">
+          // 默认按视窗等比缩放（SVG 内部 width=100% + viewBox）；
+          // 打印 / 用户想看原尺寸时可横向滚动（仅打印态启用 overflow-x-auto）
+          <div className="rounded-lg border border-border bg-panel p-4 shadow-sm print:overflow-x-auto print:rounded-none print:border-0 print:p-0 print:shadow-none">
             <LineageChartSvg
               layout={layout}
               title={family.name}
