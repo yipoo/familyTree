@@ -65,6 +65,9 @@ export function BookSectionManager({
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [showPreview, setShowPreview] = useState(false);
+  const [previewNonce, setPreviewNonce] = useState(0);
+  const bumpPreview = () => setPreviewNonce((n) => n + 1);
 
   const base = `/api/families/${familyId}/album-sections`;
 
@@ -86,6 +89,7 @@ export function BookSectionManager({
 
   async function refresh() {
     ingest(await fetch(base).then((r) => r.json()));
+    bumpPreview();
   }
 
   async function initSections(force = false) {
@@ -102,6 +106,7 @@ export function BookSectionManager({
       const j = await r.json().catch(() => null);
       if (!r.ok) throw new Error(j?.error?.message ?? "初始化失败");
       ingest({ data: j.data, initialized: true });
+      bumpPreview();
     } catch (e) {
       setError(e instanceof Error ? e.message : "初始化失败");
     } finally {
@@ -136,7 +141,8 @@ export function BookSectionManager({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ enabled: !sec.enabled }),
     });
-    if (!r.ok) refresh();
+    if (r.ok) bumpPreview();
+    else refresh();
   }
 
   async function move(index: number, dir: -1 | 1) {
@@ -151,7 +157,8 @@ export function BookSectionManager({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ order: next.map((s, i) => ({ id: s.id, order: i })) }),
     });
-    if (!r.ok) refresh();
+    if (r.ok) bumpPreview();
+    else refresh();
   }
 
   async function saveEdit(sec: Section, patch: Partial<Section>) {
@@ -168,6 +175,7 @@ export function BookSectionManager({
       if (!r.ok) throw new Error(j?.error?.message ?? "保存失败");
       setSections((prev) => prev.map((s) => (s.id === sec.id ? { ...s, ...patch } : s)));
       setEditingId(null);
+      bumpPreview();
     } catch (e) {
       setError(e instanceof Error ? e.message : "保存失败");
     } finally {
@@ -232,8 +240,10 @@ export function BookSectionManager({
     if (!sec.id) return;
     if (!confirm(`删除「${sec.title || defaultTitleForKind(sec.kind)}」章节？`)) return;
     const r = await fetch(`${base}/${sec.id}`, { method: "DELETE" });
-    if (r.ok) setSections((prev) => prev.filter((s) => s.id !== sec.id));
-    else {
+    if (r.ok) {
+      setSections((prev) => prev.filter((s) => s.id !== sec.id));
+      bumpPreview();
+    } else {
       const j = await r.json().catch(() => null);
       setError(j?.error?.message ?? "删除失败");
     }
@@ -250,6 +260,19 @@ export function BookSectionManager({
           {error}
         </p>
       )}
+
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-fg-subtle">
+          编辑后下方预览会自动刷新（合编本体例）
+        </p>
+        <button
+          type="button"
+          onClick={() => setShowPreview((s) => !s)}
+          className="rounded-md border border-border px-3 py-1.5 text-xs font-medium text-foreground hover:bg-muted"
+        >
+          {showPreview ? "隐藏预览" : "显示实时预览"}
+        </button>
+      </div>
 
       <CoverEditor
         key={cover?.id ?? "new"}
@@ -357,6 +380,32 @@ export function BookSectionManager({
           >
             恢复默认
           </button>
+        </div>
+      )}
+
+      {showPreview && (
+        <div className="border-t border-hairline pt-3">
+          <div className="mb-2 flex items-center justify-between">
+            <span className="text-xs font-medium text-foreground">
+              实时预览 · 合编本
+            </span>
+            <button
+              type="button"
+              onClick={bumpPreview}
+              className="text-xs text-fg-muted hover:text-foreground hover:underline"
+            >
+              手动刷新
+            </button>
+          </div>
+          <iframe
+            key={previewNonce}
+            src={`/f/${familyId}/album/complete?_pv=${previewNonce}`}
+            title="册谱预览"
+            className="h-[70vh] w-full rounded-lg border border-border bg-white"
+          />
+          <p className="mt-1 text-[11px] text-fg-subtle">
+            预览为完整合编本渲染；族谱较大时加载稍慢。打印 / 下载 PDF 请到册谱页操作。
+          </p>
         </div>
       )}
     </div>
