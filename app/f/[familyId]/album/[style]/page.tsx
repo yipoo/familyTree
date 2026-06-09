@@ -18,10 +18,11 @@ import { buildSuPages } from "@/components/album/SuPages";
 import { buildPagodaPages } from "@/components/album/PagodaPages";
 import {
   buildCompletePages,
+  buildFrontMatterPages,
   type ComplianceMember,
   type PortraitEntry,
 } from "@/components/album/CompletePages";
-import type { AlbumBuild } from "@/components/album/album-index";
+import { offsetIndex, type AlbumBuild } from "@/components/album/album-index";
 import { AlbumPrintActions } from "../AlbumPrintActions";
 
 export const dynamic = "force-dynamic";
@@ -144,6 +145,18 @@ export default async function AlbumStylePage({
           biography: p.biography,
         }));
       build = buildCompletePages({ ...treeInput, members, portraits });
+    }
+  }
+
+  // 非合编本体例：把 appliesTo 含本体例的前置内容（封面/谱序/凡例…）prepend 到正文前。
+  // 合编本自身已含完整前置内容，故跳过。
+  if (style !== "complete") {
+    const frontMatter = buildFrontMatterPages(book, style);
+    if (frontMatter.length > 0) {
+      build = {
+        pages: [...frontMatter, ...build.pages],
+        index: offsetIndex(build.index, frontMatter.length),
+      };
     }
   }
 

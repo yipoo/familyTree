@@ -14,6 +14,7 @@ import {
   Image,
   StyleSheet,
   pdf,
+  type DocumentProps,
 } from "@react-pdf/renderer";
 
 import { type AlbumBook, formatPersonEntryText } from "@/lib/services/album";
@@ -31,24 +32,32 @@ import { AlbumSectionKind } from "@/lib/generated/prisma/enums";
 export async function renderAlbumPdf(book: AlbumBook): Promise<Buffer> {
   const fontFamily = ensureCjkFont();
   try {
-    const stream = await pdf(
-      <AlbumDocument book={book} fontFamily={fontFamily} />,
-    ).toBuffer();
-    return await streamToBuffer(stream);
+    return await renderDoc(<AlbumDocument book={book} fontFamily={fontFamily} />);
   } catch (e) {
-    // 已知 react-pdf 在超大族谱（数千条世系传）复杂分页下可能抛布局错误
-    // （unsupported number…）。回退到"仅前置内容 + 说明页"，保证产出可用 PDF
-    // 而非整本失败。常规规模家族不会触发。
+    // 防御性兜底：理论上世系传已扁平化分页（见 AlbumDocument），不应再触发
+    // react-pdf 的"超高可换行 View"布局崩溃；保留此回退以防未知边界。
     console.error("[pdf] 完整册谱渲染失败，回退到仅前置内容版：", e);
-    const stream = await pdf(
+    return await renderDoc(
       <AlbumDocument
         book={{ ...book, volumes: [] }}
         fontFamily={fontFamily}
         degraded
       />,
-    ).toBuffer();
-    return await streamToBuffer(stream);
+    );
   }
+}
+
+/**
+ * 严格渲染：不回退，布局异常直接抛出。供测试 / 诊断脚本验证完整渲染是否成功。
+ */
+export async function renderAlbumPdfStrict(book: AlbumBook): Promise<Buffer> {
+  const fontFamily = ensureCjkFont();
+  return renderDoc(<AlbumDocument book={book} fontFamily={fontFamily} />);
+}
+
+async function renderDoc(doc: React.ReactElement<DocumentProps>): Promise<Buffer> {
+  const stream = await pdf(doc).toBuffer();
+  return streamToBuffer(stream);
 }
 
 function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
@@ -152,8 +161,15 @@ function AlbumDocument({
           </Text>
           <Text style={styles.subtitle}>收录 {vol.count} 人</Text>
           {vol.chapters.map((ch) => (
-            <View key={ch.generation} style={styles.chapter} wrap>
-              <Text style={styles.h3}>
+            // 关键：不要用「每代一个 <View wrap> 包裹标题 + 全部条目」。当某代人数
+            // 极多、该 View 高于一页时，react-pdf 分页这个「超高且可换行的 View」会
+            // 算出垃圾坐标并整本崩溃（unsupported number: -9.44e+21）。改用 Fragment
+            // 把「世标题 + 各条目」作为 <Page> 的直接同级子节点，交给 react-pdf 自然
+            // 流式分页——每个条目是 wrap={false} 的小 View，跨页时整体下移到下一页。
+            <React.Fragment key={ch.generation}>
+              {/* 世标题：minPresenceAhead 保证标题后至少留约一个条目的高度，
+                  否则把标题推到下一页，避免标题孤儿落在页脚处。 */}
+              <Text style={styles.h3} minPresenceAhead={48} wrap={false}>
                 第 {ch.generation} 世{ch.generationChar ? `·${ch.generationChar}` : ""}
                 <Text style={styles.subtle}>　 {ch.entries.length} 人</Text>
               </Text>
@@ -168,7 +184,7 @@ function AlbumDocument({
               {ch.entries.length === 0 && (
                 <Text style={styles.subtle}>本世暂无</Text>
               )}
-            </View>
+            </React.Fragment>
           ))}
           <Footer />
         </Page>

@@ -210,6 +210,62 @@ function renderSection(sec: ResolvedSection, ctx: SectionCtx): RenderedSection |
   }
 }
 
+/**
+ * 跨版式前置页：把封面 + 文本/模板/自定义章节渲染成页，prepend 到牒记/欧式/苏式/宝塔。
+ * 仅取 appliesTo 含该 style 的章节；数据驱动章节（字辈/修谱人员/世系图录/像赞）不跨版式，
+ * 也不生成目录（TOC 只在合编本）。无适用章节时返回空数组。
+ */
+export function buildFrontMatterPages(book: AlbumBook, style: string): React.ReactNode[] {
+  const inStyle = (s: ResolvedSection) => s.enabled && s.appliesTo.includes(style);
+  const pages: React.ReactNode[] = [];
+
+  const cover = book.sections.find((s) => s.kind === AlbumSectionKind.COVER);
+  if (cover && inStyle(cover)) pages.push(coverPage(book, book.volumes.length, cover));
+
+  for (const sec of book.sections) {
+    if (sec.kind === AlbumSectionKind.COVER || !inStyle(sec)) continue;
+    const title = sec.title?.trim() || defaultTitleForKind(sec.kind);
+    const hasBody = !!sec.body && sec.body.trim().length > 0;
+    switch (sec.kind) {
+      case AlbumSectionKind.FANLI:
+        pages.push(
+          ...(hasBody
+            ? markdownSectionPages(title, sec)
+            : [fanliPage(book, book.compilerCount)]),
+        );
+        break;
+      case AlbumSectionKind.PREFACE:
+        if (hasBody) pages.push(...markdownSectionPages(title, sec));
+        else if (book.family.description) pages.push(pufuXuPage(book));
+        break;
+      case AlbumSectionKind.YUANLIU:
+        pages.push(
+          ...(hasBody ? markdownSectionPages(title, sec) : [yuanliuPage(book)]),
+        );
+        break;
+      case AlbumSectionKind.RULES:
+        if (hasBody) pages.push(...markdownSectionPages(title, sec));
+        else if (book.family.familyRules)
+          pages.push(...familyRulesPages(book.family.familyRules));
+        break;
+      case AlbumSectionKind.POSTSCRIPT:
+        pages.push(
+          ...(hasBody ? markdownSectionPages(title, sec) : [baPage(book)]),
+        );
+        break;
+      case AlbumSectionKind.CUSTOM_TEXT:
+        if (hasBody) pages.push(...markdownSectionPages(title, sec));
+        break;
+      case AlbumSectionKind.CUSTOM_IMAGE:
+        if (sec.imageUrl) pages.push(customImagePage(title, sec));
+        break;
+      default:
+        break; // 数据驱动章节不跨版式
+    }
+  }
+  return pages;
+}
+
 /** 世系图录：吊线图 + 欧式详录配对，产出人物索引（相对段首页码）。 */
 function buildTuluSection(title: string, ctx: SectionCtx): RenderedSection | null {
   const { chunks, tree, generationChars, book } = ctx;

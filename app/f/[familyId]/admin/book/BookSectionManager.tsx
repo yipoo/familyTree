@@ -50,6 +50,58 @@ const AUTO_NOTE: Record<string, string> = {
   PORTRAITS: "由含头像与传略的族人自动生成。",
 };
 
+/** 合编本之外、可勾选让前置内容也出现的体例。 */
+const EXTRA_STYLES = [
+  { key: "diejii", label: "牒记式" },
+  { key: "ouyang", label: "欧式" },
+  { key: "su", label: "苏式" },
+  { key: "pagoda", label: "宝塔式" },
+] as const;
+const EXTRA_KEYS = EXTRA_STYLES.map((s) => s.key) as string[];
+
+/** appliesTo（存 ["complete", ...额外体例]，空=仅合编本）→ 额外体例列表。 */
+function toExtras(appliesTo: string[]): string[] {
+  return appliesTo.filter((k) => EXTRA_KEYS.includes(k));
+}
+/** 额外体例列表 → appliesTo（有额外项时带上 complete，保证合编本仍显示）。 */
+function toAppliesTo(extras: string[]): string[] {
+  return extras.length ? ["complete", ...extras] : [];
+}
+
+function StyleScopePicker({
+  extras,
+  onChange,
+}: {
+  extras: string[];
+  onChange: (next: string[]) => void;
+}) {
+  return (
+    <div>
+      <span className="mb-1 block text-xs text-fg-muted">
+        同时显示在其它体例（默认仅合编本）
+      </span>
+      <div className="flex flex-wrap gap-3">
+        {EXTRA_STYLES.map((s) => (
+          <label key={s.key} className="flex items-center gap-1 text-xs text-foreground">
+            <input
+              type="checkbox"
+              checked={extras.includes(s.key)}
+              onChange={(e) =>
+                onChange(
+                  e.target.checked
+                    ? [...extras, s.key]
+                    : extras.filter((k) => k !== s.key),
+                )
+              }
+            />
+            {s.label}
+          </label>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 export function BookSectionManager({
   familyId,
   ossReady,
@@ -566,6 +618,7 @@ function SectionEditor({
   const [body, setBody] = useState(sec.body ?? "");
   const [signature, setSignature] = useState(sec.signature ?? "");
   const [imageUrl, setImageUrl] = useState(sec.imageUrl ?? "");
+  const [extras, setExtras] = useState<string[]>(toExtras(sec.appliesTo));
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
 
@@ -678,6 +731,8 @@ function SectionEditor({
         </label>
       )}
 
+      <StyleScopePicker extras={extras} onChange={setExtras} />
+
       <div className="flex items-center gap-3">
         <button
           type="button"
@@ -687,6 +742,7 @@ function SectionEditor({
               title: title.trim() || null,
               body: body.trim() || null,
               signature: signature.trim() || null,
+              appliesTo: toAppliesTo(extras),
               ...(isImage ? { imageUrl: imageUrl || null } : {}),
             })
           }
@@ -739,6 +795,7 @@ function CoverEditor({
   const [subtitle, setSubtitle] = useState(cover?.subtitle ?? "");
   const [signature, setSignature] = useState(cover?.signature ?? "");
   const [imageUrl, setImageUrl] = useState(cover?.imageUrl ?? "");
+  const [extras, setExtras] = useState<string[]>(toExtras(cover?.appliesTo ?? []));
   const [uploading, setUploading] = useState(false);
   const [uploadErr, setUploadErr] = useState<string | null>(null);
   // 注：cover 刷新后通过父级 key 重挂载本组件来同步初值（见 <CoverEditor key=… />），
@@ -856,6 +913,7 @@ function CoverEditor({
           <p className="text-[11px] text-fg-subtle">
             修谱版次（如「三续」）在「印刷家谱信息」里维护。
           </p>
+          <StyleScopePicker extras={extras} onChange={setExtras} />
           <button
             type="button"
             disabled={busy || uploading}
@@ -865,6 +923,7 @@ function CoverEditor({
                 subtitle: subtitle.trim() || null,
                 signature: signature.trim() || null,
                 imageUrl: imageUrl || null,
+                appliesTo: toAppliesTo(extras),
               })
             }
             className="rounded-md bg-brand px-4 py-1.5 text-xs font-medium text-brand-fg hover:opacity-90 disabled:opacity-50"
