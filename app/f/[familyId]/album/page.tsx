@@ -1,25 +1,84 @@
 /**
- * 册谱（傳統紙質族譜的網頁版）
+ * 册谱入口页：介绍四种体例 + 链接到对应"翻书"页面。
  *
- * 路由：/f/[familyId]/album
- *
- * 内容布局（亦同步用于 PDF）：
- *   1. 封面：家族名 / 始祖 / 生成时间
- *   2. 序：description / 字辈表
- *   3. 各卷（按支系分卷）
- *      - 章（按世代）
- *        - 人物条目（传记体文字）
+ * /album              ← 入口（本页）
+ * /album/diejii       牒记式（行传体，纯文字）
+ * /album/ouyang       欧式（横表 5 世为一图）
+ * /album/su           苏式（纵排缩进叠层）
+ * /album/pagoda       宝塔式（顶端始祖、向下展开）
  */
+import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
-import { buildAlbumBook, formatPersonEntryText } from "@/lib/services/album";
-import { AlbumPrintActions } from "./AlbumPrintActions";
 
 export const dynamic = "force-dynamic";
 
-export default async function AlbumPage({
+const STYLES = [
+  {
+    key: "complete",
+    label: "合编本",
+    subtitle: "传统印刷家谱完整体例",
+    origin: "图谱 + 传记 · 一一对应",
+    description:
+      "仿传统印刷家谱：封面 / 目录 / 凡例 / 谱序 / 姓氏源流 / 字辈表 / 修谱人员 / 卷一·世系图（吊线图）/ 卷二·世系传（牒记） / 像赞 / 跋。一书在手，与传统纸谱无异。",
+    badges: ["图+录", "完整体例", "推荐"],
+    accent: "from-violet-50 to-violet-100",
+    accentDark: "dark:from-violet-950/40 dark:to-violet-900/30",
+    tag: "已实现",
+  },
+  {
+    key: "diejii",
+    label: "牒记式",
+    subtitle: "传记体 · 纯文字",
+    origin: "古老体例 · 文人最爱",
+    description:
+      "每位族人一段传记：「××公，行第×，字××，号××。生于××，卒于××，享年××。配××氏，子×：……葬于××。」无图，按支系卷、世代章组织。",
+    badges: ["传记体", "无图", "可印刷"],
+    accent: "from-amber-50 to-amber-100",
+    accentDark: "dark:from-amber-950/40 dark:to-amber-900/30",
+    tag: "已实现",
+  },
+  {
+    key: "ouyang",
+    label: "欧式",
+    subtitle: "横排表格 · 5 世为一图",
+    origin: "宋·欧阳修创制",
+    description:
+      "横排表格，左→右一代一列。通常 5 世为一图，第 6 世起另起一图、首列重列第 5 世做接续。每格大字写名、小字注字号生卒。阅读连贯。",
+    badges: ["横排", "代数列分", "图表"],
+    accent: "from-emerald-50 to-emerald-100",
+    accentDark: "dark:from-emerald-950/40 dark:to-emerald-900/30",
+    tag: "已实现",
+  },
+  {
+    key: "su",
+    label: "苏式",
+    subtitle: "纵排叠层 · 缩进显层级",
+    origin: "宋·苏洵创制",
+    description:
+      "纵排叠层：自上而下，子嗣较父辈右缩一格。靠层级缩进表达父子、靠相邻表达兄弟，不画连线。紧凑、便于刻印。",
+    badges: ["纵排", "缩进", "刻印友好"],
+    accent: "from-rose-50 to-rose-100",
+    accentDark: "dark:from-rose-950/40 dark:to-rose-900/30",
+    tag: "已实现",
+  },
+  {
+    key: "pagoda",
+    label: "宝塔式",
+    subtitle: "顶端始祖 · 向下展开",
+    origin: "近代图谱常见",
+    description:
+      "始祖居顶，每代向下分支水平居中，父→子画直角连线。同辈节点等距分布，形似倒置宝塔。视觉对称、一目了然。",
+    badges: ["树状", "视觉对称", "代数少"],
+    accent: "from-sky-50 to-sky-100",
+    accentDark: "dark:from-sky-950/40 dark:to-sky-900/30",
+    tag: "已实现",
+  },
+] as const;
+
+export default async function AlbumOverviewPage({
   params,
 }: {
   params: Promise<{ familyId: string }>;
@@ -47,117 +106,100 @@ export default async function AlbumPage({
     );
   }
 
-  const book = await buildAlbumBook(familyId);
-  if (!book) notFound();
-
-  const pageStyle =
-    "rounded-lg border border-border bg-panel px-8 py-10 text-foreground shadow-sm print:border-0 print:bg-white print:text-zinc-900 print:shadow-none print:rounded-none";
+  const family = await prisma.family.findUnique({
+    where: { id: familyId },
+    select: {
+      id: true,
+      name: true,
+      surname: true,
+      _count: { select: { persons: true, branches: true } },
+    },
+  });
+  if (!family) notFound();
 
   return (
-    <div className="print:bg-white">
-      <header className="sticky top-14 z-10 border-b border-hairline bg-surface/90 backdrop-blur print:hidden">
-        <div className="mx-auto flex max-w-3xl flex-wrap items-end justify-between gap-3 px-4 py-4 sm:px-6 lg:px-8">
+    <div>
+      <header className="border-b border-hairline bg-surface">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-3 px-3 py-6 sm:px-5 lg:px-6">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
               册谱
             </p>
-            <h1 className="mt-0.5 font-serif text-lg font-semibold text-foreground">
-              {book.family.name}
+            <h1 className="mt-1 font-serif text-2xl font-semibold text-foreground">
+              {family.name}
             </h1>
-            <p className="text-[11px] text-fg-subtle">
-              共 {book.totalPersons} 人 · {book.volumes.length} 卷
+            <p className="mt-1 text-xs text-fg-muted">
+              {family._count.persons} 人 · {family._count.branches} 支系
             </p>
           </div>
-          <AlbumPrintActions familyId={familyId} />
         </div>
       </header>
 
-      <main className="mx-auto max-w-3xl space-y-6 px-4 py-8 sm:px-6 lg:px-8 print:max-w-none print:p-0">
-        {/* 封面 */}
-        <section className={`${pageStyle} text-center`}>
-          <p className="text-sm text-zinc-500">{book.family.surname} 氏家族</p>
-          <h2 className="mt-2 text-3xl font-semibold tracking-wider">
-            {book.family.name}
-          </h2>
-          {book.family.founderName && (
-            <p className="mt-2 text-sm">始祖 · {book.family.founderName}</p>
-          )}
-          <p className="mt-8 text-xs text-zinc-500">
-            生成于 {new Date(book.generatedAt).toLocaleString("zh-CN")}
-          </p>
-        </section>
+      <main className="mx-auto max-w-[1440px] px-3 py-8 sm:px-5 lg:px-6">
+        <p className="mb-6 text-sm text-fg-muted">
+          传统印刷家谱以"图（世系图）+ 录（世系传）"配对编修。
+          推荐"合编本"获得完整阅读体验；亦可单独打开某一体例。
+        </p>
 
-        {/* 序 */}
-        {(book.family.description || book.generationNames.length > 0) && (
-          <section className={pageStyle}>
-            <h3 className="mb-3 text-lg font-semibold">序</h3>
-            {book.family.description && (
-              <p className="whitespace-pre-wrap leading-7 text-sm">
-                {book.family.description}
-              </p>
-            )}
-            {book.generationNames.length > 0 && (
-              <div className="mt-4">
-                <h4 className="mb-2 text-sm font-medium">字辈表</h4>
-                <div className="flex flex-wrap gap-1.5 text-sm">
-                  {book.generationNames.map((g) => (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {STYLES.map((s) => (
+            <Link
+              key={s.key}
+              href={`/f/${familyId}/album/${s.key}`}
+              className="group relative flex flex-col overflow-hidden rounded-xl border border-border bg-panel transition hover:-translate-y-0.5 hover:shadow-lg"
+            >
+              {/* 顶部色带模拟"书脊" */}
+              <div
+                className={`h-24 bg-gradient-to-br ${s.accent} ${s.accentDark} relative flex items-end px-5 py-3`}
+              >
+                <span
+                  className="text-3xl font-semibold tracking-widest text-zinc-900/80 dark:text-zinc-100"
+                  style={{ fontFamily: "var(--font-serif)" }}
+                >
+                  {s.label}
+                </span>
+                <span
+                  className={`absolute right-3 top-3 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                    s.tag === "已实现"
+                      ? "bg-emerald-500 text-white"
+                      : "bg-zinc-200 text-zinc-600 dark:bg-zinc-700 dark:text-zinc-300"
+                  }`}
+                >
+                  {s.tag}
+                </span>
+              </div>
+
+              <div className="flex flex-1 flex-col gap-3 px-5 py-4">
+                <div>
+                  <p className="text-sm font-medium text-foreground">
+                    {s.subtitle}
+                  </p>
+                  <p className="text-[11px] text-fg-subtle">{s.origin}</p>
+                </div>
+                <p className="line-clamp-4 text-xs leading-6 text-fg-muted">
+                  {s.description}
+                </p>
+                <div className="mt-auto flex flex-wrap items-center gap-1.5">
+                  {s.badges.map((b) => (
                     <span
-                      key={g.generation}
-                      className="rounded border border-zinc-200 bg-zinc-50 px-2 py-1 text-xs dark:border-zinc-700 dark:bg-zinc-800"
+                      key={b}
+                      className="rounded-full border border-border bg-background px-1.5 py-0.5 text-[10px] text-fg-muted"
                     >
-                      <span className="text-zinc-500">{g.generation}世</span>
-                      <span className="ml-1 font-semibold">{g.character}</span>
+                      {b}
                     </span>
                   ))}
+                  <span className="ml-auto text-xs font-medium text-brand transition group-hover:translate-x-0.5">
+                    打开 →
+                  </span>
                 </div>
               </div>
-            )}
-          </section>
-        )}
+            </Link>
+          ))}
+        </div>
 
-        {/* 各卷 */}
-        {book.volumes.map((vol, vi) => (
-          <section key={vol.branchId ?? "_no"} className={pageStyle}>
-            <h3 className="mb-1 text-lg font-semibold">
-              卷之{["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"][vi] ?? vi + 1}
-              　{vol.branchName}
-            </h3>
-            <p className="mb-4 text-xs text-zinc-500">收录 {vol.count} 人</p>
-            <div className="space-y-6">
-              {vol.chapters.map((ch) => (
-                <div key={ch.generation}>
-                  <h4 className="mb-2 border-b border-zinc-200 pb-1 text-base font-medium dark:border-zinc-700">
-                    第 {ch.generation} 世
-                    {ch.generationChar && `·${ch.generationChar}`}
-                    <span className="ml-2 text-xs font-normal text-zinc-500">
-                      {ch.entries.length} 人
-                    </span>
-                  </h4>
-                  <ol className="space-y-3">
-                    {ch.entries.map((e, ei) => (
-                      <li
-                        key={e.id}
-                        className="text-sm leading-7"
-                        style={{ textIndent: "2em" }}
-                      >
-                        <span className="mr-1 text-xs text-zinc-400">{ei + 1}.</span>
-                        {formatPersonEntryText(e)}
-                      </li>
-                    ))}
-                  </ol>
-                </div>
-              ))}
-              {vol.chapters.length === 0 && (
-                <p className="text-sm text-zinc-500">本卷暂无人物</p>
-              )}
-            </div>
-          </section>
-        ))}
-
-        {/* 跋 */}
-        <section className={`${pageStyle} text-center text-xs text-zinc-500`}>
-          ——本册谱由家谱系统自动生成，记录共 {book.totalPersons} 位族人——
-        </section>
+        <p className="mt-8 text-center text-[11px] text-fg-subtle">
+          打开后用 ←/→ 键或点击书页两侧翻页
+        </p>
       </main>
     </div>
   );

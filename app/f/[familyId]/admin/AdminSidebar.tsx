@@ -12,10 +12,12 @@ interface NavItem {
 export function AdminSidebar({
   familyId,
   pendingCount,
+  joinPendingCount = 0,
   horizontal,
 }: {
   familyId: string;
   pendingCount: number;
+  joinPendingCount?: number;
   horizontal?: boolean;
 }) {
   const pathname = usePathname();
@@ -24,14 +26,23 @@ export function AdminSidebar({
   const items: NavItem[] = [
     { href: root, label: "成员" }, // 默认页 = 成员
     { href: `${root}/invites`, label: "邀请码" },
+    {
+      href: `${root}/join-requests`,
+      label: "入族申请",
+      badge: joinPendingCount,
+    },
     { href: `${root}/grants`, label: "子树管理员" },
     { href: `${root}/shares`, label: "分享链接" },
     { href: `${root}/generations`, label: "字辈表" },
     { href: `${root}/branches`, label: "支系管理" },
+    { href: `${root}/print-info`, label: "印刷家谱信息" },
+    { href: `${root}/book`, label: "册谱编辑" },
     { href: `${root}/locations`, label: "居住地字典" },
+    { href: `${root}/collect`, label: "二维码采集" },
     { href: `${root}/submissions`, label: "待审提交", badge: pendingCount },
     { href: `${root}/migrations`, label: "支系迁徙" },
     { href: `${root}/import`, label: "数据导入" },
+    { href: `${root}/data-check`, label: "数据体检" },
     { href: `${root}/audit`, label: "审计日志" },
   ];
 

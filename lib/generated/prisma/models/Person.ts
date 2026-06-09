@@ -66,6 +66,7 @@ export type PersonMinAggregateOutputType = {
   biography: string | null
   isMarriedIn: boolean | null
   residenceId: string | null
+  contactPhoneHash: string | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -97,6 +98,7 @@ export type PersonMaxAggregateOutputType = {
   biography: string | null
   isMarriedIn: boolean | null
   residenceId: string | null
+  contactPhoneHash: string | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -128,6 +130,7 @@ export type PersonCountAggregateOutputType = {
   biography: number
   isMarriedIn: number
   residenceId: number
+  contactPhoneHash: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -175,6 +178,7 @@ export type PersonMinAggregateInputType = {
   biography?: true
   isMarriedIn?: true
   residenceId?: true
+  contactPhoneHash?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -206,6 +210,7 @@ export type PersonMaxAggregateInputType = {
   biography?: true
   isMarriedIn?: true
   residenceId?: true
+  contactPhoneHash?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -237,6 +242,7 @@ export type PersonCountAggregateInputType = {
   biography?: true
   isMarriedIn?: true
   residenceId?: true
+  contactPhoneHash?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -355,6 +361,7 @@ export type PersonGroupByOutputType = {
   biography: string | null
   isMarriedIn: boolean
   residenceId: string | null
+  contactPhoneHash: string | null
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -409,6 +416,7 @@ export type PersonWhereInput = {
   biography?: Prisma.StringNullableFilter<"Person"> | string | null
   isMarriedIn?: Prisma.BoolFilter<"Person"> | boolean
   residenceId?: Prisma.StringNullableFilter<"Person"> | string | null
+  contactPhoneHash?: Prisma.StringNullableFilter<"Person"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Person"> | Date | string | null
@@ -423,6 +431,8 @@ export type PersonWhereInput = {
   migrations?: Prisma.MigrationListRelationFilter
   branchesRoot?: Prisma.BranchListRelationFilter
   subtreeAdmins?: Prisma.SubtreeAdminListRelationFilter
+  media?: Prisma.MediaListRelationFilter
+  collectionLinks?: Prisma.CollectionLinkListRelationFilter
 }
 
 export type PersonOrderByWithRelationInput = {
@@ -451,6 +461,7 @@ export type PersonOrderByWithRelationInput = {
   biography?: Prisma.SortOrderInput | Prisma.SortOrder
   isMarriedIn?: Prisma.SortOrder
   residenceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactPhoneHash?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -465,6 +476,8 @@ export type PersonOrderByWithRelationInput = {
   migrations?: Prisma.MigrationOrderByRelationAggregateInput
   branchesRoot?: Prisma.BranchOrderByRelationAggregateInput
   subtreeAdmins?: Prisma.SubtreeAdminOrderByRelationAggregateInput
+  media?: Prisma.MediaOrderByRelationAggregateInput
+  collectionLinks?: Prisma.CollectionLinkOrderByRelationAggregateInput
 }
 
 export type PersonWhereUniqueInput = Prisma.AtLeast<{
@@ -497,6 +510,7 @@ export type PersonWhereUniqueInput = Prisma.AtLeast<{
   biography?: Prisma.StringNullableFilter<"Person"> | string | null
   isMarriedIn?: Prisma.BoolFilter<"Person"> | boolean
   residenceId?: Prisma.StringNullableFilter<"Person"> | string | null
+  contactPhoneHash?: Prisma.StringNullableFilter<"Person"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Person"> | Date | string | null
@@ -511,6 +525,8 @@ export type PersonWhereUniqueInput = Prisma.AtLeast<{
   migrations?: Prisma.MigrationListRelationFilter
   branchesRoot?: Prisma.BranchListRelationFilter
   subtreeAdmins?: Prisma.SubtreeAdminListRelationFilter
+  media?: Prisma.MediaListRelationFilter
+  collectionLinks?: Prisma.CollectionLinkListRelationFilter
 }, "id" | "familyId_externalId">
 
 export type PersonOrderByWithAggregationInput = {
@@ -539,6 +555,7 @@ export type PersonOrderByWithAggregationInput = {
   biography?: Prisma.SortOrderInput | Prisma.SortOrder
   isMarriedIn?: Prisma.SortOrder
   residenceId?: Prisma.SortOrderInput | Prisma.SortOrder
+  contactPhoneHash?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -578,6 +595,7 @@ export type PersonScalarWhereWithAggregatesInput = {
   biography?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   isMarriedIn?: Prisma.BoolWithAggregatesFilter<"Person"> | boolean
   residenceId?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
+  contactPhoneHash?: Prisma.StringNullableWithAggregatesFilter<"Person"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Person"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Person"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Person"> | Date | string | null
@@ -606,6 +624,7 @@ export type PersonCreateInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -620,6 +639,8 @@ export type PersonCreateInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateInput = {
@@ -648,6 +669,7 @@ export type PersonUncheckedCreateInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -659,6 +681,8 @@ export type PersonUncheckedCreateInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUpdateInput = {
@@ -684,6 +708,7 @@ export type PersonUpdateInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -698,6 +723,8 @@ export type PersonUpdateInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateInput = {
@@ -726,6 +753,7 @@ export type PersonUncheckedUpdateInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -737,6 +765,8 @@ export type PersonUncheckedUpdateInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonCreateManyInput = {
@@ -765,6 +795,7 @@ export type PersonCreateManyInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -793,6 +824,7 @@ export type PersonUpdateManyMutationInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -824,6 +856,7 @@ export type PersonUncheckedUpdateManyInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -870,6 +903,7 @@ export type PersonCountOrderByAggregateInput = {
   biography?: Prisma.SortOrder
   isMarriedIn?: Prisma.SortOrder
   residenceId?: Prisma.SortOrder
+  contactPhoneHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -908,6 +942,7 @@ export type PersonMaxOrderByAggregateInput = {
   biography?: Prisma.SortOrder
   isMarriedIn?: Prisma.SortOrder
   residenceId?: Prisma.SortOrder
+  contactPhoneHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -939,6 +974,7 @@ export type PersonMinOrderByAggregateInput = {
   biography?: Prisma.SortOrder
   isMarriedIn?: Prisma.SortOrder
   residenceId?: Prisma.SortOrder
+  contactPhoneHash?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -1217,6 +1253,36 @@ export type PersonUpdateOneRequiredWithoutSubtreeAdminsNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutSubtreeAdminsInput, Prisma.PersonUpdateWithoutSubtreeAdminsInput>, Prisma.PersonUncheckedUpdateWithoutSubtreeAdminsInput>
 }
 
+export type PersonCreateNestedOneWithoutMediaInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutMediaInput, Prisma.PersonUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutMediaInput
+  connect?: Prisma.PersonWhereUniqueInput
+}
+
+export type PersonUpdateOneWithoutMediaNestedInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutMediaInput, Prisma.PersonUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutMediaInput
+  upsert?: Prisma.PersonUpsertWithoutMediaInput
+  disconnect?: Prisma.PersonWhereInput | boolean
+  delete?: Prisma.PersonWhereInput | boolean
+  connect?: Prisma.PersonWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutMediaInput, Prisma.PersonUpdateWithoutMediaInput>, Prisma.PersonUncheckedUpdateWithoutMediaInput>
+}
+
+export type PersonCreateNestedOneWithoutCollectionLinksInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutCollectionLinksInput, Prisma.PersonUncheckedCreateWithoutCollectionLinksInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutCollectionLinksInput
+  connect?: Prisma.PersonWhereUniqueInput
+}
+
+export type PersonUpdateOneRequiredWithoutCollectionLinksNestedInput = {
+  create?: Prisma.XOR<Prisma.PersonCreateWithoutCollectionLinksInput, Prisma.PersonUncheckedCreateWithoutCollectionLinksInput>
+  connectOrCreate?: Prisma.PersonCreateOrConnectWithoutCollectionLinksInput
+  upsert?: Prisma.PersonUpsertWithoutCollectionLinksInput
+  connect?: Prisma.PersonWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.PersonUpdateToOneWithWhereWithoutCollectionLinksInput, Prisma.PersonUpdateWithoutCollectionLinksInput>, Prisma.PersonUncheckedUpdateWithoutCollectionLinksInput>
+}
+
 export type PersonCreateWithoutFamilyInput = {
   id?: string
   externalId?: string | null
@@ -1240,6 +1306,7 @@ export type PersonCreateWithoutFamilyInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1253,6 +1320,8 @@ export type PersonCreateWithoutFamilyInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutFamilyInput = {
@@ -1280,6 +1349,7 @@ export type PersonUncheckedCreateWithoutFamilyInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1291,6 +1361,8 @@ export type PersonUncheckedCreateWithoutFamilyInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutFamilyInput = {
@@ -1348,6 +1420,7 @@ export type PersonScalarWhereInput = {
   biography?: Prisma.StringNullableFilter<"Person"> | string | null
   isMarriedIn?: Prisma.BoolFilter<"Person"> | boolean
   residenceId?: Prisma.StringNullableFilter<"Person"> | string | null
+  contactPhoneHash?: Prisma.StringNullableFilter<"Person"> | string | null
   createdAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Person"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Person"> | Date | string | null
@@ -1376,6 +1449,7 @@ export type PersonCreateWithoutMarriagesAsHusbandInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1389,6 +1463,8 @@ export type PersonCreateWithoutMarriagesAsHusbandInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutMarriagesAsHusbandInput = {
@@ -1417,6 +1493,7 @@ export type PersonUncheckedCreateWithoutMarriagesAsHusbandInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1427,6 +1504,8 @@ export type PersonUncheckedCreateWithoutMarriagesAsHusbandInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutMarriagesAsHusbandInput = {
@@ -1457,6 +1536,7 @@ export type PersonCreateWithoutMarriagesAsWifeInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1470,6 +1550,8 @@ export type PersonCreateWithoutMarriagesAsWifeInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutMarriagesAsWifeInput = {
@@ -1498,6 +1580,7 @@ export type PersonUncheckedCreateWithoutMarriagesAsWifeInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1508,6 +1591,8 @@ export type PersonUncheckedCreateWithoutMarriagesAsWifeInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutMarriagesAsWifeInput = {
@@ -1549,6 +1634,7 @@ export type PersonUpdateWithoutMarriagesAsHusbandInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1562,6 +1648,8 @@ export type PersonUpdateWithoutMarriagesAsHusbandInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutMarriagesAsHusbandInput = {
@@ -1590,6 +1678,7 @@ export type PersonUncheckedUpdateWithoutMarriagesAsHusbandInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1600,6 +1689,8 @@ export type PersonUncheckedUpdateWithoutMarriagesAsHusbandInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUpsertWithoutMarriagesAsWifeInput = {
@@ -1636,6 +1727,7 @@ export type PersonUpdateWithoutMarriagesAsWifeInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1649,6 +1741,8 @@ export type PersonUpdateWithoutMarriagesAsWifeInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutMarriagesAsWifeInput = {
@@ -1677,6 +1771,7 @@ export type PersonUncheckedUpdateWithoutMarriagesAsWifeInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1687,6 +1782,8 @@ export type PersonUncheckedUpdateWithoutMarriagesAsWifeInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonCreateWithoutParentRelationsInput = {
@@ -1712,6 +1809,7 @@ export type PersonCreateWithoutParentRelationsInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1725,6 +1823,8 @@ export type PersonCreateWithoutParentRelationsInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutParentRelationsInput = {
@@ -1753,6 +1853,7 @@ export type PersonUncheckedCreateWithoutParentRelationsInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1763,6 +1864,8 @@ export type PersonUncheckedCreateWithoutParentRelationsInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutParentRelationsInput = {
@@ -1793,6 +1896,7 @@ export type PersonCreateWithoutChildRelationsInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1806,6 +1910,8 @@ export type PersonCreateWithoutChildRelationsInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutChildRelationsInput = {
@@ -1834,6 +1940,7 @@ export type PersonUncheckedCreateWithoutChildRelationsInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1844,6 +1951,8 @@ export type PersonUncheckedCreateWithoutChildRelationsInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutChildRelationsInput = {
@@ -1885,6 +1994,7 @@ export type PersonUpdateWithoutParentRelationsInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1898,6 +2008,8 @@ export type PersonUpdateWithoutParentRelationsInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutParentRelationsInput = {
@@ -1926,6 +2038,7 @@ export type PersonUncheckedUpdateWithoutParentRelationsInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1936,6 +2049,8 @@ export type PersonUncheckedUpdateWithoutParentRelationsInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUpsertWithoutChildRelationsInput = {
@@ -1972,6 +2087,7 @@ export type PersonUpdateWithoutChildRelationsInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1985,6 +2101,8 @@ export type PersonUpdateWithoutChildRelationsInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutChildRelationsInput = {
@@ -2013,6 +2131,7 @@ export type PersonUncheckedUpdateWithoutChildRelationsInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2023,6 +2142,8 @@ export type PersonUncheckedUpdateWithoutChildRelationsInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonCreateWithoutBranchesRootInput = {
@@ -2048,6 +2169,7 @@ export type PersonCreateWithoutBranchesRootInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2061,6 +2183,8 @@ export type PersonCreateWithoutBranchesRootInput = {
   locations?: Prisma.PersonLocationCreateNestedManyWithoutPersonInput
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutBranchesRootInput = {
@@ -2089,6 +2213,7 @@ export type PersonUncheckedCreateWithoutBranchesRootInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2099,6 +2224,8 @@ export type PersonUncheckedCreateWithoutBranchesRootInput = {
   locations?: Prisma.PersonLocationUncheckedCreateNestedManyWithoutPersonInput
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutBranchesRootInput = {
@@ -2129,6 +2256,7 @@ export type PersonCreateWithoutBranchInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2142,6 +2270,8 @@ export type PersonCreateWithoutBranchInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutBranchInput = {
@@ -2169,6 +2299,7 @@ export type PersonUncheckedCreateWithoutBranchInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2180,6 +2311,8 @@ export type PersonUncheckedCreateWithoutBranchInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutBranchInput = {
@@ -2226,6 +2359,7 @@ export type PersonUpdateWithoutBranchesRootInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2239,6 +2373,8 @@ export type PersonUpdateWithoutBranchesRootInput = {
   locations?: Prisma.PersonLocationUpdateManyWithoutPersonNestedInput
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutBranchesRootInput = {
@@ -2267,6 +2403,7 @@ export type PersonUncheckedUpdateWithoutBranchesRootInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2277,6 +2414,8 @@ export type PersonUncheckedUpdateWithoutBranchesRootInput = {
   locations?: Prisma.PersonLocationUncheckedUpdateManyWithoutPersonNestedInput
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUpsertWithWhereUniqueWithoutBranchInput = {
@@ -2318,6 +2457,7 @@ export type PersonCreateWithoutResidenceInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2331,6 +2471,8 @@ export type PersonCreateWithoutResidenceInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutResidenceInput = {
@@ -2358,6 +2500,7 @@ export type PersonUncheckedCreateWithoutResidenceInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2369,6 +2512,8 @@ export type PersonUncheckedCreateWithoutResidenceInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutResidenceInput = {
@@ -2420,6 +2565,7 @@ export type PersonCreateWithoutLocationsInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2433,6 +2579,8 @@ export type PersonCreateWithoutLocationsInput = {
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutLocationsInput = {
@@ -2461,6 +2609,7 @@ export type PersonUncheckedCreateWithoutLocationsInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2471,6 +2620,8 @@ export type PersonUncheckedCreateWithoutLocationsInput = {
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutLocationsInput = {
@@ -2512,6 +2663,7 @@ export type PersonUpdateWithoutLocationsInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2525,6 +2677,8 @@ export type PersonUpdateWithoutLocationsInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutLocationsInput = {
@@ -2553,6 +2707,7 @@ export type PersonUncheckedUpdateWithoutLocationsInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2563,6 +2718,8 @@ export type PersonUncheckedUpdateWithoutLocationsInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonCreateWithoutMigrationsInput = {
@@ -2588,6 +2745,7 @@ export type PersonCreateWithoutMigrationsInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2601,6 +2759,8 @@ export type PersonCreateWithoutMigrationsInput = {
   locations?: Prisma.PersonLocationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutMigrationsInput = {
@@ -2629,6 +2789,7 @@ export type PersonUncheckedCreateWithoutMigrationsInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2639,6 +2800,8 @@ export type PersonUncheckedCreateWithoutMigrationsInput = {
   locations?: Prisma.PersonLocationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutMigrationsInput = {
@@ -2680,6 +2843,7 @@ export type PersonUpdateWithoutMigrationsInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2693,6 +2857,8 @@ export type PersonUpdateWithoutMigrationsInput = {
   locations?: Prisma.PersonLocationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutMigrationsInput = {
@@ -2721,6 +2887,7 @@ export type PersonUncheckedUpdateWithoutMigrationsInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2731,6 +2898,8 @@ export type PersonUncheckedUpdateWithoutMigrationsInput = {
   locations?: Prisma.PersonLocationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonCreateWithoutSubtreeAdminsInput = {
@@ -2756,6 +2925,7 @@ export type PersonCreateWithoutSubtreeAdminsInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2769,6 +2939,8 @@ export type PersonCreateWithoutSubtreeAdminsInput = {
   locations?: Prisma.PersonLocationCreateNestedManyWithoutPersonInput
   migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
 }
 
 export type PersonUncheckedCreateWithoutSubtreeAdminsInput = {
@@ -2797,6 +2969,7 @@ export type PersonUncheckedCreateWithoutSubtreeAdminsInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2807,6 +2980,8 @@ export type PersonUncheckedCreateWithoutSubtreeAdminsInput = {
   locations?: Prisma.PersonLocationUncheckedCreateNestedManyWithoutPersonInput
   migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
   branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
 }
 
 export type PersonCreateOrConnectWithoutSubtreeAdminsInput = {
@@ -2848,6 +3023,7 @@ export type PersonUpdateWithoutSubtreeAdminsInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2861,6 +3037,8 @@ export type PersonUpdateWithoutSubtreeAdminsInput = {
   locations?: Prisma.PersonLocationUpdateManyWithoutPersonNestedInput
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutSubtreeAdminsInput = {
@@ -2889,6 +3067,7 @@ export type PersonUncheckedUpdateWithoutSubtreeAdminsInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2899,6 +3078,368 @@ export type PersonUncheckedUpdateWithoutSubtreeAdminsInput = {
   locations?: Prisma.PersonLocationUncheckedUpdateManyWithoutPersonNestedInput
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
+}
+
+export type PersonCreateWithoutMediaInput = {
+  id?: string
+  externalId?: string | null
+  name: string
+  alias?: string | null
+  surnameOnly?: boolean
+  gender: $Enums.Gender
+  generation: number
+  generationChar?: string | null
+  birthOrder?: number | null
+  birthYear?: number | null
+  deathYear?: number | null
+  birthDate?: string | null
+  deathDate?: string | null
+  birthPlace?: string | null
+  status?: $Enums.LifeStatus
+  avatarUrl?: string | null
+  note?: string | null
+  noteHint?: string | null
+  paperRecord?: string | null
+  succession?: string | null
+  biography?: string | null
+  isMarriedIn?: boolean
+  contactPhoneHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  family: Prisma.FamilyCreateNestedOneWithoutPersonsInput
+  branch?: Prisma.BranchCreateNestedOneWithoutPersonsInput
+  residence?: Prisma.LocationCreateNestedOneWithoutResidentsInput
+  marriagesAsHusband?: Prisma.MarriageCreateNestedManyWithoutHusbandInput
+  marriagesAsWife?: Prisma.MarriageCreateNestedManyWithoutWifeInput
+  childRelations?: Prisma.ParentChildCreateNestedManyWithoutChildInput
+  parentRelations?: Prisma.ParentChildCreateNestedManyWithoutParentInput
+  locations?: Prisma.PersonLocationCreateNestedManyWithoutPersonInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
+  branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutPersonInput
+}
+
+export type PersonUncheckedCreateWithoutMediaInput = {
+  id?: string
+  familyId: string
+  branchId?: string | null
+  externalId?: string | null
+  name: string
+  alias?: string | null
+  surnameOnly?: boolean
+  gender: $Enums.Gender
+  generation: number
+  generationChar?: string | null
+  birthOrder?: number | null
+  birthYear?: number | null
+  deathYear?: number | null
+  birthDate?: string | null
+  deathDate?: string | null
+  birthPlace?: string | null
+  status?: $Enums.LifeStatus
+  avatarUrl?: string | null
+  note?: string | null
+  noteHint?: string | null
+  paperRecord?: string | null
+  succession?: string | null
+  biography?: string | null
+  isMarriedIn?: boolean
+  residenceId?: string | null
+  contactPhoneHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  marriagesAsHusband?: Prisma.MarriageUncheckedCreateNestedManyWithoutHusbandInput
+  marriagesAsWife?: Prisma.MarriageUncheckedCreateNestedManyWithoutWifeInput
+  childRelations?: Prisma.ParentChildUncheckedCreateNestedManyWithoutChildInput
+  parentRelations?: Prisma.ParentChildUncheckedCreateNestedManyWithoutParentInput
+  locations?: Prisma.PersonLocationUncheckedCreateNestedManyWithoutPersonInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
+  branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutPersonInput
+}
+
+export type PersonCreateOrConnectWithoutMediaInput = {
+  where: Prisma.PersonWhereUniqueInput
+  create: Prisma.XOR<Prisma.PersonCreateWithoutMediaInput, Prisma.PersonUncheckedCreateWithoutMediaInput>
+}
+
+export type PersonUpsertWithoutMediaInput = {
+  update: Prisma.XOR<Prisma.PersonUpdateWithoutMediaInput, Prisma.PersonUncheckedUpdateWithoutMediaInput>
+  create: Prisma.XOR<Prisma.PersonCreateWithoutMediaInput, Prisma.PersonUncheckedCreateWithoutMediaInput>
+  where?: Prisma.PersonWhereInput
+}
+
+export type PersonUpdateToOneWithWhereWithoutMediaInput = {
+  where?: Prisma.PersonWhereInput
+  data: Prisma.XOR<Prisma.PersonUpdateWithoutMediaInput, Prisma.PersonUncheckedUpdateWithoutMediaInput>
+}
+
+export type PersonUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  alias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gender?: Prisma.EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationChar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deathDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthPlace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumLifeStatusFieldUpdateOperationsInput | $Enums.LifeStatus
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteHint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paperRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  family?: Prisma.FamilyUpdateOneRequiredWithoutPersonsNestedInput
+  branch?: Prisma.BranchUpdateOneWithoutPersonsNestedInput
+  residence?: Prisma.LocationUpdateOneWithoutResidentsNestedInput
+  marriagesAsHusband?: Prisma.MarriageUpdateManyWithoutHusbandNestedInput
+  marriagesAsWife?: Prisma.MarriageUpdateManyWithoutWifeNestedInput
+  childRelations?: Prisma.ParentChildUpdateManyWithoutChildNestedInput
+  parentRelations?: Prisma.ParentChildUpdateManyWithoutParentNestedInput
+  locations?: Prisma.PersonLocationUpdateManyWithoutPersonNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
+  branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
+}
+
+export type PersonUncheckedUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  familyId?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  alias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gender?: Prisma.EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationChar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deathDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthPlace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumLifeStatusFieldUpdateOperationsInput | $Enums.LifeStatus
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteHint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paperRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marriagesAsHusband?: Prisma.MarriageUncheckedUpdateManyWithoutHusbandNestedInput
+  marriagesAsWife?: Prisma.MarriageUncheckedUpdateManyWithoutWifeNestedInput
+  childRelations?: Prisma.ParentChildUncheckedUpdateManyWithoutChildNestedInput
+  parentRelations?: Prisma.ParentChildUncheckedUpdateManyWithoutParentNestedInput
+  locations?: Prisma.PersonLocationUncheckedUpdateManyWithoutPersonNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
+  branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
+}
+
+export type PersonCreateWithoutCollectionLinksInput = {
+  id?: string
+  externalId?: string | null
+  name: string
+  alias?: string | null
+  surnameOnly?: boolean
+  gender: $Enums.Gender
+  generation: number
+  generationChar?: string | null
+  birthOrder?: number | null
+  birthYear?: number | null
+  deathYear?: number | null
+  birthDate?: string | null
+  deathDate?: string | null
+  birthPlace?: string | null
+  status?: $Enums.LifeStatus
+  avatarUrl?: string | null
+  note?: string | null
+  noteHint?: string | null
+  paperRecord?: string | null
+  succession?: string | null
+  biography?: string | null
+  isMarriedIn?: boolean
+  contactPhoneHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  family: Prisma.FamilyCreateNestedOneWithoutPersonsInput
+  branch?: Prisma.BranchCreateNestedOneWithoutPersonsInput
+  residence?: Prisma.LocationCreateNestedOneWithoutResidentsInput
+  marriagesAsHusband?: Prisma.MarriageCreateNestedManyWithoutHusbandInput
+  marriagesAsWife?: Prisma.MarriageCreateNestedManyWithoutWifeInput
+  childRelations?: Prisma.ParentChildCreateNestedManyWithoutChildInput
+  parentRelations?: Prisma.ParentChildCreateNestedManyWithoutParentInput
+  locations?: Prisma.PersonLocationCreateNestedManyWithoutPersonInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutPersonInput
+  branchesRoot?: Prisma.BranchCreateNestedManyWithoutRootPersonInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaCreateNestedManyWithoutPersonInput
+}
+
+export type PersonUncheckedCreateWithoutCollectionLinksInput = {
+  id?: string
+  familyId: string
+  branchId?: string | null
+  externalId?: string | null
+  name: string
+  alias?: string | null
+  surnameOnly?: boolean
+  gender: $Enums.Gender
+  generation: number
+  generationChar?: string | null
+  birthOrder?: number | null
+  birthYear?: number | null
+  deathYear?: number | null
+  birthDate?: string | null
+  deathDate?: string | null
+  birthPlace?: string | null
+  status?: $Enums.LifeStatus
+  avatarUrl?: string | null
+  note?: string | null
+  noteHint?: string | null
+  paperRecord?: string | null
+  succession?: string | null
+  biography?: string | null
+  isMarriedIn?: boolean
+  residenceId?: string | null
+  contactPhoneHash?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  marriagesAsHusband?: Prisma.MarriageUncheckedCreateNestedManyWithoutHusbandInput
+  marriagesAsWife?: Prisma.MarriageUncheckedCreateNestedManyWithoutWifeInput
+  childRelations?: Prisma.ParentChildUncheckedCreateNestedManyWithoutChildInput
+  parentRelations?: Prisma.ParentChildUncheckedCreateNestedManyWithoutParentInput
+  locations?: Prisma.PersonLocationUncheckedCreateNestedManyWithoutPersonInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutPersonInput
+  branchesRoot?: Prisma.BranchUncheckedCreateNestedManyWithoutRootPersonInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutRootInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutPersonInput
+}
+
+export type PersonCreateOrConnectWithoutCollectionLinksInput = {
+  where: Prisma.PersonWhereUniqueInput
+  create: Prisma.XOR<Prisma.PersonCreateWithoutCollectionLinksInput, Prisma.PersonUncheckedCreateWithoutCollectionLinksInput>
+}
+
+export type PersonUpsertWithoutCollectionLinksInput = {
+  update: Prisma.XOR<Prisma.PersonUpdateWithoutCollectionLinksInput, Prisma.PersonUncheckedUpdateWithoutCollectionLinksInput>
+  create: Prisma.XOR<Prisma.PersonCreateWithoutCollectionLinksInput, Prisma.PersonUncheckedCreateWithoutCollectionLinksInput>
+  where?: Prisma.PersonWhereInput
+}
+
+export type PersonUpdateToOneWithWhereWithoutCollectionLinksInput = {
+  where?: Prisma.PersonWhereInput
+  data: Prisma.XOR<Prisma.PersonUpdateWithoutCollectionLinksInput, Prisma.PersonUncheckedUpdateWithoutCollectionLinksInput>
+}
+
+export type PersonUpdateWithoutCollectionLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  alias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gender?: Prisma.EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationChar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deathDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthPlace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumLifeStatusFieldUpdateOperationsInput | $Enums.LifeStatus
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteHint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paperRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  family?: Prisma.FamilyUpdateOneRequiredWithoutPersonsNestedInput
+  branch?: Prisma.BranchUpdateOneWithoutPersonsNestedInput
+  residence?: Prisma.LocationUpdateOneWithoutResidentsNestedInput
+  marriagesAsHusband?: Prisma.MarriageUpdateManyWithoutHusbandNestedInput
+  marriagesAsWife?: Prisma.MarriageUpdateManyWithoutWifeNestedInput
+  childRelations?: Prisma.ParentChildUpdateManyWithoutChildNestedInput
+  parentRelations?: Prisma.ParentChildUpdateManyWithoutParentNestedInput
+  locations?: Prisma.PersonLocationUpdateManyWithoutPersonNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
+  branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+}
+
+export type PersonUncheckedUpdateWithoutCollectionLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  familyId?: Prisma.StringFieldUpdateOperationsInput | string
+  branchId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  externalId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  alias?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOnly?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  gender?: Prisma.EnumGenderFieldUpdateOperationsInput | $Enums.Gender
+  generation?: Prisma.IntFieldUpdateOperationsInput | number
+  generationChar?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthOrder?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  deathYear?: Prisma.NullableIntFieldUpdateOperationsInput | number | null
+  birthDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  deathDate?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  birthPlace?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  status?: Prisma.EnumLifeStatusFieldUpdateOperationsInput | $Enums.LifeStatus
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  note?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  noteHint?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  paperRecord?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  marriagesAsHusband?: Prisma.MarriageUncheckedUpdateManyWithoutHusbandNestedInput
+  marriagesAsWife?: Prisma.MarriageUncheckedUpdateManyWithoutWifeNestedInput
+  childRelations?: Prisma.ParentChildUncheckedUpdateManyWithoutChildNestedInput
+  parentRelations?: Prisma.ParentChildUncheckedUpdateManyWithoutParentNestedInput
+  locations?: Prisma.PersonLocationUncheckedUpdateManyWithoutPersonNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
+  branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonCreateManyFamilyInput = {
@@ -2926,6 +3467,7 @@ export type PersonCreateManyFamilyInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -2954,6 +3496,7 @@ export type PersonUpdateWithoutFamilyInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -2967,6 +3510,8 @@ export type PersonUpdateWithoutFamilyInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutFamilyInput = {
@@ -2994,6 +3539,7 @@ export type PersonUncheckedUpdateWithoutFamilyInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3005,6 +3551,8 @@ export type PersonUncheckedUpdateWithoutFamilyInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateManyWithoutFamilyInput = {
@@ -3032,6 +3580,7 @@ export type PersonUncheckedUpdateManyWithoutFamilyInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3062,6 +3611,7 @@ export type PersonCreateManyBranchInput = {
   biography?: string | null
   isMarriedIn?: boolean
   residenceId?: string | null
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3090,6 +3640,7 @@ export type PersonUpdateWithoutBranchInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3103,6 +3654,8 @@ export type PersonUpdateWithoutBranchInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutBranchInput = {
@@ -3130,6 +3683,7 @@ export type PersonUncheckedUpdateWithoutBranchInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3141,6 +3695,8 @@ export type PersonUncheckedUpdateWithoutBranchInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateManyWithoutBranchInput = {
@@ -3168,6 +3724,7 @@ export type PersonUncheckedUpdateManyWithoutBranchInput = {
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
   residenceId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3198,6 +3755,7 @@ export type PersonCreateManyResidenceInput = {
   succession?: string | null
   biography?: string | null
   isMarriedIn?: boolean
+  contactPhoneHash?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -3226,6 +3784,7 @@ export type PersonUpdateWithoutResidenceInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3239,6 +3798,8 @@ export type PersonUpdateWithoutResidenceInput = {
   migrations?: Prisma.MigrationUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateWithoutResidenceInput = {
@@ -3266,6 +3827,7 @@ export type PersonUncheckedUpdateWithoutResidenceInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3277,6 +3839,8 @@ export type PersonUncheckedUpdateWithoutResidenceInput = {
   migrations?: Prisma.MigrationUncheckedUpdateManyWithoutPersonNestedInput
   branchesRoot?: Prisma.BranchUncheckedUpdateManyWithoutRootPersonNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutRootNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutPersonNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutPersonNestedInput
 }
 
 export type PersonUncheckedUpdateManyWithoutResidenceInput = {
@@ -3304,6 +3868,7 @@ export type PersonUncheckedUpdateManyWithoutResidenceInput = {
   succession?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   biography?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   isMarriedIn?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  contactPhoneHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -3323,6 +3888,8 @@ export type PersonCountOutputType = {
   migrations: number
   branchesRoot: number
   subtreeAdmins: number
+  media: number
+  collectionLinks: number
 }
 
 export type PersonCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3334,6 +3901,8 @@ export type PersonCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   migrations?: boolean | PersonCountOutputTypeCountMigrationsArgs
   branchesRoot?: boolean | PersonCountOutputTypeCountBranchesRootArgs
   subtreeAdmins?: boolean | PersonCountOutputTypeCountSubtreeAdminsArgs
+  media?: boolean | PersonCountOutputTypeCountMediaArgs
+  collectionLinks?: boolean | PersonCountOutputTypeCountCollectionLinksArgs
 }
 
 /**
@@ -3402,6 +3971,20 @@ export type PersonCountOutputTypeCountSubtreeAdminsArgs<ExtArgs extends runtime.
   where?: Prisma.SubtreeAdminWhereInput
 }
 
+/**
+ * PersonCountOutputType without action
+ */
+export type PersonCountOutputTypeCountMediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaWhereInput
+}
+
+/**
+ * PersonCountOutputType without action
+ */
+export type PersonCountOutputTypeCountCollectionLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CollectionLinkWhereInput
+}
+
 
 export type PersonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -3429,6 +4012,7 @@ export type PersonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   biography?: boolean
   isMarriedIn?: boolean
   residenceId?: boolean
+  contactPhoneHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -3443,6 +4027,8 @@ export type PersonSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   migrations?: boolean | Prisma.Person$migrationsArgs<ExtArgs>
   branchesRoot?: boolean | Prisma.Person$branchesRootArgs<ExtArgs>
   subtreeAdmins?: boolean | Prisma.Person$subtreeAdminsArgs<ExtArgs>
+  media?: boolean | Prisma.Person$mediaArgs<ExtArgs>
+  collectionLinks?: boolean | Prisma.Person$collectionLinksArgs<ExtArgs>
   _count?: boolean | Prisma.PersonCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["person"]>
 
@@ -3472,6 +4058,7 @@ export type PersonSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   biography?: boolean
   isMarriedIn?: boolean
   residenceId?: boolean
+  contactPhoneHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -3506,6 +4093,7 @@ export type PersonSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   biography?: boolean
   isMarriedIn?: boolean
   residenceId?: boolean
+  contactPhoneHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -3540,12 +4128,13 @@ export type PersonSelectScalar = {
   biography?: boolean
   isMarriedIn?: boolean
   residenceId?: boolean
+  contactPhoneHash?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "familyId" | "branchId" | "externalId" | "name" | "alias" | "surnameOnly" | "gender" | "generation" | "generationChar" | "birthOrder" | "birthYear" | "deathYear" | "birthDate" | "deathDate" | "birthPlace" | "status" | "avatarUrl" | "note" | "noteHint" | "paperRecord" | "succession" | "biography" | "isMarriedIn" | "residenceId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["person"]>
+export type PersonOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "familyId" | "branchId" | "externalId" | "name" | "alias" | "surnameOnly" | "gender" | "generation" | "generationChar" | "birthOrder" | "birthYear" | "deathYear" | "birthDate" | "deathDate" | "birthPlace" | "status" | "avatarUrl" | "note" | "noteHint" | "paperRecord" | "succession" | "biography" | "isMarriedIn" | "residenceId" | "contactPhoneHash" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["person"]>
 export type PersonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   family?: boolean | Prisma.FamilyDefaultArgs<ExtArgs>
   branch?: boolean | Prisma.Person$branchArgs<ExtArgs>
@@ -3558,6 +4147,8 @@ export type PersonInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   migrations?: boolean | Prisma.Person$migrationsArgs<ExtArgs>
   branchesRoot?: boolean | Prisma.Person$branchesRootArgs<ExtArgs>
   subtreeAdmins?: boolean | Prisma.Person$subtreeAdminsArgs<ExtArgs>
+  media?: boolean | Prisma.Person$mediaArgs<ExtArgs>
+  collectionLinks?: boolean | Prisma.Person$collectionLinksArgs<ExtArgs>
   _count?: boolean | Prisma.PersonCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type PersonIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -3585,6 +4176,8 @@ export type $PersonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     migrations: Prisma.$MigrationPayload<ExtArgs>[]
     branchesRoot: Prisma.$BranchPayload<ExtArgs>[]
     subtreeAdmins: Prisma.$SubtreeAdminPayload<ExtArgs>[]
+    media: Prisma.$MediaPayload<ExtArgs>[]
+    collectionLinks: Prisma.$CollectionLinkPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -3612,6 +4205,7 @@ export type $PersonPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     biography: string | null
     isMarriedIn: boolean
     residenceId: string | null
+    contactPhoneHash: string | null
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -4020,6 +4614,8 @@ export interface Prisma__PersonClient<T, Null = never, ExtArgs extends runtime.T
   migrations<T extends Prisma.Person$migrationsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$migrationsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MigrationPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   branchesRoot<T extends Prisma.Person$branchesRootArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$branchesRootArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$BranchPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   subtreeAdmins<T extends Prisma.Person$subtreeAdminsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$subtreeAdminsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubtreeAdminPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  media<T extends Prisma.Person$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  collectionLinks<T extends Prisma.Person$collectionLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Person$collectionLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollectionLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -4074,6 +4670,7 @@ export interface PersonFieldRefs {
   readonly biography: Prisma.FieldRef<"Person", 'String'>
   readonly isMarriedIn: Prisma.FieldRef<"Person", 'Boolean'>
   readonly residenceId: Prisma.FieldRef<"Person", 'String'>
+  readonly contactPhoneHash: Prisma.FieldRef<"Person", 'String'>
   readonly createdAt: Prisma.FieldRef<"Person", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Person", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Person", 'DateTime'>
@@ -4705,6 +5302,54 @@ export type Person$subtreeAdminsArgs<ExtArgs extends runtime.Types.Extensions.In
   take?: number
   skip?: number
   distinct?: Prisma.SubtreeAdminScalarFieldEnum | Prisma.SubtreeAdminScalarFieldEnum[]
+}
+
+/**
+ * Person.media
+ */
+export type Person$mediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Media
+   */
+  select?: Prisma.MediaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Media
+   */
+  omit?: Prisma.MediaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaInclude<ExtArgs> | null
+  where?: Prisma.MediaWhereInput
+  orderBy?: Prisma.MediaOrderByWithRelationInput | Prisma.MediaOrderByWithRelationInput[]
+  cursor?: Prisma.MediaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaScalarFieldEnum | Prisma.MediaScalarFieldEnum[]
+}
+
+/**
+ * Person.collectionLinks
+ */
+export type Person$collectionLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollectionLink
+   */
+  select?: Prisma.CollectionLinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollectionLink
+   */
+  omit?: Prisma.CollectionLinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionLinkInclude<ExtArgs> | null
+  where?: Prisma.CollectionLinkWhereInput
+  orderBy?: Prisma.CollectionLinkOrderByWithRelationInput | Prisma.CollectionLinkOrderByWithRelationInput[]
+  cursor?: Prisma.CollectionLinkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CollectionLinkScalarFieldEnum | Prisma.CollectionLinkScalarFieldEnum[]
 }
 
 /**

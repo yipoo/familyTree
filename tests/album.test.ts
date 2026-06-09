@@ -23,9 +23,16 @@ const ENTRY: AlbumPersonEntry = {
   noteHint: null,
   fatherName: "丁太公",
   motherName: "李氏",
+  spouses: [
+    { name: "王氏", type: "PRIMARY", order: 1 },
+    { name: "赵氏", type: "SECONDARY", order: 2 },
+  ],
   spouseNames: ["王氏", "赵氏"],
+  sons: ["丁二"],
+  daughters: ["丁三"],
   childrenNames: ["丁二", "丁三"],
   residenceText: "山东省济南市丁庄",
+  ageAtDeath: 81,
 };
 
 describe("formatPersonEntryText", () => {
@@ -35,11 +42,11 @@ describe("formatPersonEntryText", () => {
     expect(txt).toMatch(/【第 1 世·天】/);
   });
 
-  it("写入姓名 + 别名 + 性别 + 排行", () => {
+  it("写入姓名 + 字号 + 性别 + 行第（汉字）", () => {
     expect(txt).toContain("丁老");
-    expect(txt).toContain("（大老）");
+    expect(txt).toContain("（字大老）");
     expect(txt).toContain("男");
-    expect(txt).toContain("行1");
+    expect(txt).toContain("行一");
   });
 
   it("包含父母", () => {
@@ -47,16 +54,22 @@ describe("formatPersonEntryText", () => {
     expect(txt).toContain("母：李氏");
   });
 
-  it("包含生卒 / 出生地 / 居住地", () => {
-    expect(txt).toContain("生于1900");
-    expect(txt).toContain("卒于1980");
-    expect(txt).toContain("出生地：丁庄");
+  it("包含生卒 / 享年 / 出生地 / 居住地", () => {
+    expect(txt).toContain("生于1900 年");
+    expect(txt).toContain("卒于1980 年");
+    expect(txt).toContain("享年 81 岁");
+    expect(txt).toContain("出生于 丁庄");
     expect(txt).toContain("居：山东省济南市丁庄");
   });
 
-  it("包含配偶 / 子女", () => {
-    expect(txt).toContain("配：王氏、赵氏");
-    expect(txt).toContain("子女：丁二、丁三（2人）");
+  it("配偶分元配 / 继配 / 妾 标签", () => {
+    expect(txt).toContain("元配 王氏");
+    expect(txt).toContain("继配 赵氏");
+  });
+
+  it("子女分别记 子 N / 女 N", () => {
+    expect(txt).toContain("子一：丁二");
+    expect(txt).toContain("女一：丁三");
   });
 
   it("包含纸谱行传 / 个人传记", () => {
@@ -86,14 +99,19 @@ describe("formatPersonEntryText", () => {
       noteHint: null,
       fatherName: null,
       motherName: null,
+      spouses: [],
       spouseNames: [],
+      sons: [],
+      daughters: [],
       childrenNames: [],
       residenceText: null,
+      ageAtDeath: null,
     };
     const t = formatPersonEntryText(minimal);
     expect(t).toContain("【第 5 世】");
     expect(t).not.toContain("配：");
-    expect(t).not.toContain("子女：");
+    expect(t).not.toContain("子");
+    expect(t).not.toContain("女");
     expect(t).not.toContain("传：");
   });
 });

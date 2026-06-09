@@ -136,3 +136,23 @@ export type VerificationCode = Prisma.VerificationCodeModel
  * 
  */
 export type PdfJob = Prisma.PdfJobModel
+/**
+ * Model JoinRequest
+ * 
+ */
+export type JoinRequest = Prisma.JoinRequestModel
+/**
+ * Model Media
+ * 
+ */
+export type Media = Prisma.MediaModel
+/**
+ * Model CollectionLink
+ * 
+ */
+export type CollectionLink = Prisma.CollectionLinkModel
+/**
+ * Model AlbumSection
+ * 
+ */
+export type AlbumSection = Prisma.AlbumSectionModel

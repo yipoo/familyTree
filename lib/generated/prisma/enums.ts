@@ -120,3 +120,49 @@ export const PdfJobStatus = {
 } as const
 
 export type PdfJobStatus = (typeof PdfJobStatus)[keyof typeof PdfJobStatus]
+
+
+export const JoinRequestStatus = {
+  PENDING: 'PENDING',
+  APPROVED: 'APPROVED',
+  REJECTED: 'REJECTED',
+  CANCELLED: 'CANCELLED'
+} as const
+
+export type JoinRequestStatus = (typeof JoinRequestStatus)[keyof typeof JoinRequestStatus]
+
+
+export const MediaKind = {
+  PHOTO: 'PHOTO',
+  DOCUMENT: 'DOCUMENT',
+  AUDIO: 'AUDIO',
+  VIDEO: 'VIDEO'
+} as const
+
+export type MediaKind = (typeof MediaKind)[keyof typeof MediaKind]
+
+
+export const CollectMode = {
+  PERSON_UPDATE: 'PERSON_UPDATE',
+  ADD_CHILD: 'ADD_CHILD'
+} as const
+
+export type CollectMode = (typeof CollectMode)[keyof typeof CollectMode]
+
+
+export const AlbumSectionKind = {
+  COVER: 'COVER',
+  PREFACE: 'PREFACE',
+  FANLI: 'FANLI',
+  YUANLIU: 'YUANLIU',
+  RULES: 'RULES',
+  ZIBEI: 'ZIBEI',
+  COMPILERS: 'COMPILERS',
+  TULU: 'TULU',
+  PORTRAITS: 'PORTRAITS',
+  POSTSCRIPT: 'POSTSCRIPT',
+  CUSTOM_TEXT: 'CUSTOM_TEXT',
+  CUSTOM_IMAGE: 'CUSTOM_IMAGE'
+} as const
+
+export type AlbumSectionKind = (typeof AlbumSectionKind)[keyof typeof AlbumSectionKind]
