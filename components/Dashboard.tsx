@@ -16,6 +16,7 @@ import Link from "next/link";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/db";
 
+import { CreateFamilyButton } from "@/components/family/CreateFamilyButton";
 import {
   IconBook,
   IconChevronRight,
@@ -233,7 +234,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
     <div className="bg-background text-foreground">
       {/* 顶部欢迎 + 概览 ------------------------------------------------- */}
       <section className="border-b border-hairline">
-        <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8 lg:py-10">
+        <div className="mx-auto max-w-[1440px] px-3 py-8 sm:px-5 lg:px-6 lg:py-10">
           <div className="flex flex-wrap items-end justify-between gap-3">
             <div>
               <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
@@ -295,7 +296,7 @@ export function DashboardView({ data }: { data: DashboardData }) {
       </section>
 
       {/* 主体：家族卡片 + 活动栏 ---------------------------------------- */}
-      <section className="mx-auto grid max-w-7xl gap-6 px-4 py-8 sm:px-6 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-8">
+      <section className="mx-auto grid max-w-[1440px] gap-6 px-3 py-8 sm:px-5 lg:grid-cols-[minmax(0,1fr)_320px] lg:px-6">
         <div className="min-w-0">
           <div className="mb-4 flex items-baseline justify-between">
             <h2 className="text-lg font-semibold text-foreground">
@@ -412,12 +413,7 @@ function FamilyCard({
 }) {
   return (
     <li className="group relative overflow-hidden rounded-lg border border-border bg-panel shadow-sm transition hover:-translate-y-0.5 hover:border-brand/40 hover:shadow-md">
-      <Link
-        href={`/f/${family.id}`}
-        className="absolute inset-0 z-0"
-        aria-label={`进入家族 ${family.name}`}
-      />
-      <div className="relative z-10 p-5">
+      <div className="relative z-0 p-5">
         <div className="flex items-start gap-3">
           <span
             aria-hidden
@@ -478,6 +474,12 @@ function FamilyCard({
           </span>
         </div>
       </div>
+      {/* 整卡点击进入家族：覆盖层链接置于内容之上（内容均为非交互元素，不会被遮挡误触） */}
+      <Link
+        href={`/f/${family.id}`}
+        className="absolute inset-0 z-10"
+        aria-label={`进入家族 ${family.name}`}
+      />
     </li>
   );
 }
@@ -586,21 +588,22 @@ function EmptyState() {
         你还没有加入任何家族
       </p>
       <p className="mt-1 text-xs text-fg-muted">
-        请向族中长辈索取 8 位邀请码或邀请链接，加入你的家谱
+        创建一个属于你自己的家族，或用邀请码 / 链接加入族中长辈已有的家谱
       </p>
       <div className="mt-5 flex flex-wrap justify-center gap-2">
+        <CreateFamilyButton label="创建一个新家族" />
         <Link
           href="/join"
-          className="inline-flex items-center gap-1.5 rounded-md bg-brand px-4 py-2 text-sm font-medium text-brand-fg shadow-sm transition hover:opacity-90"
+          className="inline-flex items-center gap-1.5 rounded-md border border-border bg-panel px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
         >
           <IconPlus size={14} />
           输入邀请码加入
         </Link>
         <Link
-          href="/about"
+          href="/discover"
           className="inline-flex items-center gap-1 rounded-md border border-border bg-panel px-4 py-2 text-sm font-medium text-foreground transition hover:bg-muted"
         >
-          了解平台
+          浏览公开家族
         </Link>
       </div>
     </div>

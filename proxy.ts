@@ -24,7 +24,12 @@ const PUBLIC = (pathname: string) =>
   pathname.startsWith("/api/auth/") ||
   pathname.startsWith("/share/") ||
   pathname === "/join" ||
-  pathname.startsWith("/join/");
+  pathname.startsWith("/join/") ||
+  // 二维码采集：族人无需登录即可填写
+  pathname.startsWith("/collect/") ||
+  pathname.startsWith("/api/collect/") ||
+  // 小程序接口：自带 Bearer token 鉴权，不走 web cookie
+  pathname.startsWith("/api/miniapp/");
 
 const SESSION_COOKIE_NAMES = [
   "authjs.session-token",

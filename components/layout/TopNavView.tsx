@@ -8,6 +8,8 @@
 
 import Link from "next/link";
 
+import { CreateFamilyButton } from "@/components/family/CreateFamilyButton";
+
 import { FamilySwitcher, type SwitcherFamily } from "./FamilySwitcher";
 import { MobileNav } from "./MobileNav";
 import { QuickAddMenu } from "./QuickAddMenu";
@@ -70,7 +72,7 @@ export function TopNavView({
             族
           </span>
           <span className="hidden text-sm font-semibold text-foreground sm:inline">
-            族谱·家
+            家族族谱在线协同管理系统 V1.0
           </span>
         </Link>
 
@@ -98,12 +100,18 @@ export function TopNavView({
 
         <div className="ml-auto flex shrink-0 items-center gap-1 md:gap-1.5">
           {!currentFamily && (
-            <Link
-              href="/join"
-              className="hidden rounded-md border border-border px-2.5 py-1.5 text-xs text-fg-muted transition hover:bg-muted hover:text-foreground sm:inline-block"
-            >
-              + 加入家族
-            </Link>
+            <>
+              <CreateFamilyButton
+                label="+ 创建家族"
+                className="hidden rounded-md bg-brand px-2.5 py-1.5 text-xs font-medium text-brand-fg shadow-sm transition hover:opacity-90 sm:inline-block"
+              />
+              <Link
+                href="/join"
+                className="hidden rounded-md border border-border px-2.5 py-1.5 text-xs text-fg-muted transition hover:bg-muted hover:text-foreground sm:inline-block"
+              >
+                + 加入家族
+              </Link>
+            </>
           )}
           {currentFamily && canManage && (
             <QuickAddMenu familyId={currentFamily.id} />

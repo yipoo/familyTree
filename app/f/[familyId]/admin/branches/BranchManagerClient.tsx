@@ -31,6 +31,11 @@ export function BranchManagerClient({ familyId, branches, persons }: Props) {
   const [pending, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [createOpen, setCreateOpen] = useState(false);
+  const hasPersons = persons.length > 0;
+  // 空族时强制走"新建独立人物"，避免下拉为空导致无法创建
+  const [rootMode, setRootMode] = useState<"existing" | "new">(
+    hasPersons ? "existing" : "new",
+  );
 
   async function call(method: string, url: string, body?: unknown) {
     setError(null);
@@ -54,18 +59,40 @@ export function BranchManagerClient({ familyId, branches, persons }: Props) {
 
   async function handleCreate(form: FormData) {
     const name = String(form.get("name") ?? "").trim();
-    const rootPersonId = String(form.get("rootPersonId") ?? "").trim();
     const description = String(form.get("description") ?? "").trim();
-    if (!name || !rootPersonId) {
-      setError("支系名与根人物必填");
+    if (!name) {
+      setError("支系名必填");
       return;
     }
-    try {
-      await call("POST", `/api/families/${familyId}/branches`, {
+    let body: Record<string, unknown>;
+    if (rootMode === "existing") {
+      const rootPersonId = String(form.get("rootPersonId") ?? "").trim();
+      if (!rootPersonId) {
+        setError("请选择根人物");
+        return;
+      }
+      body = { name, rootPersonId, description: description || null };
+    } else {
+      const rootName = String(form.get("rootName") ?? "").trim();
+      const gender = String(form.get("rootGender") ?? "MALE");
+      const genStr = String(form.get("rootGeneration") ?? "1");
+      const generation = Number.parseInt(genStr, 10);
+      if (!rootName) {
+        setError("根人物姓名必填");
+        return;
+      }
+      if (!Number.isFinite(generation) || generation < 1) {
+        setError("起始世代必须是 ≥ 1 的整数");
+        return;
+      }
+      body = {
         name,
-        rootPersonId,
+        newRoot: { name: rootName, gender, generation },
         description: description || null,
-      });
+      };
+    }
+    try {
+      await call("POST", `/api/families/${familyId}/branches`, body);
       setCreateOpen(false);
       refresh();
     } catch (e) {
@@ -128,7 +155,7 @@ export function BranchManagerClient({ familyId, branches, persons }: Props) {
           className="mb-4 grid gap-2 rounded-md border border-border p-3 sm:grid-cols-2"
           action={handleCreate}
         >
-          <label className="flex flex-col gap-1 text-xs">
+          <label className="flex flex-col gap-1 text-xs sm:col-span-2">
             <span className="text-fg-muted">支系名</span>
             <input
               name="name"
@@ -137,21 +164,107 @@ export function BranchManagerClient({ familyId, branches, persons }: Props) {
               className="rounded border border-border bg-panel px-2 py-1 text-sm"
             />
           </label>
-          <label className="flex flex-col gap-1 text-xs">
-            <span className="text-fg-muted">根人物</span>
-            <select
-              name="rootPersonId"
-              required
-              className="rounded border border-border bg-panel px-2 py-1 text-sm"
-            >
-              <option value="">— 请选择 —</option>
-              {persons.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}（{p.generation} 世）
-                </option>
-              ))}
-            </select>
-          </label>
+
+          {hasPersons ? (
+            <fieldset className="flex flex-col gap-1.5 text-xs sm:col-span-2">
+              <legend className="text-fg-muted">根人物来源</legend>
+              <label className="flex items-start gap-2">
+                <input
+                  type="radio"
+                  name="rootMode"
+                  value="existing"
+                  checked={rootMode === "existing"}
+                  onChange={() => setRootMode("existing")}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="text-foreground">选已有人物作为根</span>
+                  <span className="block text-[10px] text-fg-subtle">
+                    适合从某位已知祖先派出的支系
+                  </span>
+                </span>
+              </label>
+              <label className="flex items-start gap-2">
+                <input
+                  type="radio"
+                  name="rootMode"
+                  value="new"
+                  checked={rootMode === "new"}
+                  onChange={() => setRootMode("new")}
+                  className="mt-0.5"
+                />
+                <span>
+                  <span className="text-foreground">新建独立人物作为根（无上世）</span>
+                  <span className="block text-[10px] text-fg-subtle">
+                    适合"找不到上一世"的离散分支始祖
+                  </span>
+                </span>
+              </label>
+            </fieldset>
+          ) : (
+            <p className="text-xs text-fg-subtle sm:col-span-2">
+              该家族尚无人物，将作为离散分支始祖建立第一个根人物。
+            </p>
+          )}
+
+          {rootMode === "existing" ? (
+            <label className="flex flex-col gap-1 text-xs sm:col-span-2">
+              <span className="text-fg-muted">根人物</span>
+              <select
+                name="rootPersonId"
+                required
+                className="rounded border border-border bg-panel px-2 py-1 text-sm"
+              >
+                <option value="">— 请选择 —</option>
+                {persons.map((p) => (
+                  <option key={p.id} value={p.id}>
+                    {p.name}（{p.generation} 世）
+                  </option>
+                ))}
+              </select>
+            </label>
+          ) : (
+            <>
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="text-fg-muted">始祖姓名</span>
+                <input
+                  name="rootName"
+                  required
+                  maxLength={40}
+                  placeholder="如：丁明远"
+                  className="rounded border border-border bg-panel px-2 py-1 text-sm"
+                />
+              </label>
+              <label className="flex flex-col gap-1 text-xs">
+                <span className="text-fg-muted">性别</span>
+                <select
+                  name="rootGender"
+                  defaultValue="MALE"
+                  className="rounded border border-border bg-panel px-2 py-1 text-sm"
+                >
+                  <option value="MALE">男</option>
+                  <option value="FEMALE">女</option>
+                  <option value="UNKNOWN">未知</option>
+                </select>
+              </label>
+              <label className="flex flex-col gap-1 text-xs sm:col-span-2">
+                <span className="text-fg-muted">起始世代</span>
+                <input
+                  name="rootGeneration"
+                  type="number"
+                  min={1}
+                  max={200}
+                  defaultValue={1}
+                  required
+                  className="w-32 rounded border border-border bg-panel px-2 py-1 text-sm"
+                />
+                <span className="text-[10px] text-fg-subtle">
+                  无对应字辈时直接填本支自起的世代号；后续可在人物详情里改
+                </span>
+              </label>
+            </>
+          )}
+
           <label className="flex flex-col gap-1 text-xs sm:col-span-2">
             <span className="text-fg-muted">说明（可选）</span>
             <textarea
@@ -173,7 +286,7 @@ export function BranchManagerClient({ familyId, branches, persons }: Props) {
       )}
 
       <div className="overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[620px] text-sm">
           <thead className="text-left text-xs text-fg-muted">
             <tr>
               <th className="py-2 pr-4 font-medium">支系名</th>

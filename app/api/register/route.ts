@@ -14,10 +14,9 @@ import { encode } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { hashPassword, normalizePhone } from "@/lib/auth/password";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { publicUrl, sessionCookie } from "@/lib/api/public-url";
 
-const SESSION_COOKIE = "authjs.session-token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
-const SALT = SESSION_COOKIE;
 
 const EMAIL_RE = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
 
@@ -31,7 +30,7 @@ async function registerHandler(req: Request) {
 
   const fail = (code: "missing" | "short" | "taken" | "regfail" | "invalid_email") =>
     NextResponse.redirect(
-      new URL(`/register?error=${code}&next=${encodeURIComponent(next)}`, req.url),
+      publicUrl(req, `/register?error=${code}&next=${encodeURIComponent(next)}`),
       303,
     );
 
@@ -68,6 +67,7 @@ async function registerHandler(req: Request) {
   const secret = process.env.AUTH_SECRET;
   if (!secret) throw new Error("AUTH_SECRET is not configured");
 
+  const cookie = sessionCookie(req);
   const encoded = await encode({
     token: {
       uid: user.id,
@@ -77,17 +77,18 @@ async function registerHandler(req: Request) {
       sub: user.id,
     },
     secret,
-    salt: SALT,
+    salt: cookie.name,
     maxAge: SESSION_MAX_AGE,
   });
 
-  const res = NextResponse.redirect(new URL(next, req.url), 303);
-  res.cookies.set(SESSION_COOKIE, encoded, {
+  const target = publicUrl(req, next);
+  const res = NextResponse.redirect(target, 303);
+  res.cookies.set(cookie.name, encoded, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE,
-    secure: req.url.startsWith("https://"),
+    secure: cookie.secure,
   });
   return res;
 }

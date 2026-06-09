@@ -49,6 +49,13 @@ export function conflict(code: string, message: string): NextResponse {
   );
 }
 
+export function forbidden(code: string, message: string): NextResponse {
+  return NextResponse.json(
+    { error: { code, message } },
+    { status: 403 },
+  );
+}
+
 export function handleApiError(err: unknown): NextResponse {
   if (err instanceof AuthError) return authErrorResponse(err);
   console.error("[api]", err);

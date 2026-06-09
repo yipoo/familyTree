@@ -35,7 +35,7 @@ export default async function AdvancedSearchPage({
   return (
     <div>
       <header className="border-b border-hairline bg-surface">
-        <div className="mx-auto flex max-w-5xl flex-wrap items-end justify-between gap-3 px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-3 px-3 py-5 sm:px-5 lg:px-6">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
               高级搜索
@@ -49,7 +49,7 @@ export default async function AdvancedSearchPage({
           </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl p-4 sm:p-6 lg:p-8">
+      <main className="mx-auto max-w-[1440px] p-3 sm:p-5 lg:p-6">
         <AdvancedSearchPanel
           familyId={familyId}
           branches={family.branches.map((b) => ({ id: b.id, name: b.name }))}

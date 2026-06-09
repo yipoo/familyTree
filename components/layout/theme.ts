@@ -9,6 +9,8 @@
 
 export type Theme = "light" | "dark" | "system";
 
+// 反闪烁脚本（public/theme-init.js）里硬编码了同样的值——若改这两个常量，
+// 必须同步改 public/theme-init.js 里的 key / cookieKey。
 export const THEME_COOKIE = "zupu-theme";
 export const THEME_STORAGE_KEY = "zupu-theme";
 export const THEME_VALUES: readonly Theme[] = [

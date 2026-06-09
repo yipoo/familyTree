@@ -72,7 +72,7 @@ export default async function DetailTablePage({
   return (
     <div className="print:bg-white">
       <header className="border-b border-hairline bg-surface print:hidden">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-3 px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-3 px-3 py-5 sm:px-5 lg:px-6">
           <div>
             <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
               详细图
@@ -88,7 +88,7 @@ export default async function DetailTablePage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-3 py-5 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1440px] px-3 py-5 sm:px-5 lg:px-6">
         {generations.map((g) => {
           const arr = byGen.get(g)!;
           return (

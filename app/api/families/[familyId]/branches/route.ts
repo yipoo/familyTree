@@ -1,6 +1,10 @@
 /**
  * GET  /api/families/[familyId]/branches    支系列表
  * POST /api/families/[familyId]/branches    新建支系（OWNER / ADMIN）
+ *
+ * 创建支持两种 root 来源：
+ *   - rootPersonId：选已有人物（派生支系）
+ *   - newRoot：在事务中新建独立人物作为根（处理"找不到上一世"的离散始祖）
  */
 import { NextResponse } from "next/server";
 import { z } from "zod";
@@ -16,12 +20,24 @@ import {
 } from "@/lib/api/error";
 import { writeAudit } from "@/lib/services/audit";
 
-const CreateSchema = z.object({
-  name: z.string().trim().min(1, "支系名必填").max(50),
-  rootPersonId: z.string().min(1, "根人物必填"),
-  locationId: z.string().min(1).optional().nullable(),
-  description: z.string().trim().max(500).optional().nullable(),
+const NewRootSchema = z.object({
+  name: z.string().trim().min(1, "始祖姓名必填").max(40),
+  gender: z.enum(["MALE", "FEMALE", "UNKNOWN"]).default("MALE"),
+  generation: z.number().int().min(1, "世代必须 ≥ 1").max(200),
 });
+
+const CreateSchema = z
+  .object({
+    name: z.string().trim().min(1, "支系名必填").max(50),
+    rootPersonId: z.string().min(1).optional(),
+    newRoot: NewRootSchema.optional(),
+    locationId: z.string().min(1).optional().nullable(),
+    description: z.string().trim().max(500).optional().nullable(),
+  })
+  .refine((v) => !!v.rootPersonId !== !!v.newRoot, {
+    message: "rootPersonId 与 newRoot 二选一",
+    path: ["rootPersonId"],
+  });
 
 export async function GET(
   _req: Request,
@@ -59,14 +75,7 @@ export async function POST(
     if (!parsed.success) return zodError(parsed.error);
     const body = parsed.data;
 
-    // 校验 rootPerson 在该家族
-    const root = await prisma.person.findFirst({
-      where: { id: body.rootPersonId, familyId, deletedAt: null },
-      select: { id: true },
-    });
-    if (!root) return badRequest("INVALID_ROOT", "根人物不存在或不属于该家族");
-
-    // 同名支系防重
+    // 同名支系防重（先做，避免新建人物又因冲突回滚）
     const dup = await prisma.branch.findFirst({
       where: { familyId, name: body.name },
       select: { id: true },
@@ -82,26 +91,90 @@ export async function POST(
       if (!loc) return badRequest("INVALID_LOCATION", "地点不存在");
     }
 
-    const created = await prisma.branch.create({
-      data: {
+    // 路径 A：用已有人物
+    if (body.rootPersonId) {
+      const root = await prisma.person.findFirst({
+        where: { id: body.rootPersonId, familyId, deletedAt: null },
+        select: { id: true },
+      });
+      if (!root) return badRequest("INVALID_ROOT", "根人物不存在或不属于该家族");
+
+      const created = await prisma.branch.create({
+        data: {
+          familyId,
+          name: body.name,
+          rootPersonId: body.rootPersonId,
+          locationId: body.locationId ?? null,
+          description: body.description ?? null,
+        },
+      });
+
+      await writeAudit({
         familyId,
-        name: body.name,
-        rootPersonId: body.rootPersonId,
-        locationId: body.locationId ?? null,
-        description: body.description ?? null,
+        actorId: auth.user.id,
+        kind: "CREATE",
+        entity: "Branch",
+        entityId: created.id,
+        after: created,
+      });
+
+      return NextResponse.json({ data: created }, { status: 201 });
+    }
+
+    // 路径 B：在事务中新建独立人物作为根（离散始祖）
+    const newRoot = body.newRoot!;
+    const gn = await prisma.generationName.findUnique({
+      where: {
+        familyId_generation: { familyId, generation: newRoot.generation },
       },
+      select: { character: true },
+    });
+
+    const { person, branch } = await prisma.$transaction(async (tx) => {
+      const person = await tx.person.create({
+        data: {
+          familyId,
+          name: newRoot.name,
+          gender: newRoot.gender,
+          generation: newRoot.generation,
+          generationChar: gn?.character ?? null,
+        },
+      });
+      const branch = await tx.branch.create({
+        data: {
+          familyId,
+          name: body.name,
+          rootPersonId: person.id,
+          locationId: body.locationId ?? null,
+          description: body.description ?? null,
+        },
+      });
+      // 把根人物归属到该支系
+      const updated = await tx.person.update({
+        where: { id: person.id },
+        data: { branchId: branch.id },
+      });
+      return { person: updated, branch };
     });
 
     await writeAudit({
       familyId,
       actorId: auth.user.id,
       kind: "CREATE",
+      entity: "Person",
+      entityId: person.id,
+      after: person,
+    });
+    await writeAudit({
+      familyId,
+      actorId: auth.user.id,
+      kind: "CREATE",
       entity: "Branch",
-      entityId: created.id,
-      after: created,
+      entityId: branch.id,
+      after: branch,
     });
 
-    return NextResponse.json({ data: created }, { status: 201 });
+    return NextResponse.json({ data: branch, rootPerson: person }, { status: 201 });
   } catch (e) {
     return handleApiError(e);
   }

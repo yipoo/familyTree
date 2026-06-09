@@ -104,6 +104,12 @@ export function TreeView({
   // 三态合一的 fetch state：避免在 effect 中同步 setLoading(true)
   const [state, setState] = useState<FetchState>(LOADING);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  // 数据变更版本号：inspector 等子组件添加 / 修改 / 删除人物后调 onDataChanged()
+  // 把它递增一次，下面的 fetch effect 把 dataRevision 列在依赖里，因此自动重拉 graph。
+  const [dataRevision, setDataRevision] = useState(0);
+  const handleDataChanged = useCallback(() => {
+    setDataRevision((v) => v + 1);
+  }, []);
   // 折叠状态由 TreeView 持有，TreeCanvas 与 PersonInspector 共用——这样 inspector 也能
   // "在选中节点上直接点折叠"，且双击节点折叠后 inspector 立刻同步显示后代数。
   const [collapsedIds, setCollapsedIds] = useState<Set<string>>(EMPTY_SET);
@@ -237,8 +243,11 @@ export function TreeView({
         if (lineage !== "all") sp.set("lineage", lineage);
         if (spacing !== DEFAULT_SPACING) sp.set("spacing", spacing);
         if (mode === "kin5") sp.set("mode", "kin5");
+        // dataRevision 进 URL —— 既绕开浏览器 HTTP 缓存，也方便排查 devtools 上看到的请求是哪一次
+        if (dataRevision > 0) sp.set("_v", String(dataRevision));
         const r = await fetch(`/api/families/${familyId}/graph?${sp}`, {
           signal: ctrl.signal,
+          cache: "no-store",
         });
         if (cancelled) return;
         if (r.status === 401) {
@@ -270,7 +279,7 @@ export function TreeView({
       cancelled = true;
       ctrl.abort();
     };
-  }, [familyId, root, focus, lineage, spacing, mode, router]);
+  }, [familyId, root, focus, lineage, spacing, mode, router, dataRevision]);
 
   // 计算当前可见集合中"不匹配筛选"的人物 id（dimmedIds）。
   // 注意：layout.nodes 已经按 lineage / focus / root 过滤过，所以"总数"取这里的长度。
@@ -455,6 +464,7 @@ export function TreeView({
               onClearSelection={() => setSelectedId(null)}
               collapsedIds={collapsedIds}
               onToggleCollapsed={handleToggleCollapsed}
+              onDataChanged={handleDataChanged}
             />
           )}
         </div>
@@ -475,6 +485,7 @@ export function TreeView({
                 onClearSelection={() => setSelectedId(null)}
                 collapsedIds={collapsedIds}
                 onToggleCollapsed={handleToggleCollapsed}
+                onDataChanged={handleDataChanged}
               />
             </div>
           </>

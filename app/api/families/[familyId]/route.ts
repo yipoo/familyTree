@@ -26,6 +26,10 @@ const PatchSchema = z
     founderName: z.string().trim().max(40).nullable().optional(),
     /** 仅 OWNER 可改公开开关；ADMIN 也允许（家族管理职责） */
     isPublic: z.boolean().optional(),
+    /** 印刷家谱专用 */
+    familyRules: z.string().trim().max(20000).nullable().optional(),
+    editionInfo: z.string().trim().max(40).nullable().optional(),
+    surnameOrigin: z.string().trim().max(5000).nullable().optional(),
   })
   .refine((d) => Object.keys(d).length > 0, "至少修改一项");
 

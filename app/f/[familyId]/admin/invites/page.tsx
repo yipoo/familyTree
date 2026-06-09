@@ -48,7 +48,7 @@ export default async function AdminInvitesPage({
       <CreateInviteForm familyId={familyId} />
 
       <div className="mt-5 overflow-x-auto">
-        <table className="w-full text-sm">
+        <table className="w-full min-w-[620px] text-sm">
           <thead className="text-left text-xs text-zinc-500">
             <tr>
               <th className="py-2 pr-4 font-medium">码</th>

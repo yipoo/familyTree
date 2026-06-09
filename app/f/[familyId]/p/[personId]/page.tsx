@@ -24,6 +24,8 @@ import { canWriteOnPerson } from "@/lib/auth/guard";
 import type { Gender, MarriageType } from "@/lib/generated/prisma/enums";
 import { PersonDetailActions } from "./PersonDetailActions";
 import { MigrationsPanel } from "@/components/migrations/MigrationsPanel";
+import { MediaGallery } from "@/components/media/MediaGallery";
+import { ossConfigured } from "@/lib/services/oss";
 
 export const dynamic = "force-dynamic";
 
@@ -240,7 +242,7 @@ export default async function PersonDetailPage({
   return (
     <div>
       <header className="border-b border-hairline bg-surface">
-        <div className="mx-auto max-w-4xl px-4 py-5 sm:px-6 lg:px-8">
+        <div className="mx-auto max-w-[1440px] px-3 py-5 sm:px-5 lg:px-6">
           <nav aria-label="面包屑" className="text-xs text-fg-subtle">
             <Link href="/" className="transition hover:text-foreground">
               我的家族
@@ -260,19 +262,28 @@ export default async function PersonDetailPage({
             <span className="text-foreground">人物</span>
           </nav>
           <div className="mt-3 flex flex-wrap items-center gap-3">
-            <span
-              aria-hidden
-              className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-lg font-semibold shadow-md ${
-                person.gender === "FEMALE"
-                  ? "bg-pink-500 text-white"
-                  : person.gender === "MALE"
-                  ? "bg-brand text-brand-fg"
-                  : "bg-muted text-fg-muted"
-              }`}
-              style={{ fontFamily: "var(--font-serif)" }}
-            >
-              {person.name?.[0] ?? "氏"}
-            </span>
+            {person.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={person.avatarUrl}
+                alt={person.name}
+                className="h-12 w-12 shrink-0 rounded-lg object-cover shadow-md"
+              />
+            ) : (
+              <span
+                aria-hidden
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-lg font-semibold shadow-md ${
+                  person.gender === "FEMALE"
+                    ? "bg-pink-500 text-white"
+                    : person.gender === "MALE"
+                    ? "bg-brand text-brand-fg"
+                    : "bg-muted text-fg-muted"
+                }`}
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                {person.name?.[0] ?? "氏"}
+              </span>
+            )}
             <div className="min-w-0">
               <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
                 {person.name}
@@ -310,7 +321,7 @@ export default async function PersonDetailPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1440px] px-3 py-6 sm:px-5 lg:px-6">
         <div className="grid gap-4 md:grid-cols-3">
           {/* ---------------- 主信息 ---------------- */}
           <section className="md:col-span-2 space-y-4">
@@ -479,6 +490,14 @@ export default async function PersonDetailPage({
                 canEdit={canEdit}
               />
             </Card>
+
+            {/* 影像相册：照片 / 文档 / 老谱扫描件 / 录音 */}
+            <MediaGallery
+              familyId={familyId}
+              personId={personId}
+              canWrite={canEdit}
+              ossReady={ossConfigured()}
+            />
           </section>
 
           {/* ---------------- 边栏 ---------------- */}

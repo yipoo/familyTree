@@ -248,6 +248,33 @@ function TreeCanvasInner({
     return () => clearTimeout(t);
   }, [trigger, focusPersonId, locateId, layout, rf, onSelectChange]);
 
+  // 数据 refetch 之后（layout 引用变了）把镜头跟过去：
+  //   - 当前有选中节点 → setCenter 到它（保持缩放，平滑过渡）
+  //   - 没选中 → fitView 重新整体居中
+  // 否则 React Flow 的 viewport 会停留在旧位置；新增的节点 / 重新排版后的节点
+  // 容易跑到屏外，看上去"画布空了"。
+  const lastLayoutRef = useRef<LayoutResult | null>(null);
+  useEffect(() => {
+    const prev = lastLayoutRef.current;
+    lastLayoutRef.current = layout;
+    if (prev === null) return; // 初次渲染由 <ReactFlow fitView /> 兜底
+    if (prev === layout) return;
+
+    if (selectedId) {
+      const target = layout.nodes.find((n) => n.id === selectedId);
+      if (target) {
+        const { NODE_W, NODE_H } = TREE_LAYOUT_CONSTS;
+        const z = rf.getViewport().zoom;
+        rf.setCenter(target.x + NODE_W / 2, target.y + NODE_H / 2, {
+          zoom: z,
+          duration: 250,
+        });
+        return;
+      }
+    }
+    rf.fitView({ padding: 0.2, maxZoom: 1, duration: 250 });
+  }, [layout, selectedId, rf]);
+
   // 全部折叠 / 全部展开按钮 → 委托外部 actions
   const collapseAll = onCollapseAll;
   const expandAll = onExpandAll;

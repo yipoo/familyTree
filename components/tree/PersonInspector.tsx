@@ -41,6 +41,9 @@ export interface PersonInspectorProps {
   collapsedIds: Set<string>;
   /** 切换某节点的折叠状态 */
   onToggleCollapsed: (id: string) => void;
+  /** 数据发生写入（添加亲属 / 编辑 / 删除）后通知父组件重拉 graph，
+   *  否则仅 router.refresh() 不会让 TreeView 内部 fetch 重跑。 */
+  onDataChanged?: () => void;
 }
 
 type Kind = "father" | "mother" | "spouse" | "son" | "daughter" | "brother" | "sister";
@@ -63,6 +66,7 @@ export function PersonInspector({
   residenceByPersonId,
   collapsedIds,
   onToggleCollapsed,
+  onDataChanged,
 }: PersonInspectorProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -150,6 +154,9 @@ export function PersonInspector({
   const canCollapse = visibleChildCount > 0;
 
   function refresh() {
+    // router.refresh() 只刷 RSC；TreeView 自己拉 graph，需要通过 onDataChanged
+    // 让父组件递增 dataRevision，触发 fetch effect 重跑。
+    onDataChanged?.();
     startTransition(() => router.refresh());
   }
 

@@ -94,8 +94,18 @@ export default async function SubmissionsPage({
                     <StatusBadge status={s.status} />
                   </div>
 
+                  {payload?.source === "collect" && payload.contributor?.name ? (
+                    <p className="mt-2 inline-block rounded bg-emerald-100 px-2 py-0.5 text-[11px] text-emerald-800 dark:bg-emerald-900/40 dark:text-emerald-300">
+                      二维码采集 · 填写人 {payload.contributor.name}
+                      {payload.contributor.relation ? `（${payload.contributor.relation}）` : ""}
+                      {payload.contributor.phone ? ` · ${payload.contributor.phone}` : ""}
+                    </p>
+                  ) : null}
+
                   {payload?.kind === "person-update" ? (
                     <PersonUpdateView payload={payload} />
+                  ) : payload?.kind === "person-add-child" ? (
+                    <AddChildView payload={payload} />
                   ) : (
                     <p className="mt-2 text-xs text-red-600">提交内容无法解析</p>
                   )}
@@ -161,6 +171,55 @@ function PersonUpdateView({
               </td>
             </tr>
           ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+function AddChildView({
+  payload,
+}: {
+  payload: Extract<
+    NonNullable<ReturnType<typeof parsePayload>>,
+    { kind: "person-add-child" }
+  >;
+}) {
+  const c = payload.child;
+  const g = c.gender === "MALE" ? "男" : c.gender === "FEMALE" ? "女" : "不详";
+  return (
+    <div className="mt-2 text-sm">
+      <div className="text-xs text-zinc-500">
+        为 <strong className="text-zinc-700 dark:text-zinc-200">{payload.parentName}</strong> 新增子女
+      </div>
+      <table className="mt-2 w-full text-xs">
+        <tbody>
+          <tr className="border-t border-zinc-100 dark:border-zinc-800">
+            <td className="py-1 pr-4 text-zinc-600 dark:text-zinc-400">姓名</td>
+            <td className="py-1 text-zinc-900 dark:text-zinc-100">{c.name}</td>
+          </tr>
+          <tr className="border-t border-zinc-100 dark:border-zinc-800">
+            <td className="py-1 pr-4 text-zinc-600 dark:text-zinc-400">性别</td>
+            <td className="py-1 text-zinc-900 dark:text-zinc-100">{g}</td>
+          </tr>
+          {c.birthYear ? (
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <td className="py-1 pr-4 text-zinc-600 dark:text-zinc-400">出生年</td>
+              <td className="py-1 text-zinc-900 dark:text-zinc-100">{c.birthYear}</td>
+            </tr>
+          ) : null}
+          {c.birthPlace ? (
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <td className="py-1 pr-4 text-zinc-600 dark:text-zinc-400">出生地</td>
+              <td className="py-1 text-zinc-900 dark:text-zinc-100">{c.birthPlace}</td>
+            </tr>
+          ) : null}
+          {c.note ? (
+            <tr className="border-t border-zinc-100 dark:border-zinc-800">
+              <td className="py-1 pr-4 text-zinc-600 dark:text-zinc-400">备注</td>
+              <td className="py-1 text-zinc-900 dark:text-zinc-100">{c.note}</td>
+            </tr>
+          ) : null}
         </tbody>
       </table>
     </div>

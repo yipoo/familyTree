@@ -1,6 +1,19 @@
 import Link from "next/link";
 
 import { CodeLoginForm } from "./CodeLoginForm";
+import { TestAccountsPanel, type TestAccount } from "./TestAccountsPanel";
+
+// 本地测试账号（仅开发环境展示，见下方 isDev 判断）。统一密码 111111。
+// 约定：本地项目登录页都附带测试账号快捷填充，方便联调。
+const TEST_ACCOUNTS: TestAccount[] = [
+  { phone: "13800138000", name: "总管理员", role: "超管" },
+  { phone: "13800000000", name: "系统管理员", role: "超管" },
+  { phone: "13900139000", name: "zhang", role: "用户" },
+  { phone: "13900000001", name: "测试用户", role: "用户" },
+  { phone: "13900001111", name: "用户1111", role: "用户" },
+  { phone: "13900000002", name: "丁惟磊", role: "管理员·绑惟磊" },
+];
+const TEST_PASSWORD = "111111";
 
 export const dynamic = "force-dynamic";
 
@@ -39,12 +52,15 @@ export default async function LoginPage({
         ? "请填写手机号 / 邮箱和密码"
         : null;
 
+  const isDev = process.env.NODE_ENV !== "production";
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 dark:bg-zinc-950">
+    <div className="flex min-h-screen items-center justify-center bg-zinc-50 px-4 py-8 dark:bg-zinc-950">
+      <div className="w-full max-w-sm">
       <form
         method="POST"
         action="/api/login"
-        className="w-full max-w-sm rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
+        className="w-full rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900"
       >
         <input type="hidden" name="next" value={next} />
         <h1 className="mb-1 text-xl font-semibold">登录</h1>
@@ -100,6 +116,8 @@ export default async function LoginPage({
           </Link>
         </div>
       </form>
+        {isDev && <TestAccountsPanel accounts={TEST_ACCOUNTS} password={TEST_PASSWORD} />}
+      </div>
     </div>
   );
 }

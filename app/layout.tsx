@@ -23,8 +23,8 @@ import "./globals.css";
 export const metadata: Metadata = {
   metadataBase: new URL("https://zupu.app"),
   title: {
-    default: "族谱·家 — 把家族的故事，刻进时间",
-    template: "%s · 族谱·家",
+    default: "家族族谱在线协同管理系统 V1.0",
+    template: "%s · 家族族谱在线协同管理系统",
   },
   description:
     "为中国家族打造的现代化家谱平台。支持关系树、吊线古谱、字辈支系、嫁入嫁出、居住地继承、子树管理员、册谱 PDF 导出、Excel 批量导入、GEDCOM 国际通用导出。50 人以下永久免费。",

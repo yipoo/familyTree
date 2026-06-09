@@ -1,9 +1,12 @@
+import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { LineageTabs } from "@/components/LineageTabs";
 import { lineagePersonWhere, parseLineage } from "@/lib/services/lineage";
 import { StatsCards } from "@/components/stats/StatsCards";
 import { computeFamilyStats } from "@/lib/services/family-stats";
+import { canManageFamily } from "@/app/f/[familyId]/admin/actions";
+import { EmptyFamilyOnboarding } from "@/components/family/EmptyFamilyOnboarding";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +43,14 @@ export default async function FamilyDetailPage({
 
   const familyStats = await computeFamilyStats(familyId);
 
+  // 总人数（不受 lineage 过滤影响）—— 用来判定是否进入空态引导
+  const totalPersons = await prisma.person.count({
+    where: { familyId, deletedAt: null },
+  });
+  const isEmptyFamily = totalPersons === 0;
+  const isManager = await canManageFamily(familyId);
+  const canManage = isEmptyFamily ? isManager : false;
+
   const persons = await prisma.person.findMany({
     where: {
       familyId,
@@ -68,7 +79,7 @@ export default async function FamilyDetailPage({
   return (
     <div>
       <header className="border-b border-hairline bg-surface">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-end justify-between gap-3 px-4 py-6 sm:px-6 lg:px-8">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-3 px-3 py-6 sm:px-5 lg:px-6">
           <div className="min-w-0">
             <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
               {family.surname} 氏 · 概览
@@ -98,7 +109,38 @@ export default async function FamilyDetailPage({
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-4 py-6 sm:px-6 lg:px-8">
+      <main className="mx-auto max-w-[1440px] px-3 py-6 sm:px-5 lg:px-6">
+        {isEmptyFamily ? (
+          <EmptyFamilyOnboarding
+            familyId={familyId}
+            familyName={family.name}
+            canManage={canManage}
+          />
+        ) : (
+          <>
+        {/* 全族功能入口 */}
+        <section className="mb-8">
+          <h2 className="mb-3 text-base font-semibold text-foreground">全族功能</h2>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">
+            <QuickLink href={`/f/${familyId}/tree`} title="树谱" desc="关系树 · 可缩放" emoji="🌳" />
+            <QuickLink href={`/f/${familyId}/table`} title="详细图" desc="家庭单元表" emoji="📋" />
+            <QuickLink href={`/f/${familyId}/lineage`} title="吊线图" desc="父系世系图" emoji="📜" />
+            <QuickLink href={`/f/${familyId}/wufu`} title="五服图" desc="本宗九族服制" emoji="⊚" />
+            <QuickLink href={`/f/${familyId}/circle`} title="族谱圆" desc="同心圆世系" emoji="◎" />
+            <QuickLink href={`/f/${familyId}/album`} title="册谱" desc="成册 · 导出 PDF" emoji="📖" />
+            <QuickLink href={`/f/${familyId}/search`} title="搜索" desc="按姓名找人" emoji="🔍" />
+            <QuickLink href={`/f/${familyId}/photos`} title="家族相册" desc="照片 · 老谱扫描" emoji="🖼️" />
+            {isManager ? (
+              <>
+                <QuickLink href={`/f/${familyId}/admin/migrations`} title="迁徙" desc="支系 / 个人迁徙" emoji="🧭" />
+                <QuickLink href={`/f/${familyId}/admin/data-check`} title="数据体检" desc="一致性纠错" emoji="🩺" />
+                <QuickLink href={`/f/${familyId}/admin/collect`} title="二维码采集" desc="族人扫码自填" emoji="📲" />
+                <QuickLink href={`/f/${familyId}/admin`} title="后台管理" desc="成员/字辈/支系…" emoji="⚙️" />
+              </>
+            ) : null}
+          </div>
+        </section>
+
         {/* 视图统计卡片 */}
         {familyStats && (
           <section className="mb-8">
@@ -228,7 +270,36 @@ export default async function FamilyDetailPage({
             })}
           </div>
         </section>
+          </>
+        )}
       </main>
     </div>
+  );
+}
+
+function QuickLink({
+  href,
+  title,
+  desc,
+  emoji,
+}: {
+  href: string;
+  title: string;
+  desc: string;
+  emoji: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className="flex items-center gap-3 rounded-lg border border-border bg-panel p-3 shadow-sm transition hover:border-brand hover:shadow"
+    >
+      <span aria-hidden className="text-2xl leading-none">
+        {emoji}
+      </span>
+      <span className="min-w-0">
+        <span className="block text-sm font-medium text-foreground">{title}</span>
+        <span className="block truncate text-xs text-fg-subtle">{desc}</span>
+      </span>
+    </Link>
   );
 }
