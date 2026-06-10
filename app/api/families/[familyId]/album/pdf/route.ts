@@ -9,6 +9,7 @@ import { NextResponse } from "next/server";
 
 import { requireFamilyRole } from "@/lib/auth/guard";
 import { handleApiError } from "@/lib/api/error";
+import { attachmentDisposition } from "@/lib/api/download";
 import { buildAlbumBook } from "@/lib/services/album";
 import { renderAlbumPdf } from "@/lib/pdf/album";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -59,7 +60,9 @@ async function albumPdfHandler(
       status: 200,
       headers: {
         "content-type": "application/pdf",
-        "content-disposition": `attachment; filename="album-${book.family.surname}-${book.family.name}.pdf"`,
+        "content-disposition": attachmentDisposition(
+          `${book.family.name}-册谱.pdf`,
+        ),
         "cache-control": "private, max-age=0, must-revalidate",
       },
     });

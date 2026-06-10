@@ -16,6 +16,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireFamilyRole } from "@/lib/auth/guard";
 import { handleApiError } from "@/lib/api/error";
+import { attachmentDisposition } from "@/lib/api/download";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
 import {
   type ExportSnapshot,
@@ -136,7 +137,7 @@ async function exportHandler(
         status: 200,
         headers: {
           "content-type": "application/json; charset=utf-8",
-          "content-disposition": `attachment; filename="${fileBase}.json"`,
+          "content-disposition": attachmentDisposition(`${fileBase}.json`),
         },
       });
     }
@@ -146,7 +147,7 @@ async function exportHandler(
         status: 200,
         headers: {
           "content-type": "application/x-gedcom; charset=utf-8",
-          "content-disposition": `attachment; filename="${fileBase}.ged"`,
+          "content-disposition": attachmentDisposition(`${fileBase}.ged`),
         },
       });
     }
@@ -191,7 +192,7 @@ function csvResponse(body: string, filename: string): NextResponse {
     status: 200,
     headers: {
       "content-type": "text/csv; charset=utf-8",
-      "content-disposition": `attachment; filename="${filename}"`,
+      "content-disposition": attachmentDisposition(filename),
     },
   });
 }

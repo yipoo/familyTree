@@ -12,6 +12,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireFamilyRole } from "@/lib/auth/guard";
 import { handleApiError } from "@/lib/api/error";
+import { attachmentDisposition } from "@/lib/api/download";
 import { layoutLineageChart } from "@/lib/services/lineage-chart";
 import { renderLineageChartPdf } from "@/lib/pdf/lineage-chart";
 import { withRateLimit } from "@/lib/rate-limit-middleware";
@@ -138,7 +139,9 @@ async function lineageChartPdfHandler(
       status: 200,
       headers: {
         "content-type": "application/pdf",
-        "content-disposition": `attachment; filename="lineage-${family.surname}-${rootName}.pdf"`,
+        "content-disposition": attachmentDisposition(
+          `${family.name}-吊线图-${rootName}.pdf`,
+        ),
         "cache-control": "private, max-age=0, must-revalidate",
       },
     });

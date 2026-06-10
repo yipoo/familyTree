@@ -8,6 +8,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
 import { requireFamilyRole } from "@/lib/auth/guard";
 import { handleApiError, notFound } from "@/lib/api/error";
+import { attachmentDisposition } from "@/lib/api/download";
 
 export async function GET(
   _req: Request,
@@ -56,7 +57,7 @@ export async function GET(
       status: 200,
       headers: {
         "content-type": "application/pdf",
-        "content-disposition": `attachment; filename="${filename}"`,
+        "content-disposition": attachmentDisposition(filename),
         "cache-control": "private, max-age=0, must-revalidate",
       },
     });
