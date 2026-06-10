@@ -51,13 +51,14 @@ export function buildFamilyTabs({
     { href: `/f/${familyId}/lineage`, label: "吊线图", icon: "lineage", group: "chart" },
     { href: `/f/${familyId}/wufu`, label: "五服图", icon: "wufu", group: "chart" },
     { href: `/f/${familyId}/circle`, label: "族谱圆", icon: "circle", group: "chart" },
+    { href: `/f/${familyId}/map`, label: "迁徙图", icon: "route", group: "chart" },
     { href: `/f/${familyId}/album`, label: "册谱", icon: "book" },
     { href: `/f/${familyId}/search`, label: "搜索", icon: "search" },
   ];
   if (canManage) {
     tabs.push({
       href: `/f/${familyId}/admin/migrations`,
-      label: "迁徙",
+      label: "迁徙管理",
       icon: "route",
     });
     tabs.push({
