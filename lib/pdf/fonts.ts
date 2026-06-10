@@ -48,3 +48,35 @@ export function ensureCjkFont(): "CJK" | "Helvetica" {
   );
   return "Helvetica";
 }
+
+let brushFamily: string | null = null;
+
+const BRUSH_CANDIDATES = [
+  process.env.CJK_BRUSH_FONT_PATH,
+  // 系统楷体（部署时优先用 CJK_BRUSH_FONT_PATH 指定一个 .ttf/.otf 楷体/行楷）
+  "/System/Library/Fonts/Supplemental/Kaiti.ttc", // 注意 .ttc 不被支持，仅占位
+  path.resolve(process.cwd(), "public/fonts/brush.ttf"),
+  path.resolve(process.cwd(), "public/fonts/kaiti.ttf"),
+].filter((x): x is string => !!x);
+
+/**
+ * 册谱封面竖排题名用的"毛笔/楷体"字体。
+ * 部署时把一个 .ttf/.otf 楷体放到 public/fonts/brush.ttf 或用 CJK_BRUSH_FONT_PATH 指定。
+ * 找不到专用毛笔字体时回退到常规 CJK 字体（竖排仍生效，只是非毛笔风）。
+ */
+export function ensureBrushFont(): string {
+  if (brushFamily) return brushFamily;
+  for (const p of BRUSH_CANDIDATES) {
+    try {
+      if (!fs.existsSync(p)) continue;
+      if (p.toLowerCase().endsWith(".ttc")) continue; // react-pdf 不支持字体集合
+      Font.register({ family: "CJKBrush", src: p });
+      brushFamily = "CJKBrush";
+      return brushFamily;
+    } catch {
+      // try next
+    }
+  }
+  brushFamily = ensureCjkFont(); // 回退常规 CJK
+  return brushFamily;
+}

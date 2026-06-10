@@ -23,7 +23,7 @@ import {
   formatPersonEntryText,
   paginateVolume,
 } from "@/lib/services/album";
-import { ensureCjkFont } from "@/lib/pdf/fonts";
+import { ensureCjkFont, ensureBrushFont } from "@/lib/pdf/fonts";
 import { parseMarkdown } from "@/lib/markdown/parse";
 import { MarkdownPdf } from "@/lib/pdf/markdown-pdf";
 import { AlbumLineageChart } from "@/lib/pdf/album-lineage";
@@ -99,6 +99,7 @@ function AlbumDocument({
   degraded?: boolean;
 }) {
   const styles = makeStyles(fontFamily);
+  const brush = ensureBrushFont();
   const titleZh = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
 
   // 前置章节：与 HTML 合编本同一过滤规则；封面单独处理
@@ -128,9 +129,18 @@ function AlbumDocument({
           <Text style={styles.coverSurname}>
             {book.family.surname} 氏{cover?.subtitle ? ` · ${cover.subtitle}` : "家族"}
           </Text>
-          <Text style={styles.coverTitle}>{cover?.title?.trim() || book.family.name}</Text>
+          {/* 竖排毛笔题名（题签框）：每字一行自上而下 */}
+          <View style={styles.coverTitleFrame}>
+            {Array.from(cover?.title?.trim() || book.family.name).map((ch, i) => (
+              <Text key={i} style={[styles.coverTitleChar, { fontFamily: brush }]}>
+                {ch}
+              </Text>
+            ))}
+          </View>
           {book.family.editionInfo && (
-            <Text style={styles.coverEdition}>·{book.family.editionInfo}·</Text>
+            <Text style={[styles.coverEdition, { fontFamily: brush }]}>
+              ·{book.family.editionInfo}·
+            </Text>
           )}
           {book.family.founderName && (
             <Text style={styles.coverFounder}>始祖 · {book.family.founderName}</Text>
@@ -493,15 +503,22 @@ function makeStyles(fontFamily: string) {
     coverInner: { alignItems: "center" },
     coverImage: { width: 120, height: 120, objectFit: "contain", marginBottom: 18 },
     coverSurname: { fontSize: 14, color: "#64748b", letterSpacing: 4, fontFamily },
-    coverTitle: {
-      marginTop: 18,
-      fontSize: 36,
-      fontWeight: 700,
-      letterSpacing: 8,
-      color: "#0f172a",
-      fontFamily,
+    coverTitleFrame: {
+      marginTop: 22,
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "#27272a",
+      paddingVertical: 18,
+      paddingHorizontal: 18,
     },
-    coverEdition: { marginTop: 8, fontSize: 12, letterSpacing: 4, color: "#475569", fontFamily },
+    coverTitleChar: {
+      fontSize: 40,
+      fontWeight: 700,
+      color: "#0f172a",
+      lineHeight: 1.18,
+      textAlign: "center",
+    },
+    coverEdition: { marginTop: 14, fontSize: 13, letterSpacing: 4, color: "#475569", fontFamily },
     coverFounder: { marginTop: 18, fontSize: 14, color: "#475569", fontFamily },
     coverMeta: { marginTop: 60, fontSize: 9, color: "#94a3b8", fontFamily },
 

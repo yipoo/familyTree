@@ -380,22 +380,32 @@ function coverPage(
       <p className="text-xs tracking-[0.3em] text-zinc-500">
         {book.family.surname} 氏{cover?.subtitle?.trim() ? ` · ${cover.subtitle}` : " · 合编本"}
       </p>
-      <h1
-        className="mt-6 text-4xl font-semibold tracking-[0.25em] text-zinc-900"
-        style={{ fontFamily: "var(--font-serif)" }}
-      >
-        {mainTitle}
-      </h1>
-      <h2
-        className="mt-3 text-base tracking-widest text-zinc-600"
-        style={{ fontFamily: "var(--font-serif)" }}
-      >
-        家 谱
-      </h2>
+      {/* 竖排毛笔题名（双线题签框，传统家谱封面样式）*/}
+      <div className="mt-6 border-4 border-double border-zinc-800 px-7 py-9">
+        <h1
+          className="text-5xl font-semibold text-zinc-900"
+          style={{
+            fontFamily: "var(--font-brush)",
+            writingMode: "vertical-rl",
+            letterSpacing: "0.3em",
+            lineHeight: 1.1,
+          }}
+        >
+          {mainTitle}
+        </h1>
+      </div>
+      {!mainTitle.includes("谱") && (
+        <h2
+          className="mt-4 text-lg tracking-[0.5em] text-zinc-600"
+          style={{ fontFamily: "var(--font-brush)" }}
+        >
+          家 谱
+        </h2>
+      )}
       {book.family.editionInfo && (
         <p
-          className="mt-2 text-sm tracking-widest text-zinc-700"
-          style={{ fontFamily: "var(--font-serif)" }}
+          className="mt-3 text-base tracking-widest text-zinc-700"
+          style={{ fontFamily: "var(--font-brush)" }}
         >
           ·{book.family.editionInfo}·
         </p>

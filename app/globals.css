@@ -103,6 +103,8 @@
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
   --font-serif: var(--font-noto-serif-sc);
+  /* 毛笔/楷体：册谱封面竖排题名用；优先系统楷体，回退衬线 */
+  --font-brush: "Kaiti SC", STKaiti, KaiTi, "楷体", "楷体_GB2312", "Noto Serif SC", var(--font-serif), serif;
 }
 
 html {
