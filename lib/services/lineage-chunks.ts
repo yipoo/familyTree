@@ -30,6 +30,25 @@ const MAX_GEN_PER_CHART = 5; // 每图最多 5 代（与欧式 5 列对齐，便
 const MAX_LEAVES_PER_CHART = 8; // 每图最多 ~8 列（控宽度 → 各图缩放一致）
 const MAX_CHARTS = 9000; // 安全上限，避免病态数据无限分图
 
+/** 欧式详录一个单元格（一个人）。 */
+export interface OuyangDetailCell {
+  id: string;
+  name: string;
+  generationChar: string | null;
+  /** 字号 + 生卒 短注，如「字伯温 1900—1970」。 */
+  annotation: string;
+  /** 配偶（妻）姓名。 */
+  wives: string[];
+  /** 0-based 列号 = generation - chunk.startGen（0..4），用于在 5 列网格里定位。 */
+  col: number;
+}
+
+/**
+ * 欧式详录一行：cells 按列号升序、可不连续（前导列留空——其祖先已在上一行铺出，
+ * 靠位置自明父子，省略 rowSpan）。一行内每列至多一个 cell。
+ */
+export type OuyangDetailRow = OuyangDetailCell[];
+
 export interface LineageChunk {
   index: number;
   rootId: string;
@@ -39,6 +58,8 @@ export interface LineageChunk {
   maleIds: string[];
   layout: ReturnType<typeof layoutLineageChart>;
   continuationCount: number;
+  /** 与本图一一对应的欧式详录（5 列横排，父子靠位置对齐）。 */
+  detailRows: OuyangDetailRow[];
 }
 
 /**
@@ -139,6 +160,14 @@ export function chunkLineage(input: {
         maleIds: [...chunkMales],
         layout,
         continuationCount: continuations.length,
+        detailRows: buildDetailRows(
+          rootId,
+          root.generation,
+          chunkMales,
+          input.tree.childrenOf,
+          personById,
+          wivesOf,
+        ),
       });
     }
 
@@ -149,6 +178,58 @@ export function chunkLineage(input: {
     }
   }
   return chunks;
+}
+
+/** 字号 + 生卒短注（与 components/album/tree-data.ts:shortPersonAnnotation 一致）。 */
+function shortAnnotation(p: LineagePerson): string {
+  const bits: string[] = [];
+  if (p.alias) bits.push(`字${p.alias}`);
+  if (p.birthYear || p.deathYear) {
+    bits.push(`${p.birthYear ?? "?"}—${p.deathYear ?? ""}`);
+  }
+  return bits.join(" ");
+}
+
+/**
+ * 为一个吊线图分块生成「欧式详录」行（与 components/album/OuyangPages.tsx:layoutChunk
+ * 同构，但产出可序列化的扁平行结构，便于 react-pdf 逐行流式分页，不依赖 HTML table/rowSpan）。
+ *
+ * 递归规则：叶子自成一行；有子嗣者把「自己」prepend 到第一个子行的行首，其余子行原样下挂。
+ * 于是兄弟自然纵向堆叠、父子靠列位（generation - startGen）对齐——正是欧式「省略连线、
+ * 以位置自明」的版式。仅在 maleSet 内展开（≤5 代），续接点的后嗣在别图另展。
+ */
+export function buildDetailRows(
+  rootId: string,
+  startGen: number,
+  maleSet: Set<string>,
+  childrenOf: Map<string, string[]>,
+  personById: Map<string, LineagePerson>,
+  wivesOf: Map<string, string[]>,
+): OuyangDetailRow[] {
+  const cellOf = (p: LineagePerson): OuyangDetailCell => ({
+    id: p.id,
+    name: p.name,
+    generationChar: p.generationChar,
+    annotation: shortAnnotation(p),
+    wives: (wivesOf.get(p.id) ?? [])
+      .map((id) => personById.get(id)?.name ?? "")
+      .filter((n) => n.length > 0),
+    col: p.generation - startGen,
+  });
+
+  const build = (id: string): OuyangDetailRow[] => {
+    const p = personById.get(id);
+    if (!p) return [];
+    const kids = (childrenOf.get(id) ?? []).filter((k) => maleSet.has(k));
+    if (kids.length === 0) return [[cellOf(p)]];
+    const childRows = kids.flatMap(build);
+    if (childRows.length === 0) return [[cellOf(p)]];
+    // 把自己接到第一个子行行首；后续兄弟行前导列留空（靠位置对齐）
+    childRows[0] = [cellOf(p), ...childRows[0]];
+    return childRows;
+  };
+
+  return build(rootId);
 }
 
 /** 把 TreePerson / TreeEdge / TreeMarriage 转成 lineage-chart 需要的入参。 */

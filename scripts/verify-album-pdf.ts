@@ -31,7 +31,8 @@ async function main() {
   if (!familyId) return console.log("没有家族数据");
 
   const t0 = Date.now();
-  const book = await buildAlbumBook(familyId);
+  // withLineage: true —— 计算世系图录吊线图分块 + 欧式详录（PDF 正文），与导出路径一致
+  const book = await buildAlbumBook(familyId, { withLineage: true });
   if (!book) return console.log("buildAlbumBook 返回 null");
 
   const entries = book.volumes.reduce(

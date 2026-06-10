@@ -103,6 +103,23 @@ export function buildCompletePages(input: {
     .map((s) => renderSection(s, ctx))
     .filter((s): s is RenderedSection => s !== null && s.pages.length > 0);
 
+  // 图录奇偶对齐：世系图录第一张吊线图（自一世始祖起）必须落在奇数页（右页）。
+  // 图录段结构为 [分隔页, 图1, 录1, 图2, 录2, …]，图与详录两页一对——
+  // 图1 对齐到奇数页后，全部吊线图皆在右页、欧式详录皆在左页，正合传统对开体例
+  // （同时分隔页恰落左页，与图1 同一对开）。
+  // 图1 的 1-based 页码 = 累计页数 + 2（分隔页占 +1），为奇 ⇔ 累计页数为奇；
+  // 不满足则在分隔页前插一张空白衬页，并同步平移该段人物索引。
+  {
+    let acc = 2; // 封面 + 目录
+    for (const s of sections) {
+      if (s.isTulu && acc % 2 === 0) {
+        s.pages.unshift(blankFacingPage(book));
+        if (s.index) s.index = s.index.map((e) => ({ ...e, page: e.page + 1 }));
+      }
+      acc += s.pages.length;
+    }
+  }
+
   // 组装：封面 + 目录 + 各章节
   const pages: React.ReactNode[] = [];
   pages.push(coverPage(book, sections.length, cover));
@@ -139,7 +156,23 @@ type RenderedSection = {
   title: string;
   pages: React.ReactNode[];
   index?: AlbumIndexEntry[];
+  /** 世系图录段（用于图录奇偶对齐：图在右页、录在左页） */
+  isTulu?: boolean;
 };
+
+/** 空白衬页：用于把图录第一张图垫到奇数页（右页），仿传统书籍衬页带极淡书名。 */
+function blankFacingPage(book: AlbumBook) {
+  return (
+    <div className="flex h-full items-center justify-center">
+      <p
+        className="text-xs tracking-[0.6em] text-zinc-300"
+        style={{ fontFamily: "var(--font-serif)" }}
+      >
+        {book.family.name}
+      </p>
+    </div>
+  );
+}
 
 /**
  * 把一个解析后的章节渲染成页。返回 null = 该章节无内容（不进册、不进目录）。
@@ -301,7 +334,7 @@ function buildTuluSection(title: string, ctx: SectionCtx): RenderedSection | nul
       }
     }
   }
-  return { title, pages, index };
+  return { title, pages, index, isTulu: true };
 }
 
 /** 用户填了 markdown 正文时的章节渲染：标题 + markdown 分页 + 落款。 */
