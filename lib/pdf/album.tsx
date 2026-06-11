@@ -273,38 +273,50 @@ function PackDetailPage({
               </Text>
             ))}
           </View>
-          {chunk.detailRows.map((row, ri) => (
-            <View key={ri} style={styles.detailRow} wrap={false}>
-              {Array.from({ length: DETAIL_COLS }, (_, c) => {
-                const cell = row.find((x) => x.col === c);
-                return (
-                  <View key={c} style={styles.detailSlot}>
-                    {cell ? (
-                      <View style={styles.detailCell}>
-                        <Text style={[styles.detailName, { fontSize: 8 * k }]}>
-                          {cell.name}
-                          {cell.generationChar ? (
-                            <Text style={styles.detailGenChar}> {cell.generationChar}</Text>
-                          ) : null}
-                        </Text>
-                        {cell.annotation ? (
-                          <Text style={[styles.detailAnno, { fontSize: 6.5 * k }]}>{cell.annotation}</Text>
-                        ) : null}
-                        {cell.wives.length > 0 ? (
-                          <Text style={[styles.detailWives, { fontSize: 7 * k }]}>妻 {cell.wives.join("、")}</Text>
-                        ) : null}
-                        {cell.sons.length > 0 ? (
-                          <Text style={[styles.detailSons, { fontSize: 6.5 * k }]}>
-                            子{cell.sons.length}：{cell.sons.join("　")}
+          {/* 方格表（与 HTML TuluDetailTable 同构：共边框网格，空格也画框；
+              名/注/妻一行，子嗣换行小字） */}
+          <View style={styles.detailGrid}>
+            {chunk.detailRows.map((row, ri) => (
+              <View key={ri} style={styles.detailRow} wrap={false}>
+                {Array.from({ length: DETAIL_COLS }, (_, c) => {
+                  const cell = row.find((x) => x.col === c);
+                  return (
+                    <View key={c} style={styles.detailSlot}>
+                      {cell ? (
+                        <>
+                          <Text style={[styles.detailName, { fontSize: 8 * k }]}>
+                            {cell.name}
+                            {cell.generationChar ? (
+                              <Text style={[styles.detailGenChar, { fontSize: 6 * k }]}>
+                                {" "}
+                                {cell.generationChar}
+                              </Text>
+                            ) : null}
+                            {cell.annotation ? (
+                              <Text style={[styles.detailAnno, { fontSize: 6.5 * k }]}>
+                                {" "}
+                                {cell.annotation}
+                              </Text>
+                            ) : null}
+                            {cell.wives.length > 0 ? (
+                              <Text style={[styles.detailWives, { fontSize: 6.5 * k }]}>
+                                　妻{cell.wives.join("、")}
+                              </Text>
+                            ) : null}
                           </Text>
-                        ) : null}
-                      </View>
-                    ) : null}
-                  </View>
-                );
-              })}
-            </View>
-          ))}
+                          {cell.sons.length > 0 ? (
+                            <Text style={[styles.detailSons, { fontSize: 6.5 * k }]}>
+                              子{numToHan(cell.sons.length)}：{cell.sons.join("　")}
+                            </Text>
+                          ) : null}
+                        </>
+                      ) : null}
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
         </View>
       ))}
       <Footer />
@@ -509,6 +521,14 @@ function renderSectionContent(
     default:
       return null;
   }
+}
+
+/** 子嗣数 → 汉字（与 HTML TuluDetailTable.numToHan 同构） */
+function numToHan(n: number): string {
+  const map = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+  if (n <= 10) return map[n];
+  if (n < 20) return "十" + map[n - 10];
+  return String(n);
 }
 
 function roleLabel(role: string): string {
@@ -735,19 +755,25 @@ function makeStyles(fontFamily: string) {
       textAlign: "center",
       fontFamily,
     },
-    detailRow: { flexDirection: "row", marginTop: 3 },
-    detailSlot: { width: `${100 / 6}%`, paddingHorizontal: 1 },
-    detailCell: {
-      borderWidth: 0.5,
+    detailGrid: {
+      marginTop: 2,
+      borderLeftWidth: 0.5,
+      borderTopWidth: 0.5,
       borderColor: "#cbd5e1",
-      borderRadius: 2,
-      paddingHorizontal: 3,
-      paddingVertical: 2,
     },
-    detailName: { fontSize: 9.5, fontWeight: 700, color: "#0f172a", fontFamily },
-    detailGenChar: { fontSize: 7, color: "#94a3b8", fontFamily },
-    detailAnno: { marginTop: 1, fontSize: 7, lineHeight: 1.4, color: "#64748b", fontFamily },
-    detailSons: { fontSize: 6.5, color: "#a1a1aa", marginTop: 1, fontFamily },
-    detailWives: { marginTop: 1, fontSize: 7, lineHeight: 1.4, color: "#9f1239", fontFamily },
+    detailRow: { flexDirection: "row" },
+    detailSlot: {
+      width: `${100 / 6}%`,
+      borderRightWidth: 0.5,
+      borderBottomWidth: 0.5,
+      borderColor: "#cbd5e1",
+      paddingHorizontal: 2,
+      paddingVertical: 1.5,
+    },
+    detailName: { fontSize: 8, lineHeight: 1.45, fontWeight: 700, color: "#0f172a", fontFamily },
+    detailGenChar: { fontSize: 6, color: "#94a3b8", fontFamily },
+    detailAnno: { fontSize: 6.5, color: "#64748b", fontFamily },
+    detailSons: { fontSize: 6.5, lineHeight: 1.4, color: "#71717a", marginTop: 1, fontFamily },
+    detailWives: { fontSize: 6.5, color: "#9f1239", fontFamily },
   });
 }

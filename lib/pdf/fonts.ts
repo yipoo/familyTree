@@ -14,6 +14,13 @@ import path from "node:path";
 
 import { Font } from "@react-pdf/renderer";
 
+import { splitCjkForWrap } from "@/lib/pdf/cjk-wrap";
+
+// CJK 逐字断行：react-pdf 只按 ASCII 空格分词，中文整段会被当成一个超长"词"
+// 溢出页缘且无法换行。注册全局回调逐字拆分（含避头尾，见 lib/pdf/cjk-wrap.ts）；
+// 行尾不插 "-" 由 patches/@react-pdf__textkit 补丁保证。
+Font.registerHyphenationCallback(splitCjkForWrap);
+
 let registered = false;
 
 /**

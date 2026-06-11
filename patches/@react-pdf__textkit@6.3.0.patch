@@ -1,0 +1,20 @@
+diff --git a/lib/textkit.js b/lib/textkit.js
+index 0b8b6fa636c48ef0ac9cecb27040d2bac9303ce8..8baf685a167c76220f962e7c9484416e0f1128c0 100644
+--- a/lib/textkit.js
++++ b/lib/textkit.js
+@@ -2600,7 +2600,14 @@ const breakLines = (attributedString, nodes, breaks) => {
+             // @ts-expect-error penalty node will always preceed box or glue node
+             end = prevNode.end;
+             line = slice(start, end, attributedString);
+-            line = insertGlyph(line.string.length, HYPHEN, line);
++            // CJK 断行（hyphenationCallback 逐字拆分产生的 penalty 断点）不插连字符：
++            // 中文排版行尾不加 "-"，西文音节断行行为保持不变。
++            const lastChar = line.string[line.string.length - 1];
++            const cjkBreak = !!lastChar &&
++                /[⺀-鿿　-〿豈-﫿︰-﹏＀-￯]/.test(lastChar);
++            if (!cjkBreak) {
++                line = insertGlyph(line.string.length, HYPHEN, line);
++            }
+         }
+         else {
+             end = node.end;
