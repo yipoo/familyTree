@@ -22,6 +22,7 @@ import {
   chunkLineage,
   toLineageInputs,
   packLineageChunks,
+  packDetailWeight,
   type LineagePack,
 } from "@/lib/services/lineage-chunks";
 import { VerticalLineageSvg } from "./VerticalLineageSvg";
@@ -397,8 +398,10 @@ function packChartPage(
   );
 }
 
-/** 录页：页组内各块的紧凑详录表格连排（与图页一一对应）。 */
+/** 录页：页组内各块的紧凑详录表格连排（与图页一一对应）。
+ * 组加权行超预算（单块大组）时按比例缩小字号，保证一页塞下不裁切。 */
 function packDetailPage(pk: LineagePack, familyName: string) {
+  const scale = Math.max(0.62, Math.min(1, 18 / Math.max(packDetailWeight(pk.chunks), 1)));
   return (
     <div className="flex h-full flex-col" key={`pack-detail-${pk.index}`}>
       <h3
@@ -409,7 +412,7 @@ function packDetailPage(pk: LineagePack, familyName: string) {
       </h3>
       <div className="min-h-0 flex-1 overflow-hidden">
         {pk.chunks.map((c) => (
-          <TuluDetailTable key={c.rootId} chunk={c} />
+          <TuluDetailTable key={c.rootId} chunk={c} scale={scale} />
         ))}
       </div>
       <p className="mt-1 text-center text-[10px] text-zinc-400">

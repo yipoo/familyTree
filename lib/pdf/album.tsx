@@ -21,7 +21,7 @@ import {
 } from "@react-pdf/renderer";
 
 import { type AlbumBook } from "@/lib/services/album";
-import { packLineageChunks, DETAIL_COLS } from "@/lib/services/lineage-chunks";
+import { packLineageChunks, packDetailWeight, DETAIL_COLS } from "@/lib/services/lineage-chunks";
 import { fitSectionTypography, countBlockChars } from "@/lib/services/album-typo";
 import { ensureCjkFont, ensureBrushFont } from "@/lib/pdf/fonts";
 import { parseMarkdown } from "@/lib/markdown/parse";
@@ -255,6 +255,8 @@ function PackDetailPage({
   familyName: string;
   title: string;
 }) {
+  // 组加权行超预算（单块大组）时按比例缩小字号，保证录页不溢出到下一物理页
+  const k = Math.max(0.62, Math.min(1, 18 / Math.max(packDetailWeight(pack.chunks), 1)));
   return (
     <Page size="A4" style={styles.page} wrap>
       <Header title={familyName} fontFamily={fontFamily} />
@@ -279,20 +281,20 @@ function PackDetailPage({
                   <View key={c} style={styles.detailSlot}>
                     {cell ? (
                       <View style={styles.detailCell}>
-                        <Text style={styles.detailName}>
+                        <Text style={[styles.detailName, { fontSize: 8 * k }]}>
                           {cell.name}
                           {cell.generationChar ? (
                             <Text style={styles.detailGenChar}> {cell.generationChar}</Text>
                           ) : null}
                         </Text>
                         {cell.annotation ? (
-                          <Text style={styles.detailAnno}>{cell.annotation}</Text>
+                          <Text style={[styles.detailAnno, { fontSize: 6.5 * k }]}>{cell.annotation}</Text>
                         ) : null}
                         {cell.wives.length > 0 ? (
-                          <Text style={styles.detailWives}>妻 {cell.wives.join("、")}</Text>
+                          <Text style={[styles.detailWives, { fontSize: 7 * k }]}>妻 {cell.wives.join("、")}</Text>
                         ) : null}
                         {cell.sons.length > 0 ? (
-                          <Text style={styles.detailSons}>
+                          <Text style={[styles.detailSons, { fontSize: 6.5 * k }]}>
                             子{cell.sons.length}：{cell.sons.join("　")}
                           </Text>
                         ) : null}

@@ -13,17 +13,25 @@ import {
   type LineageChunk,
 } from "@/lib/services/lineage-chunks";
 
-export function TuluDetailTable({ chunk }: { chunk: LineageChunk }) {
+export function TuluDetailTable({
+  chunk,
+  scale = 1,
+}: {
+  chunk: LineageChunk;
+  /** 字号缩放（组加权行超预算时 <1，由 packDetailPage 计算），保证一页塞下不裁切 */
+  scale?: number;
+}) {
   const cols = DETAIL_COLS;
+  const fs = (px: number) => `${Math.round(px * scale * 10) / 10}px`;
   return (
     <div className="mb-3 break-inside-avoid">
       {/* 块头：根公 + 世代列头 */}
-      <p className="mb-1 text-[11px] text-zinc-500">
+      <p className="mb-1 text-zinc-500" style={{ fontSize: fs(11) }}>
         自 {chunk.startGen} 世「{chunk.rootName}」起
       </p>
       <div
-        className="grid border-b border-zinc-400 pb-0.5 text-center text-[10px] font-medium text-zinc-600"
-        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+        className="grid border-b border-zinc-400 pb-0.5 text-center font-medium text-zinc-600"
+        style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`, fontSize: fs(10) }}
       >
         {Array.from({ length: cols }, (_, c) => (
           <span key={c}>{chunk.startGen + c} 世</span>
@@ -46,10 +54,10 @@ export function TuluDetailTable({ chunk }: { chunk: LineageChunk }) {
                 >
                   {cell && (
                     <>
-                      <p className="text-[10px] leading-4 text-zinc-800">
+                      <p className="text-zinc-800" style={{ fontSize: fs(10), lineHeight: 1.45 }}>
                         <span
-                          className="text-[11px] font-semibold text-zinc-900"
-                          style={{ fontFamily: "var(--font-serif)" }}
+                          className="font-semibold text-zinc-900"
+                          style={{ fontFamily: "var(--font-serif)", fontSize: fs(11) }}
                         >
                           {cell.name}
                         </span>
@@ -66,7 +74,7 @@ export function TuluDetailTable({ chunk }: { chunk: LineageChunk }) {
                         )}
                       </p>
                       {cell.sons.length > 0 && (
-                        <p className="font-sans text-[9px] leading-[1.5] text-zinc-500">
+                        <p className="font-sans text-zinc-500" style={{ fontSize: fs(9), lineHeight: 1.4 }}>
                           子{numToHan(cell.sons.length)}：{cell.sons.join("　")}
                         </p>
                       )}

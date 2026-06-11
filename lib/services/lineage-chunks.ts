@@ -419,6 +419,12 @@ export interface PackOptions {
   maxPersons?: number;
   /** 每页组最多堆叠的图块数，默认 3（一页 A4 竖版堆 3 张小图为宜） */
   maxChunks?: number;
+  /**
+   * 每页组详录加权行数上限（每行 1、含子嗣行 +1、块头 +1），默认 18——
+   * 录页一页的排版预算；超限即断组。单块超预算时由渲染端缩小字号兜底，
+   * 保证屏幕端不被裁切、PDF 端不溢出到下一物理页。
+   */
+  maxDetailRows?: number;
 }
 
 /**
@@ -427,32 +433,53 @@ export interface PackOptions {
  * 小块为"页组"——一页吊线图纵向堆 1~maxChunks 张小图，详录页连排各块表格。
  * 大块（人数 ≥ maxPersons）自然独占一组。纯函数，可单测。
  */
+/** 块的详录"加权行数"：每行 1，行内任一格有子嗣（换行展示）再 +1；块头 +1。 */
+export function chunkDetailWeight(c: LineageChunk): number {
+  return 1 + c.detailRows.reduce((r, row) => r + 1 + (row.some((x) => x.sons.length > 0) ? 1 : 0), 0);
+}
+
+/** 页组的详录加权行数合计（录页排版预算/字号自适应共用）。 */
+export function packDetailWeight(chunks: LineageChunk[]): number {
+  return chunks.reduce((s, c) => s + chunkDetailWeight(c), 0);
+}
+
 export function packLineageChunks(
   chunks: LineageChunk[],
   opts: PackOptions = {},
 ): LineagePack[] {
   const maxPersons = opts.maxPersons ?? 30;
   const maxChunks = opts.maxChunks ?? 3;
+  const maxDetailRows = opts.maxDetailRows ?? 18;
   const packs: LineagePack[] = [];
   let cur: LineageChunk[] = [];
   let persons = 0;
+  let rows = 0;
 
   const flush = () => {
     if (cur.length > 0) {
       packs.push({ index: packs.length + 1, chunks: cur, persons });
       cur = [];
       persons = 0;
+      rows = 0;
     }
   };
 
   for (const c of chunks) {
     const n = c.maleIds.length;
+    const r = chunkDetailWeight(c); // 加权行（含子嗣换行与块头）
     const crossBranch = cur.length > 0 && cur[0].branchName !== c.branchName;
-    if (cur.length > 0 && (persons + n > maxPersons || cur.length >= maxChunks || crossBranch)) {
+    if (
+      cur.length > 0 &&
+      (persons + n > maxPersons ||
+        rows + r > maxDetailRows ||
+        cur.length >= maxChunks ||
+        crossBranch)
+    ) {
       flush();
     }
     cur.push(c);
     persons += n;
+    rows += r;
   }
   flush();
   return packs;
