@@ -41,7 +41,14 @@ export function LineageChartSvg({
   generationChars,
   showGenerationChar = true,
   refWidth,
-}: LineageChartSvgProps) {
+  fit = "width",
+}: LineageChartSvgProps & {
+  /**
+   * width（默认）：宽度撑满容器、高度按比例自适应（单图浏览）；
+   * contain：宽高都受父容器约束、整图等比缩入（册谱一页堆叠多图用）。
+   */
+  fit?: "width" | "contain";
+}) {
   const headerH = subtitle ? 70 : 44;
   const genCol = 28;
   const w = layout.width + genCol;
@@ -55,16 +62,26 @@ export function LineageChartSvg({
       xmlns="http://www.w3.org/2000/svg"
       width="100%"
       viewBox={`0 0 ${vbW} ${h}`}
-      preserveAspectRatio="xMidYMin meet"
-      style={{
-        background: "#ffffff",
-        fontFamily: "system-ui, sans-serif",
-        // 视窗适配：宽度 100% 撑满容器，高度由 viewBox 比例换算（保持长宽比）
-        // 上限避免超大族谱在小屏被压扁到不可读
-        maxHeight: "85vh",
-        height: "auto",
-        display: "block",
-      }}
+      preserveAspectRatio={fit === "contain" ? "xMidYMid meet" : "xMidYMin meet"}
+      style={
+        fit === "contain"
+          ? {
+              background: "#ffffff",
+              fontFamily: "system-ui, sans-serif",
+              width: "100%",
+              height: "100%",
+              display: "block",
+            }
+          : {
+              background: "#ffffff",
+              fontFamily: "system-ui, sans-serif",
+              // 视窗适配：宽度 100% 撑满容器，高度由 viewBox 比例换算（保持长宽比）
+              // 上限避免超大族谱在小屏被压扁到不可读
+              maxHeight: "85vh",
+              height: "auto",
+              display: "block",
+            }
+      }
     >
       {/* 标题 */}
       <text

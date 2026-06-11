@@ -117,3 +117,42 @@ describe("buildDetailRows", () => {
     expect(cell.wives).toEqual(["王氏"]);
   });
 });
+
+import { packLineageChunks, type LineageChunk } from "@/lib/services/lineage-chunks";
+
+function mkChunk(id: string, persons: number): LineageChunk {
+  return {
+    index: 0, rootId: id, rootName: id, startGen: 1,
+    maleIds: Array.from({ length: persons }, (_, i) => `${id}-${i}`),
+    layout: { nodes: [], lines: [], generations: [], yByGen: {}, width: 100, height: 100 } as never,
+    continuationCount: 0, detailRows: [],
+  };
+}
+
+describe("packLineageChunks", () => {
+  it("小块按序合并，超人数或超块数即断组", () => {
+    const packs = packLineageChunks(
+      [mkChunk("a", 10), mkChunk("b", 10), mkChunk("c", 15), mkChunk("d", 5)],
+      { maxPersons: 30, maxChunks: 3 },
+    );
+    // a+b=20，再加 c=35 超 → [a,b] [c,d]
+    expect(packs.map((p) => p.chunks.map((c) => c.rootId))).toEqual([["a", "b"], ["c", "d"]]);
+    expect(packs[0].persons).toBe(20);
+    expect(packs[1].persons).toBe(20);
+  });
+
+  it("大块独占一组；块数上限生效", () => {
+    const packs = packLineageChunks(
+      [mkChunk("big", 40), mkChunk("a", 3), mkChunk("b", 3), mkChunk("c", 3), mkChunk("d", 3)],
+      { maxPersons: 30, maxChunks: 3 },
+    );
+    expect(packs[0].chunks.map((c) => c.rootId)).toEqual(["big"]);
+    expect(packs[1].chunks).toHaveLength(3); // a b c（块数上限）
+    expect(packs[2].chunks.map((c) => c.rootId)).toEqual(["d"]);
+    expect(packs.map((p) => p.index)).toEqual([1, 2, 3]);
+  });
+
+  it("空输入 → 空", () => {
+    expect(packLineageChunks([])).toEqual([]);
+  });
+});

@@ -26,9 +26,15 @@ import {
   type LineageMarriageIn,
 } from "@/lib/services/lineage-chart";
 
-const MAX_GEN_PER_CHART = 5; // 每图最多 5 代（与欧式 5 列对齐，便于图录配对）
-const MAX_LEAVES_PER_CHART = 8; // 每图最多 ~8 列（控宽度 → 各图缩放一致）
+// 参照 1995 四修谱版式放宽：每图 6 代 / ~14 列（旧 5 代 8 列致丁氏 1159 块、
+// 平均仅 7.4 人/块，页面稀疏）。调整后约 870 块、9.5 人/块，再经 packLineageChunks
+// 小块打包后页数减半以上。
+const MAX_GEN_PER_CHART = 6; // 每图最多 6 代（1995 谱一页世系图为 16—21 世六代）
+const MAX_LEAVES_PER_CHART = 14; // 每图最多 ~14 列
 const MAX_CHARTS = 9000; // 安全上限，避免病态数据无限分图
+
+/** 详录每行 6 列（与 MAX_GEN_PER_CHART 对齐）。 */
+export const DETAIL_COLS = MAX_GEN_PER_CHART;
 
 /** 欧式详录一个单元格（一个人）。 */
 export interface OuyangDetailCell {
@@ -39,7 +45,9 @@ export interface OuyangDetailCell {
   annotation: string;
   /** 配偶（妻）姓名。 */
   wives: string[];
-  /** 0-based 列号 = generation - chunk.startGen（0..4），用于在 5 列网格里定位。 */
+  /** 儿子姓名（全量，含续接到别图者），仿 1995 谱"妻某氏子三：名名名"体例。 */
+  sons: string[];
+  /** 0-based 列号 = generation - chunk.startGen（0..DETAIL_COLS-1），用于在网格里定位。 */
   col: number;
 }
 
@@ -214,6 +222,9 @@ export function buildDetailRows(
     wives: (wivesOf.get(p.id) ?? [])
       .map((id) => personById.get(id)?.name ?? "")
       .filter((n) => n.length > 0),
+    sons: (childrenOf.get(p.id) ?? [])
+      .map((id) => personById.get(id)?.name ?? "")
+      .filter((n) => n.length > 0),
     col: p.generation - startGen,
   });
 
@@ -269,4 +280,55 @@ export function toLineageInputs(input: {
       order: m.order,
     })),
   };
+}
+
+/** 一个"图录页组"：一页吊线图（可堆叠多个小块）+ 一页详录，仍保持图右录左对开。 */
+export interface LineagePack {
+  index: number;
+  chunks: LineageChunk[];
+  /** 组内总人数（男丁） */
+  persons: number;
+}
+
+export interface PackOptions {
+  /** 每页组最多容纳的人数（男丁），默认 30——超过则该块独占一组 */
+  maxPersons?: number;
+  /** 每页组最多堆叠的图块数，默认 3（一页 A4 竖版堆 3 张小图为宜） */
+  maxChunks?: number;
+}
+
+/**
+ * 小块打包（参照 1995 四修谱 p26/27 的紧凑版式）：续接切分会产生大量小块
+ * （丁氏平均 <10 人/块），逐块一页图一页录则页面稀疏。这里按序贪心合并相邻
+ * 小块为"页组"——一页吊线图纵向堆 1~maxChunks 张小图，详录页连排各块表格。
+ * 大块（人数 ≥ maxPersons）自然独占一组。纯函数，可单测。
+ */
+export function packLineageChunks(
+  chunks: LineageChunk[],
+  opts: PackOptions = {},
+): LineagePack[] {
+  const maxPersons = opts.maxPersons ?? 30;
+  const maxChunks = opts.maxChunks ?? 3;
+  const packs: LineagePack[] = [];
+  let cur: LineageChunk[] = [];
+  let persons = 0;
+
+  const flush = () => {
+    if (cur.length > 0) {
+      packs.push({ index: packs.length + 1, chunks: cur, persons });
+      cur = [];
+      persons = 0;
+    }
+  };
+
+  for (const c of chunks) {
+    const n = c.maleIds.length;
+    if (cur.length > 0 && (persons + n > maxPersons || cur.length >= maxChunks)) {
+      flush();
+    }
+    cur.push(c);
+    persons += n;
+  }
+  flush();
+  return packs;
 }

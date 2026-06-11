@@ -18,8 +18,14 @@
  */
 import type { AlbumBook } from "@/lib/services/album";
 
-import { chunkLineage, buildPagodaChartPage, toLineageInputs } from "./PagodaPages";
-import { buildOuyangDetailForChunk } from "./OuyangPages";
+import {
+  chunkLineage,
+  toLineageInputs,
+  packLineageChunks,
+  type LineagePack,
+} from "@/lib/services/lineage-chunks";
+import { LineageChartSvg } from "@/components/charts/LineageChartSvg";
+import { TuluDetailTable } from "./TuluDetailTable";
 import {
   buildTreeData,
   type TreeEdge,
@@ -299,42 +305,103 @@ export function buildFrontMatterPages(book: AlbumBook, style: string): React.Rea
   return pages;
 }
 
-/** 世系图录：吊线图 + 欧式详录配对，产出人物索引（相对段首页码）。 */
+/**
+ * 世系图录：图录页组配对（参照 1995 四修谱 p26/27 紧凑版式）。
+ * 小块经 packLineageChunks 打包——图页纵向堆 1~3 张小图，详录页表格连排，
+ * 仍保持"图右页、录左页"对开；产出人物索引（相对段首页码）。
+ */
 function buildTuluSection(title: string, ctx: SectionCtx): RenderedSection | null {
   const { chunks, tree, generationChars, book } = ctx;
   if (chunks.length === 0) return null;
+  const packs = packLineageChunks(chunks);
   const pages: React.ReactNode[] = [
     sectionDivider(
       "卷之",
       "世系图录",
-      "图者见族脉之大势，录者详各人之字号、生卒、配偶。每张吊线图之后即附其欧式详录，含妻室，与图一一对应；按图索骥，览者了然。",
+      "图者见族脉之大势，录者详各人之名讳、配偶、子嗣。图页或并数小图，录页表格连排，与图一一对应；按图索骥，览者了然。",
     ),
   ];
   const index: AlbumIndexEntry[] = [];
-  for (const c of chunks) {
-    const chartPageRel = pages.length; // 该图在本段内的相对页码
-    pages.push(buildPagodaChartPage(c, generationChars, book.family.name));
-    pages.push(
-      buildOuyangDetailForChunk({
-        rootId: c.rootId,
-        startGen: c.startGen,
-        maleIds: c.maleIds,
-        tree,
-      }),
-    );
-    for (const id of c.maleIds) {
-      const p = tree.personById.get(id);
-      if (p) {
-        index.push({
-          name: p.name,
-          alias: p.alias,
-          generation: p.generation,
-          page: chartPageRel,
-        });
+  for (const pk of packs) {
+    const chartPageRel = pages.length; // 图页在本段内的相对页码
+    pages.push(packChartPage(pk, generationChars, book.family.name));
+    pages.push(packDetailPage(pk, book.family.name));
+    for (const c of pk.chunks) {
+      for (const id of c.maleIds) {
+        const p = tree.personById.get(id);
+        if (p) {
+          index.push({
+            name: p.name,
+            alias: p.alias,
+            generation: p.generation,
+            page: chartPageRel,
+          });
+        }
       }
     }
   }
   return { title, pages, index, isTulu: true };
+}
+
+/** 图页：堆叠页组内的 1~3 张小吊线图（contain 等比缩入各自高度配额）。 */
+function packChartPage(
+  pk: LineagePack,
+  generationChars: Record<number, string>,
+  familyName: string,
+) {
+  const strChars: Record<string, string> = Object.fromEntries(
+    Object.entries(generationChars).map(([k, v]) => [String(k), v]),
+  );
+  const n = pk.chunks.length;
+  return (
+    <div className="flex h-full flex-col" key={`pack-chart-${pk.index}`}>
+      <h3
+        className="mb-1 border-b border-zinc-300 pb-1 text-center text-sm font-medium text-zinc-900"
+        style={{ fontFamily: "var(--font-serif)" }}
+      >
+        {familyName} · 世系图 之{pk.index}
+      </h3>
+      <div className="flex min-h-0 flex-1 flex-col gap-1">
+        {pk.chunks.map((c) => (
+          <div key={c.rootId} className="min-h-0" style={{ height: `${100 / n}%` }}>
+            <LineageChartSvg
+              layout={c.layout}
+              title={`自 ${c.startGen} 世 · ${c.rootName} 公支`}
+              subtitle={
+                c.continuationCount > 0
+                  ? `${c.maleIds.length} 人 · ${c.continuationCount} 处续接（后嗣另图）`
+                  : `${c.maleIds.length} 人`
+              }
+              generationChars={strChars}
+              fit="contain"
+            />
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+/** 录页：页组内各块的紧凑详录表格连排（与图页一一对应）。 */
+function packDetailPage(pk: LineagePack, familyName: string) {
+  return (
+    <div className="flex h-full flex-col" key={`pack-detail-${pk.index}`}>
+      <h3
+        className="mb-2 border-b border-zinc-300 pb-1 text-center text-sm font-medium text-zinc-900"
+        style={{ fontFamily: "var(--font-serif)" }}
+      >
+        {familyName} · 世系详录 之{pk.index}
+      </h3>
+      <div className="min-h-0 flex-1 overflow-hidden">
+        {pk.chunks.map((c) => (
+          <TuluDetailTable key={c.rootId} chunk={c} />
+        ))}
+      </div>
+      <p className="mt-1 text-center text-[10px] text-zinc-400">
+        与前页世系图一一对应 · 名下注妻室与子嗣，靠列位自明父子
+      </p>
+    </div>
+  );
 }
 
 /** 用户填了 markdown 正文时的章节渲染：标题 + markdown 分页 + 落款。 */

@@ -21,6 +21,7 @@ import {
 } from "@react-pdf/renderer";
 
 import { type AlbumBook } from "@/lib/services/album";
+import { packLineageChunks, DETAIL_COLS } from "@/lib/services/lineage-chunks";
 import { ensureCjkFont, ensureBrushFont } from "@/lib/pdf/fonts";
 import { parseMarkdown } from "@/lib/markdown/parse";
 import { MarkdownPdf } from "@/lib/pdf/markdown-pdf";
@@ -141,7 +142,8 @@ function AlbumDocument({
         </View>
       </Page>
 
-      {/* 前置章节（按 order）。世系图录特殊：分隔页 + 每块「吊线图一页 + 欧式详录一页」配对。 */}
+      {/* 前置章节（按 order）。世系图录：图录页组配对（1995 谱紧凑版式）——
+          小块打包后，图页纵向堆 1~3 张小图，详录页表格连排，仍图右录左。 */}
       {active.flatMap((sec, i) => {
         if (sec.kind === AlbumSectionKind.TULU) {
           if (book.lineageChunks.length === 0) return [];
@@ -149,6 +151,7 @@ function AlbumDocument({
             book.generationNames.map((g) => [String(g.generation), g.character]),
           );
           const tuluTitle = sec.title?.trim() || "世系图录";
+          const packs = packLineageChunks(book.lineageChunks);
           const pages: React.JSX.Element[] = [
             // 分隔页（与 HTML 合编本 sectionDivider 一致）
             <Page key="tulu-divider" size="A4" style={styles.page}>
@@ -157,43 +160,47 @@ function AlbumDocument({
                 <Text style={styles.dividerJuan}>卷之</Text>
                 <Text style={styles.dividerTitle}>{tuluTitle}</Text>
                 <Text style={styles.dividerNote}>
-                  图者见族脉之大势，录者详各人之字号、生卒、配偶。每张吊线图之后即附其欧式详录，
-                  含妻室，与图一一对应；按图索骥，览者了然。
+                  图者见族脉之大势，录者详各人之名讳、配偶、子嗣。图页或并数小图，
+                  录页表格连排，与图一一对应；按图索骥，览者了然。
                 </Text>
               </View>
               <Footer />
             </Page>,
           ];
-          // 每块：吊线图一页，紧跟其欧式详录一页（图录配对）
-          book.lineageChunks.forEach((chunk, ci) => {
+          for (const pk of packs) {
+            const n = pk.chunks.length;
+            const blockH = Math.floor((640 - n * 22) / n); // 每块图高（去小标题行）
             pages.push(
-              <Page key={`tulu-chart-${ci}`} size="A4" style={styles.page} wrap>
+              <Page key={`tulu-chart-${pk.index}`} size="A4" style={styles.page} wrap>
                 <Header title={book.family.name} fontFamily={fontFamily} />
-                <Text style={styles.secTitle}>{tuluTitle} 之{ci + 1}</Text>
-                <Text style={styles.subtitle}>
-                  {chunk.rootName} 公一支 · 第 {chunk.startGen} 世起
-                  {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接` : ""}
-                </Text>
-                <View style={{ marginTop: 8 }}>
-                  <AlbumLineageChart
-                    layout={chunk.layout}
-                    generationChars={genChars}
-                    fontFamily={fontFamily}
-                    contentW={483}
-                    contentH={610}
-                  />
-                </View>
+                <Text style={styles.secTitle}>{tuluTitle} 之{pk.index}</Text>
+                {pk.chunks.map((chunk) => (
+                  <View key={chunk.rootId}>
+                    <Text style={styles.subtitle}>
+                      自 {chunk.startGen} 世 · {chunk.rootName} 公支 · {chunk.maleIds.length} 人
+                      {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接（后嗣另图）` : ""}
+                    </Text>
+                    <AlbumLineageChart
+                      layout={chunk.layout}
+                      generationChars={genChars}
+                      fontFamily={fontFamily}
+                      contentW={483}
+                      contentH={blockH}
+                    />
+                  </View>
+                ))}
                 <Footer />
               </Page>,
-              <LineageDetailPage
-                key={`tulu-detail-${ci}`}
-                chunk={chunk}
+              <PackDetailPage
+                key={`tulu-detail-${pk.index}`}
+                pack={pk}
                 styles={styles}
                 fontFamily={fontFamily}
                 familyName={book.family.name}
+                title={`世系详录 之${pk.index}`}
               />,
             );
-          });
+          }
           return pages;
         }
         return [
@@ -231,57 +238,68 @@ function AlbumDocument({
  * lib/services/lineage-chunks.ts:buildDetailRows 算好（5 列、父子靠列位对齐）。
  * 逐行渲染、每行 wrap={false}，行间交给 <Page wrap> 自然跨页（不会出现超高 View）。
  */
-function LineageDetailPage({
-  chunk,
+/** 录页：页组内各块紧凑详录连排（6 列与图块 6 代对齐；格内名/注/妻/子嗣）。 */
+function PackDetailPage({
+  pack,
   styles,
   fontFamily,
   familyName,
+  title,
 }: {
-  chunk: AlbumBook["lineageChunks"][number];
+  pack: ReturnType<typeof packLineageChunks>[number];
   styles: ReturnType<typeof makeStyles>;
   fontFamily: string;
   familyName: string;
+  title: string;
 }) {
   return (
     <Page size="A4" style={styles.page} wrap>
       <Header title={familyName} fontFamily={fontFamily} />
-      <Text style={styles.secTitle}>世系详录 · 自 {chunk.startGen} 世「{chunk.rootName}」起</Text>
-      <Text style={styles.subtitle}>
-        上图各人之字号、生卒、配偶（妻）详录于此，与前页吊线图一一对应。
-      </Text>
-      {/* 列头：startGen..startGen+4 世 */}
-      <View style={styles.detailHeaderRow}>
-        {Array.from({ length: 5 }, (_, c) => (
-          <Text key={c} style={styles.detailHeaderCell}>
-            {chunk.startGen + c} 世
+      <Text style={styles.secTitle}>{title}</Text>
+      {pack.chunks.map((chunk) => (
+        <View key={chunk.rootId} style={{ marginBottom: 8 }}>
+          <Text style={styles.subtitle}>
+            自 {chunk.startGen} 世「{chunk.rootName}」起
           </Text>
-        ))}
-      </View>
-      {chunk.detailRows.map((row, ri) => (
-        <View key={ri} style={styles.detailRow} wrap={false}>
-          {Array.from({ length: 5 }, (_, c) => {
-            const cell = row.find((x) => x.col === c);
-            return (
-              <View key={c} style={styles.detailSlot}>
-                {cell ? (
-                  <View style={styles.detailCell}>
-                    <Text style={styles.detailName}>
-                      {cell.name}
-                      {cell.generationChar ? (
-                        <Text style={styles.detailGenChar}> {cell.generationChar}</Text>
-                      ) : null}
-                    </Text>
-                    {cell.annotation ? (
-                      <Text style={styles.detailAnno}>{cell.annotation}</Text>
-                    ) : null}
-                    {cell.wives.length > 0 ? (
-                      <Text style={styles.detailWives}>配 {cell.wives.join("、")}</Text>
+          <View style={styles.detailHeaderRow}>
+            {Array.from({ length: DETAIL_COLS }, (_, c) => (
+              <Text key={c} style={styles.detailHeaderCell}>
+                {chunk.startGen + c} 世
+              </Text>
+            ))}
+          </View>
+          {chunk.detailRows.map((row, ri) => (
+            <View key={ri} style={styles.detailRow} wrap={false}>
+              {Array.from({ length: DETAIL_COLS }, (_, c) => {
+                const cell = row.find((x) => x.col === c);
+                return (
+                  <View key={c} style={styles.detailSlot}>
+                    {cell ? (
+                      <View style={styles.detailCell}>
+                        <Text style={styles.detailName}>
+                          {cell.name}
+                          {cell.generationChar ? (
+                            <Text style={styles.detailGenChar}> {cell.generationChar}</Text>
+                          ) : null}
+                        </Text>
+                        {cell.annotation ? (
+                          <Text style={styles.detailAnno}>{cell.annotation}</Text>
+                        ) : null}
+                        {cell.wives.length > 0 ? (
+                          <Text style={styles.detailWives}>妻 {cell.wives.join("、")}</Text>
+                        ) : null}
+                        {cell.sons.length > 0 ? (
+                          <Text style={styles.detailWives}>
+                            子{cell.sons.length}：{cell.sons.join(" ")}
+                          </Text>
+                        ) : null}
+                      </View>
                     ) : null}
                   </View>
-                ) : null}
-              </View>
-            );
-          })}
+                );
+              })}
+            </View>
+          ))}
         </View>
       ))}
       <Footer />
@@ -678,14 +696,14 @@ function makeStyles(fontFamily: string) {
       paddingBottom: 2,
     },
     detailHeaderCell: {
-      width: "20%",
+      width: `${100 / 6}%`,
       fontSize: 8,
       color: "#64748b",
       textAlign: "center",
       fontFamily,
     },
     detailRow: { flexDirection: "row", marginTop: 3 },
-    detailSlot: { width: "20%", paddingHorizontal: 1 },
+    detailSlot: { width: `${100 / 6}%`, paddingHorizontal: 1 },
     detailCell: {
       borderWidth: 0.5,
       borderColor: "#cbd5e1",
