@@ -32,6 +32,8 @@ export type UserMinAggregateOutputType = {
   name: string | null
   avatarUrl: string | null
   platformRole: $Enums.PlatformRole | null
+  wechatOpenId: string | null
+  wechatUnionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -44,6 +46,8 @@ export type UserMaxAggregateOutputType = {
   name: string | null
   avatarUrl: string | null
   platformRole: $Enums.PlatformRole | null
+  wechatOpenId: string | null
+  wechatUnionId: string | null
   createdAt: Date | null
   updatedAt: Date | null
 }
@@ -56,6 +60,8 @@ export type UserCountAggregateOutputType = {
   name: number
   avatarUrl: number
   platformRole: number
+  wechatOpenId: number
+  wechatUnionId: number
   createdAt: number
   updatedAt: number
   _all: number
@@ -70,6 +76,8 @@ export type UserMinAggregateInputType = {
   name?: true
   avatarUrl?: true
   platformRole?: true
+  wechatOpenId?: true
+  wechatUnionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -82,6 +90,8 @@ export type UserMaxAggregateInputType = {
   name?: true
   avatarUrl?: true
   platformRole?: true
+  wechatOpenId?: true
+  wechatUnionId?: true
   createdAt?: true
   updatedAt?: true
 }
@@ -94,6 +104,8 @@ export type UserCountAggregateInputType = {
   name?: true
   avatarUrl?: true
   platformRole?: true
+  wechatOpenId?: true
+  wechatUnionId?: true
   createdAt?: true
   updatedAt?: true
   _all?: true
@@ -179,6 +191,8 @@ export type UserGroupByOutputType = {
   name: string
   avatarUrl: string | null
   platformRole: $Enums.PlatformRole
+  wechatOpenId: string | null
+  wechatUnionId: string | null
   createdAt: Date
   updatedAt: Date
   _count: UserCountAggregateOutputType | null
@@ -212,6 +226,8 @@ export type UserWhereInput = {
   name?: Prisma.StringFilter<"User"> | string
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   platformRole?: Prisma.EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+  wechatOpenId?: Prisma.StringNullableFilter<"User"> | string | null
+  wechatUnionId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   members?: Prisma.FamilyMemberListRelationFilter
@@ -219,6 +235,8 @@ export type UserWhereInput = {
   subtreeGrants?: Prisma.SubtreeAdminListRelationFilter
   invitesCreated?: Prisma.FamilyInviteListRelationFilter
   inviteUses?: Prisma.FamilyInviteUseListRelationFilter
+  joinRequests?: Prisma.JoinRequestListRelationFilter
+  joinRequestDecisions?: Prisma.JoinRequestListRelationFilter
 }
 
 export type UserOrderByWithRelationInput = {
@@ -229,6 +247,8 @@ export type UserOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  wechatOpenId?: Prisma.SortOrderInput | Prisma.SortOrder
+  wechatUnionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   members?: Prisma.FamilyMemberOrderByRelationAggregateInput
@@ -236,12 +256,15 @@ export type UserOrderByWithRelationInput = {
   subtreeGrants?: Prisma.SubtreeAdminOrderByRelationAggregateInput
   invitesCreated?: Prisma.FamilyInviteOrderByRelationAggregateInput
   inviteUses?: Prisma.FamilyInviteUseOrderByRelationAggregateInput
+  joinRequests?: Prisma.JoinRequestOrderByRelationAggregateInput
+  joinRequestDecisions?: Prisma.JoinRequestOrderByRelationAggregateInput
 }
 
 export type UserWhereUniqueInput = Prisma.AtLeast<{
   id?: string
   email?: string
   phone?: string
+  wechatOpenId?: string
   AND?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
   OR?: Prisma.UserWhereInput[]
   NOT?: Prisma.UserWhereInput | Prisma.UserWhereInput[]
@@ -249,6 +272,7 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"User"> | string
   avatarUrl?: Prisma.StringNullableFilter<"User"> | string | null
   platformRole?: Prisma.EnumPlatformRoleFilter<"User"> | $Enums.PlatformRole
+  wechatUnionId?: Prisma.StringNullableFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"User"> | Date | string
   members?: Prisma.FamilyMemberListRelationFilter
@@ -256,7 +280,9 @@ export type UserWhereUniqueInput = Prisma.AtLeast<{
   subtreeGrants?: Prisma.SubtreeAdminListRelationFilter
   invitesCreated?: Prisma.FamilyInviteListRelationFilter
   inviteUses?: Prisma.FamilyInviteUseListRelationFilter
-}, "id" | "email" | "phone">
+  joinRequests?: Prisma.JoinRequestListRelationFilter
+  joinRequestDecisions?: Prisma.JoinRequestListRelationFilter
+}, "id" | "email" | "phone" | "wechatOpenId">
 
 export type UserOrderByWithAggregationInput = {
   id?: Prisma.SortOrder
@@ -266,6 +292,8 @@ export type UserOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrderInput | Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  wechatOpenId?: Prisma.SortOrderInput | Prisma.SortOrder
+  wechatUnionId?: Prisma.SortOrderInput | Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   _count?: Prisma.UserCountOrderByAggregateInput
@@ -284,6 +312,8 @@ export type UserScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"User"> | string
   avatarUrl?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   platformRole?: Prisma.EnumPlatformRoleWithAggregatesFilter<"User"> | $Enums.PlatformRole
+  wechatOpenId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
+  wechatUnionId?: Prisma.StringNullableWithAggregatesFilter<"User"> | string | null
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"User"> | Date | string
 }
@@ -296,6 +326,8 @@ export type UserCreateInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberCreateNestedManyWithoutUserInput
@@ -303,6 +335,8 @@ export type UserCreateInput = {
   subtreeGrants?: Prisma.SubtreeAdminCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateInput = {
@@ -313,6 +347,8 @@ export type UserUncheckedCreateInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutUserInput
@@ -320,6 +356,8 @@ export type UserUncheckedCreateInput = {
   subtreeGrants?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUpdateInput = {
@@ -330,6 +368,8 @@ export type UserUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUpdateManyWithoutUserNestedInput
@@ -337,6 +377,8 @@ export type UserUpdateInput = {
   subtreeGrants?: Prisma.SubtreeAdminUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateInput = {
@@ -347,6 +389,8 @@ export type UserUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutUserNestedInput
@@ -354,6 +398,8 @@ export type UserUncheckedUpdateInput = {
   subtreeGrants?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUncheckedUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateManyInput = {
@@ -364,6 +410,8 @@ export type UserCreateManyInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
 }
@@ -376,6 +424,8 @@ export type UserUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -388,6 +438,8 @@ export type UserUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
 }
@@ -400,6 +452,8 @@ export type UserCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  wechatOpenId?: Prisma.SortOrder
+  wechatUnionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -412,6 +466,8 @@ export type UserMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  wechatOpenId?: Prisma.SortOrder
+  wechatUnionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -424,6 +480,8 @@ export type UserMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   avatarUrl?: Prisma.SortOrder
   platformRole?: Prisma.SortOrder
+  wechatOpenId?: Prisma.SortOrder
+  wechatUnionId?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
 }
@@ -431,6 +489,11 @@ export type UserMinOrderByAggregateInput = {
 export type UserScalarRelationFilter = {
   is?: Prisma.UserWhereInput
   isNot?: Prisma.UserWhereInput
+}
+
+export type UserNullableScalarRelationFilter = {
+  is?: Prisma.UserWhereInput | null
+  isNot?: Prisma.UserWhereInput | null
 }
 
 export type StringFieldUpdateOperationsInput = {
@@ -519,6 +582,36 @@ export type UserUpdateOneRequiredWithoutInviteUsesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutInviteUsesInput, Prisma.UserUpdateWithoutInviteUsesInput>, Prisma.UserUncheckedUpdateWithoutInviteUsesInput>
 }
 
+export type UserCreateNestedOneWithoutJoinRequestsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestsInput, Prisma.UserUncheckedCreateWithoutJoinRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJoinRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserCreateNestedOneWithoutJoinRequestDecisionsInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestDecisionsInput, Prisma.UserUncheckedCreateWithoutJoinRequestDecisionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJoinRequestDecisionsInput
+  connect?: Prisma.UserWhereUniqueInput
+}
+
+export type UserUpdateOneRequiredWithoutJoinRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestsInput, Prisma.UserUncheckedCreateWithoutJoinRequestsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJoinRequestsInput
+  upsert?: Prisma.UserUpsertWithoutJoinRequestsInput
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJoinRequestsInput, Prisma.UserUpdateWithoutJoinRequestsInput>, Prisma.UserUncheckedUpdateWithoutJoinRequestsInput>
+}
+
+export type UserUpdateOneWithoutJoinRequestDecisionsNestedInput = {
+  create?: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestDecisionsInput, Prisma.UserUncheckedCreateWithoutJoinRequestDecisionsInput>
+  connectOrCreate?: Prisma.UserCreateOrConnectWithoutJoinRequestDecisionsInput
+  upsert?: Prisma.UserUpsertWithoutJoinRequestDecisionsInput
+  disconnect?: Prisma.UserWhereInput | boolean
+  delete?: Prisma.UserWhereInput | boolean
+  connect?: Prisma.UserWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.UserUpdateToOneWithWhereWithoutJoinRequestDecisionsInput, Prisma.UserUpdateWithoutJoinRequestDecisionsInput>, Prisma.UserUncheckedUpdateWithoutJoinRequestDecisionsInput>
+}
+
 export type UserCreateWithoutMembersInput = {
   id?: string
   email?: string | null
@@ -527,12 +620,16 @@ export type UserCreateWithoutMembersInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutMembersInput = {
@@ -543,12 +640,16 @@ export type UserUncheckedCreateWithoutMembersInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutMembersInput = {
@@ -575,12 +676,16 @@ export type UserUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutMembersInput = {
@@ -591,12 +696,16 @@ export type UserUncheckedUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUncheckedUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateWithoutSubtreeAdminsInput = {
@@ -607,12 +716,16 @@ export type UserCreateWithoutSubtreeAdminsInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutSubtreeAdminsInput = {
@@ -623,12 +736,16 @@ export type UserUncheckedCreateWithoutSubtreeAdminsInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutSubtreeAdminsInput = {
@@ -644,12 +761,16 @@ export type UserCreateWithoutSubtreeGrantsInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberCreateNestedManyWithoutUserInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutUserInput
   invitesCreated?: Prisma.FamilyInviteCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutSubtreeGrantsInput = {
@@ -660,12 +781,16 @@ export type UserUncheckedCreateWithoutSubtreeGrantsInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutUserInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutUserInput
   invitesCreated?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutCreatedByInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutSubtreeGrantsInput = {
@@ -692,12 +817,16 @@ export type UserUpdateWithoutSubtreeAdminsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubtreeAdminsInput = {
@@ -708,12 +837,16 @@ export type UserUncheckedUpdateWithoutSubtreeAdminsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUncheckedUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUpsertWithoutSubtreeGrantsInput = {
@@ -735,12 +868,16 @@ export type UserUpdateWithoutSubtreeGrantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUpdateManyWithoutUserNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutUserNestedInput
   invitesCreated?: Prisma.FamilyInviteUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutSubtreeGrantsInput = {
@@ -751,12 +888,16 @@ export type UserUncheckedUpdateWithoutSubtreeGrantsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutUserNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutUserNestedInput
   invitesCreated?: Prisma.FamilyInviteUncheckedUpdateManyWithoutCreatedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateWithoutInvitesCreatedInput = {
@@ -767,12 +908,16 @@ export type UserCreateWithoutInvitesCreatedInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberCreateNestedManyWithoutUserInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminCreateNestedManyWithoutGrantedByInput
   inviteUses?: Prisma.FamilyInviteUseCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutInvitesCreatedInput = {
@@ -783,12 +928,16 @@ export type UserUncheckedCreateWithoutInvitesCreatedInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutUserInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutGrantedByInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutInvitesCreatedInput = {
@@ -815,12 +964,16 @@ export type UserUpdateWithoutInvitesCreatedInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUpdateManyWithoutUserNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUpdateManyWithoutGrantedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInvitesCreatedInput = {
@@ -831,12 +984,16 @@ export type UserUncheckedUpdateWithoutInvitesCreatedInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutUserNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutGrantedByNestedInput
   inviteUses?: Prisma.FamilyInviteUseUncheckedUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserCreateWithoutInviteUsesInput = {
@@ -847,12 +1004,16 @@ export type UserCreateWithoutInviteUsesInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberCreateNestedManyWithoutUserInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteCreateNestedManyWithoutCreatedByInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserUncheckedCreateWithoutInviteUsesInput = {
@@ -863,12 +1024,16 @@ export type UserUncheckedCreateWithoutInviteUsesInput = {
   name: string
   avatarUrl?: string | null
   platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
   createdAt?: Date | string
   updatedAt?: Date | string
   members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutUserInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutUserInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutGrantedByInput
   invitesCreated?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutCreatedByInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
 }
 
 export type UserCreateOrConnectWithoutInviteUsesInput = {
@@ -895,12 +1060,16 @@ export type UserUpdateWithoutInviteUsesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUpdateManyWithoutUserNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUpdateManyWithoutCreatedByNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUpdateManyWithoutDecidedByNestedInput
 }
 
 export type UserUncheckedUpdateWithoutInviteUsesInput = {
@@ -911,12 +1080,208 @@ export type UserUncheckedUpdateWithoutInviteUsesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutUserNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutUserNestedInput
   subtreeGrants?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutGrantedByNestedInput
   invitesCreated?: Prisma.FamilyInviteUncheckedUpdateManyWithoutCreatedByNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserCreateWithoutJoinRequestsInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  passwordHash?: string | null
+  name: string
+  avatarUrl?: string | null
+  platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutUserInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutUserInput
+  subtreeGrants?: Prisma.SubtreeAdminCreateNestedManyWithoutGrantedByInput
+  invitesCreated?: Prisma.FamilyInviteCreateNestedManyWithoutCreatedByInput
+  inviteUses?: Prisma.FamilyInviteUseCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestCreateNestedManyWithoutDecidedByInput
+}
+
+export type UserUncheckedCreateWithoutJoinRequestsInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  passwordHash?: string | null
+  name: string
+  avatarUrl?: string | null
+  platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutUserInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutUserInput
+  subtreeGrants?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutGrantedByInput
+  invitesCreated?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutCreatedByInput
+  inviteUses?: Prisma.FamilyInviteUseUncheckedCreateNestedManyWithoutUserInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutDecidedByInput
+}
+
+export type UserCreateOrConnectWithoutJoinRequestsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestsInput, Prisma.UserUncheckedCreateWithoutJoinRequestsInput>
+}
+
+export type UserCreateWithoutJoinRequestDecisionsInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  passwordHash?: string | null
+  name: string
+  avatarUrl?: string | null
+  platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutUserInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutUserInput
+  subtreeGrants?: Prisma.SubtreeAdminCreateNestedManyWithoutGrantedByInput
+  invitesCreated?: Prisma.FamilyInviteCreateNestedManyWithoutCreatedByInput
+  inviteUses?: Prisma.FamilyInviteUseCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutUserInput
+}
+
+export type UserUncheckedCreateWithoutJoinRequestDecisionsInput = {
+  id?: string
+  email?: string | null
+  phone?: string | null
+  passwordHash?: string | null
+  name: string
+  avatarUrl?: string | null
+  platformRole?: $Enums.PlatformRole
+  wechatOpenId?: string | null
+  wechatUnionId?: string | null
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutUserInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutUserInput
+  subtreeGrants?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutGrantedByInput
+  invitesCreated?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutCreatedByInput
+  inviteUses?: Prisma.FamilyInviteUseUncheckedCreateNestedManyWithoutUserInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutUserInput
+}
+
+export type UserCreateOrConnectWithoutJoinRequestDecisionsInput = {
+  where: Prisma.UserWhereUniqueInput
+  create: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestDecisionsInput, Prisma.UserUncheckedCreateWithoutJoinRequestDecisionsInput>
+}
+
+export type UserUpsertWithoutJoinRequestsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutJoinRequestsInput, Prisma.UserUncheckedUpdateWithoutJoinRequestsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestsInput, Prisma.UserUncheckedCreateWithoutJoinRequestsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutJoinRequestsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutJoinRequestsInput, Prisma.UserUncheckedUpdateWithoutJoinRequestsInput>
+}
+
+export type UserUpdateWithoutJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.FamilyMemberUpdateManyWithoutUserNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutUserNestedInput
+  subtreeGrants?: Prisma.SubtreeAdminUpdateManyWithoutGrantedByNestedInput
+  invitesCreated?: Prisma.FamilyInviteUpdateManyWithoutCreatedByNestedInput
+  inviteUses?: Prisma.FamilyInviteUseUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserUncheckedUpdateWithoutJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutUserNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutUserNestedInput
+  subtreeGrants?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutGrantedByNestedInput
+  invitesCreated?: Prisma.FamilyInviteUncheckedUpdateManyWithoutCreatedByNestedInput
+  inviteUses?: Prisma.FamilyInviteUseUncheckedUpdateManyWithoutUserNestedInput
+  joinRequestDecisions?: Prisma.JoinRequestUncheckedUpdateManyWithoutDecidedByNestedInput
+}
+
+export type UserUpsertWithoutJoinRequestDecisionsInput = {
+  update: Prisma.XOR<Prisma.UserUpdateWithoutJoinRequestDecisionsInput, Prisma.UserUncheckedUpdateWithoutJoinRequestDecisionsInput>
+  create: Prisma.XOR<Prisma.UserCreateWithoutJoinRequestDecisionsInput, Prisma.UserUncheckedCreateWithoutJoinRequestDecisionsInput>
+  where?: Prisma.UserWhereInput
+}
+
+export type UserUpdateToOneWithWhereWithoutJoinRequestDecisionsInput = {
+  where?: Prisma.UserWhereInput
+  data: Prisma.XOR<Prisma.UserUpdateWithoutJoinRequestDecisionsInput, Prisma.UserUncheckedUpdateWithoutJoinRequestDecisionsInput>
+}
+
+export type UserUpdateWithoutJoinRequestDecisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.FamilyMemberUpdateManyWithoutUserNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutUserNestedInput
+  subtreeGrants?: Prisma.SubtreeAdminUpdateManyWithoutGrantedByNestedInput
+  invitesCreated?: Prisma.FamilyInviteUpdateManyWithoutCreatedByNestedInput
+  inviteUses?: Prisma.FamilyInviteUseUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutUserNestedInput
+}
+
+export type UserUncheckedUpdateWithoutJoinRequestDecisionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  email?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  phone?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  passwordHash?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  avatarUrl?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  platformRole?: Prisma.EnumPlatformRoleFieldUpdateOperationsInput | $Enums.PlatformRole
+  wechatOpenId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  wechatUnionId?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutUserNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutUserNestedInput
+  subtreeGrants?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutGrantedByNestedInput
+  invitesCreated?: Prisma.FamilyInviteUncheckedUpdateManyWithoutCreatedByNestedInput
+  inviteUses?: Prisma.FamilyInviteUseUncheckedUpdateManyWithoutUserNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutUserNestedInput
 }
 
 
@@ -930,6 +1295,8 @@ export type UserCountOutputType = {
   subtreeGrants: number
   invitesCreated: number
   inviteUses: number
+  joinRequests: number
+  joinRequestDecisions: number
 }
 
 export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -938,6 +1305,8 @@ export type UserCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.I
   subtreeGrants?: boolean | UserCountOutputTypeCountSubtreeGrantsArgs
   invitesCreated?: boolean | UserCountOutputTypeCountInvitesCreatedArgs
   inviteUses?: boolean | UserCountOutputTypeCountInviteUsesArgs
+  joinRequests?: boolean | UserCountOutputTypeCountJoinRequestsArgs
+  joinRequestDecisions?: boolean | UserCountOutputTypeCountJoinRequestDecisionsArgs
 }
 
 /**
@@ -985,6 +1354,20 @@ export type UserCountOutputTypeCountInviteUsesArgs<ExtArgs extends runtime.Types
   where?: Prisma.FamilyInviteUseWhereInput
 }
 
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountJoinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JoinRequestWhereInput
+}
+
+/**
+ * UserCountOutputType without action
+ */
+export type UserCountOutputTypeCountJoinRequestDecisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JoinRequestWhereInput
+}
+
 
 export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -994,6 +1377,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   name?: boolean
   avatarUrl?: boolean
   platformRole?: boolean
+  wechatOpenId?: boolean
+  wechatUnionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   members?: boolean | Prisma.User$membersArgs<ExtArgs>
@@ -1001,6 +1386,8 @@ export type UserSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = r
   subtreeGrants?: boolean | Prisma.User$subtreeGrantsArgs<ExtArgs>
   invitesCreated?: boolean | Prisma.User$invitesCreatedArgs<ExtArgs>
   inviteUses?: boolean | Prisma.User$inviteUsesArgs<ExtArgs>
+  joinRequests?: boolean | Prisma.User$joinRequestsArgs<ExtArgs>
+  joinRequestDecisions?: boolean | Prisma.User$joinRequestDecisionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["user"]>
 
@@ -1012,6 +1399,8 @@ export type UserSelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   avatarUrl?: boolean
   platformRole?: boolean
+  wechatOpenId?: boolean
+  wechatUnionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1024,6 +1413,8 @@ export type UserSelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extensio
   name?: boolean
   avatarUrl?: boolean
   platformRole?: boolean
+  wechatOpenId?: boolean
+  wechatUnionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }, ExtArgs["result"]["user"]>
@@ -1036,17 +1427,21 @@ export type UserSelectScalar = {
   name?: boolean
   avatarUrl?: boolean
   platformRole?: boolean
+  wechatOpenId?: boolean
+  wechatUnionId?: boolean
   createdAt?: boolean
   updatedAt?: boolean
 }
 
-export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "passwordHash" | "name" | "avatarUrl" | "platformRole" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
+export type UserOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "email" | "phone" | "passwordHash" | "name" | "avatarUrl" | "platformRole" | "wechatOpenId" | "wechatUnionId" | "createdAt" | "updatedAt", ExtArgs["result"]["user"]>
 export type UserInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.User$membersArgs<ExtArgs>
   subtreeAdmins?: boolean | Prisma.User$subtreeAdminsArgs<ExtArgs>
   subtreeGrants?: boolean | Prisma.User$subtreeGrantsArgs<ExtArgs>
   invitesCreated?: boolean | Prisma.User$invitesCreatedArgs<ExtArgs>
   inviteUses?: boolean | Prisma.User$inviteUsesArgs<ExtArgs>
+  joinRequests?: boolean | Prisma.User$joinRequestsArgs<ExtArgs>
+  joinRequestDecisions?: boolean | Prisma.User$joinRequestDecisionsArgs<ExtArgs>
   _count?: boolean | Prisma.UserCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type UserIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -1060,6 +1455,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     subtreeGrants: Prisma.$SubtreeAdminPayload<ExtArgs>[]
     invitesCreated: Prisma.$FamilyInvitePayload<ExtArgs>[]
     inviteUses: Prisma.$FamilyInviteUsePayload<ExtArgs>[]
+    joinRequests: Prisma.$JoinRequestPayload<ExtArgs>[]
+    joinRequestDecisions: Prisma.$JoinRequestPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -1069,6 +1466,8 @@ export type $UserPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs =
     name: string
     avatarUrl: string | null
     platformRole: $Enums.PlatformRole
+    wechatOpenId: string | null
+    wechatUnionId: string | null
     createdAt: Date
     updatedAt: Date
   }, ExtArgs["result"]["user"]>
@@ -1470,6 +1869,8 @@ export interface Prisma__UserClient<T, Null = never, ExtArgs extends runtime.Typ
   subtreeGrants<T extends Prisma.User$subtreeGrantsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$subtreeGrantsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubtreeAdminPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invitesCreated<T extends Prisma.User$invitesCreatedArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$invitesCreatedArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamilyInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   inviteUses<T extends Prisma.User$inviteUsesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$inviteUsesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamilyInviteUsePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  joinRequests<T extends Prisma.User$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  joinRequestDecisions<T extends Prisma.User$joinRequestDecisionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.User$joinRequestDecisionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -1506,6 +1907,8 @@ export interface UserFieldRefs {
   readonly name: Prisma.FieldRef<"User", 'String'>
   readonly avatarUrl: Prisma.FieldRef<"User", 'String'>
   readonly platformRole: Prisma.FieldRef<"User", 'PlatformRole'>
+  readonly wechatOpenId: Prisma.FieldRef<"User", 'String'>
+  readonly wechatUnionId: Prisma.FieldRef<"User", 'String'>
   readonly createdAt: Prisma.FieldRef<"User", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"User", 'DateTime'>
 }
@@ -2018,6 +2421,54 @@ export type User$inviteUsesArgs<ExtArgs extends runtime.Types.Extensions.Interna
   take?: number
   skip?: number
   distinct?: Prisma.FamilyInviteUseScalarFieldEnum | Prisma.FamilyInviteUseScalarFieldEnum[]
+}
+
+/**
+ * User.joinRequests
+ */
+export type User$joinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JoinRequest
+   */
+  select?: Prisma.JoinRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JoinRequest
+   */
+  omit?: Prisma.JoinRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JoinRequestInclude<ExtArgs> | null
+  where?: Prisma.JoinRequestWhereInput
+  orderBy?: Prisma.JoinRequestOrderByWithRelationInput | Prisma.JoinRequestOrderByWithRelationInput[]
+  cursor?: Prisma.JoinRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JoinRequestScalarFieldEnum | Prisma.JoinRequestScalarFieldEnum[]
+}
+
+/**
+ * User.joinRequestDecisions
+ */
+export type User$joinRequestDecisionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JoinRequest
+   */
+  select?: Prisma.JoinRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JoinRequest
+   */
+  omit?: Prisma.JoinRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JoinRequestInclude<ExtArgs> | null
+  where?: Prisma.JoinRequestWhereInput
+  orderBy?: Prisma.JoinRequestOrderByWithRelationInput | Prisma.JoinRequestOrderByWithRelationInput[]
+  cursor?: Prisma.JoinRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JoinRequestScalarFieldEnum | Prisma.JoinRequestScalarFieldEnum[]
 }
 
 /**

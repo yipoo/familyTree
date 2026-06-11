@@ -5,20 +5,66 @@ Web 一期：基于 Next.js 16 + Auth.js v5 + Prisma 7 + PostgreSQL 的家族族
 ## 快速开始
 
 ```bash
-# 安装依赖
+# 1) 安装依赖
 pnpm install
 
-# 同步数据库 schema
+# 2) 复制 env 模板，至少填好 DATABASE_URL 和 AUTH_SECRET
+cp .env.example .env
+
+# 3) 同步生产库 schema
 pnpm db:migrate
 
-# 灌入示范数据（可选）
-pnpm db:seed
-
-# 开发
+# 4) 启动 dev server
 pnpm dev
 ```
 
 访问 [http://localhost:3000](http://localhost:3000)。
+
+完整环境变量列表见 [`.env.example`](.env.example)；
+生产部署 / 备份 / 常见问题见 [`docs/deploy.md`](docs/deploy.md)。
+
+## 数据库布局：生产 / Demo 隔离
+
+平台使用**两个 Postgres database**（可同实例）来彻底隔离真实数据与演示数据：
+
+| 库 | env | 用途 | 谁能写 |
+| --- | --- | --- | --- |
+| 生产库 | `DATABASE_URL` | 真实用户、家族、审计、邀请、提交 | 应用通过 [`prisma`](lib/db.ts) 写入 |
+| Demo 库 | `DATABASE_URL_DEMO` | `/share/demo` 演示家族 | **只**由 `pnpm db:demo:seed` 写入；应用通过 [`demoPrisma`](lib/db.ts) 只读 |
+
+### 为何隔离
+
+- `prisma/seed.ts` 会 `deleteMany` 清空所有 user/family/person —— 误在生产跑就是事故。脚本里强制只接受 `DATABASE_URL_DEMO`，物理上无法触碰生产
+- Demo 数据可独立 reset，不影响生产备份节奏
+- Demo 库可独立演进 schema、随便重灌
+
+### 初始化 Demo 库（一次性）
+
+```bash
+# 1) 在你的 Postgres 里建第二个 database
+psql -c 'CREATE DATABASE family_tree_demo;'
+
+# 2) 在 .env 里加一行（DB 名按实际填）
+echo 'DATABASE_URL_DEMO="postgresql://user:pass@localhost:5432/family_tree_demo"' >> .env
+
+# 3) 把 schema 套到 demo 库 + 灌入丁氏 demo 数据
+pnpm db:demo:migrate
+pnpm db:demo:seed
+```
+
+之后访问 [/share/demo](http://localhost:3000/share/demo) 即可看到演示家族。
+
+### 日常 Demo 维护
+
+```bash
+pnpm db:demo:migrate      # schema 有改动后，把同样的 migration 应用到 demo 库
+pnpm db:demo:reset        # 清空 demo 并重新 seed（不影响生产）
+pnpm db:demo:seed         # 仅重灌 demo 数据（保留 schema）
+pnpm db:demo:studio       # Prisma Studio 打开 demo 库
+```
+
+> ⚠️ `pnpm db:seed` / `pnpm db:reset` 已被移除。任何 seed/reset 操作都需显式带 `:demo:` 前缀。
+
 
 ## 功能总览
 

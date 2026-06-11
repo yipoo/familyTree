@@ -1,5 +1,7 @@
 "use client";
 
+import { PdfJobButton } from "@/components/PdfJobButton";
+
 interface Props {
   familyId: string;
 }
@@ -7,16 +9,16 @@ interface Props {
 export function AlbumPrintActions({ familyId }: Props) {
   return (
     <div className="flex items-center gap-2">
-      <a
-        href={`/api/families/${familyId}/album/pdf`}
-        className="rounded border border-zinc-300 px-2.5 py-1 text-xs hover:bg-zinc-50 dark:border-zinc-700 dark:hover:bg-zinc-800"
-      >
-        下载 PDF
-      </a>
+      <PdfJobButton
+        familyId={familyId}
+        type="ALBUM"
+        label="下载 PDF"
+        className="rounded-md border border-border bg-panel px-3 py-1.5 text-xs font-medium text-foreground transition hover:bg-muted"
+      />
       <button
         type="button"
         onClick={() => window.print()}
-        className="rounded bg-blue-600 px-3 py-1 text-xs font-medium text-white hover:bg-blue-700"
+        className="rounded-md bg-brand px-3 py-1.5 text-xs font-medium text-brand-fg shadow-sm transition hover:opacity-90"
       >
         打印
       </button>

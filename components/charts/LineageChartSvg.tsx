@@ -16,6 +16,12 @@ export interface LineageChartSvgProps {
   generationChars: Record<string, string>;
   /** 是否在节点旁标记字辈 */
   showGenerationChar?: boolean;
+  /**
+   * 固定参考宽度：给所有图设同一 viewBox 宽度，使每张图缩放比例一致
+   * （字号、节点大小统一），内容在参考宽度内居中。册谱多图阅读用。
+   * 不传则按图自身宽度自适应（单图预览用）。
+   */
+  refWidth?: number;
 }
 
 const FONT_SIZE_NAME = 14;
@@ -34,23 +40,52 @@ export function LineageChartSvg({
   subtitle,
   generationChars,
   showGenerationChar = true,
-}: LineageChartSvgProps) {
+  refWidth,
+  fit = "width",
+}: LineageChartSvgProps & {
+  /**
+   * width（默认）：宽度撑满容器、高度按比例自适应（单图浏览）；
+   * contain：宽高都受父容器约束、整图等比缩入（册谱一页堆叠多图用）。
+   */
+  fit?: "width" | "contain";
+}) {
   const headerH = subtitle ? 70 : 44;
   const genCol = 28;
   const w = layout.width + genCol;
   const h = layout.height + headerH;
+  // 固定参考宽度：所有图共用同一缩放比例；窄图在参考宽度内居中
+  const vbW = refWidth && refWidth > w ? refWidth : w;
+  const xOffset = refWidth && refWidth > w ? (refWidth - w) / 2 : 0;
 
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      width={w}
-      height={h}
-      viewBox={`0 0 ${w} ${h}`}
-      style={{ background: "#ffffff", fontFamily: "system-ui, sans-serif" }}
+      width="100%"
+      viewBox={`0 0 ${vbW} ${h}`}
+      preserveAspectRatio={fit === "contain" ? "xMidYMid meet" : "xMidYMin meet"}
+      style={
+        fit === "contain"
+          ? {
+              background: "#ffffff",
+              fontFamily: "system-ui, sans-serif",
+              width: "100%",
+              height: "100%",
+              display: "block",
+            }
+          : {
+              background: "#ffffff",
+              fontFamily: "system-ui, sans-serif",
+              // 视窗适配：宽度 100% 撑满容器，高度由 viewBox 比例换算（保持长宽比）
+              // 上限避免超大族谱在小屏被压扁到不可读
+              maxHeight: "85vh",
+              height: "auto",
+              display: "block",
+            }
+      }
     >
       {/* 标题 */}
       <text
-        x={w / 2}
+        x={vbW / 2}
         y={26}
         textAnchor="middle"
         fontSize={20}
@@ -61,7 +96,7 @@ export function LineageChartSvg({
       </text>
       {subtitle && (
         <text
-          x={w / 2}
+          x={vbW / 2}
           y={50}
           textAnchor="middle"
           fontSize={12}
@@ -75,7 +110,7 @@ export function LineageChartSvg({
       {layout.generations.map((g) => {
         const ch = generationChars[String(g)] ?? "";
         return (
-          <g key={`gen-${g}`} transform={`translate(${10}, ${headerH + (layout.yByGen[g] ?? 0) + 20})`}>
+          <g key={`gen-${g}`} transform={`translate(${10 + xOffset}, ${headerH + (layout.yByGen[g] ?? 0) + 20})`}>
             <text fontSize={FONT_SIZE_SUB} fill={COLOR_TEXT_MUTED} y={-4}>
               {g} 世
             </text>
@@ -88,7 +123,7 @@ export function LineageChartSvg({
         );
       })}
 
-      <g transform={`translate(${genCol}, ${headerH})`}>
+      <g transform={`translate(${genCol + xOffset}, ${headerH})`}>
         {/* 连线 */}
         {layout.lines.map((l, i) => (
           <line

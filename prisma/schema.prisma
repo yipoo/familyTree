@@ -28,26 +28,45 @@ model User {
   name         String
   avatarUrl    String?
   platformRole PlatformRole @default(USER)
+  // 微信小程序绑定：openid 唯一标识小程序内的微信用户
+  wechatOpenId  String?     @unique
+  wechatUnionId String?
   createdAt    DateTime     @default(now())
   updatedAt    DateTime     @updatedAt
 
   members        FamilyMember[]
-  subtreeAdmins  SubtreeAdmin[] @relation("subtreeAdminUser")
-  subtreeGrants  SubtreeAdmin[] @relation("subtreeAdminGranter")
-  invitesCreated FamilyInvite[] @relation("inviteCreator")
+  subtreeAdmins  SubtreeAdmin[]    @relation("subtreeAdminUser")
+  subtreeGrants  SubtreeAdmin[]    @relation("subtreeAdminGranter")
+  invitesCreated FamilyInvite[]    @relation("inviteCreator")
   inviteUses     FamilyInviteUse[] @relation("inviteUser")
+
+  joinRequests         JoinRequest[] @relation("joinRequestUser")
+  joinRequestDecisions JoinRequest[] @relation("joinRequestDecider")
 }
 
 model Family {
-  id          String    @id @default(cuid())
-  surname     String
-  name        String
-  founderName String?
-  description String?
-  ownerId     String
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
-  deletedAt   DateTime?
+  id            String    @id @default(cuid())
+  surname       String
+  name          String
+  founderName   String?
+  description   String?
+  /**
+   * 族规家训：印刷家谱的"家训"章节正文（多行 markdown 风格纯文本）
+   */
+  familyRules   String?
+  /**
+   * 修谱版次：如"初修"、"续修"、"三续"、"民国版重修"等；用于册谱封面
+   */
+  editionInfo   String?
+  /**
+   * 姓氏源流：传统家谱的源流叙述；为空时自动用 description 或模板文
+   */
+  surnameOrigin String?
+  ownerId       String
+  isPublic      Boolean   @default(false) // P2 发现页：公开家族才会出现在 /discover
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime?
 
   members         FamilyMember[]
   generationNames GenerationName[]
@@ -61,6 +80,14 @@ model Family {
   subtreeAdmins   SubtreeAdmin[]
   invites         FamilyInvite[]
   submissions     PendingSubmission[]
+  pdfJobs         PdfJob[]
+  joinRequests    JoinRequest[]
+  media           Media[]
+  collectionLinks CollectionLink[]
+  albumSections   AlbumSection[]
+
+  @@index([deletedAt])
+  @@index([isPublic])
 }
 
 enum FamilyRole {
@@ -122,28 +149,31 @@ model Person {
   id             String     @id @default(cuid())
   familyId       String
   branchId       String?
-  externalId     String?    // 来自外部数据源（如 Excel）的稳定 ID，用于导入对账
+  externalId     String? // 来自外部数据源（如 Excel）的稳定 ID，用于导入对账
   name           String
-  alias          String?    // 别名
+  alias          String? // 别名
   surnameOnly    Boolean    @default(false)
   gender         Gender
   generation     Int
   generationChar String?
-  birthOrder     Int?       // 同辈排行（0=未知，1=长，2=次……）
+  birthOrder     Int? // 同辈排行（0=未知，1=长，2=次……）
   birthYear      Int?
   deathYear      Int?
   birthDate      String?
   deathDate      String?
-  birthPlace     String?    // 出生地（自由文本）
+  birthPlace     String? // 出生地（自由文本）
   status         LifeStatus @default(ALIVE)
   avatarUrl      String?
   note           String?
-  noteHint       String?    // 线索备注
-  paperRecord    String?    // 纸谱行传
-  succession     String?    // 出承（过继 / 嗣子等）
-  biography      String?    // 个人传记
+  noteHint       String? // 线索备注
+  paperRecord    String? // 纸谱行传
+  succession     String? // 出承（过继 / 嗣子等）
+  biography      String? // 个人传记
   isMarriedIn    Boolean    @default(false)
-  residenceId    String?    // 显式居住地；null = 沿父系/夫上溯继承
+  residenceId    String? // 显式居住地；null = 沿父系/夫上溯继承
+  // 在世族人联系手机号的哈希（sha256(规范化手机号)）——小程序"纯自动匹配"定位用，
+  // 不存明文以保护隐私。来源：二维码采集自填 / 管理员录入。
+  contactPhoneHash String?
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -161,11 +191,14 @@ model Person {
   migrations         Migration[]      @relation("personMigration")
   branchesRoot       Branch[]         @relation("branchRoot")
   subtreeAdmins      SubtreeAdmin[]   @relation("subtreeRoot")
+  media              Media[]
+  collectionLinks    CollectionLink[] @relation("collectTarget")
 
   @@unique([familyId, externalId])
   @@index([familyId, generation])
   @@index([familyId, branchId])
   @@index([familyId, name])
+  @@index([contactPhoneHash])
 }
 
 // ============================================================
@@ -407,9 +440,9 @@ model SubtreeAdmin {
 model FamilyInvite {
   id          String     @id @default(cuid())
   familyId    String
-  code        String     @unique  // 8 位 base32 友好码（如 K3FH9P2X）
+  code        String     @unique // 8 位 base32 友好码（如 K3FH9P2X）
   role        FamilyRole @default(MEMBER)
-  maxUses     Int?       // null = 不限次（多用），1 = 单次
+  maxUses     Int? // null = 不限次（多用），1 = 单次
   uses        Int        @default(0)
   expiresAt   DateTime?
   note        String?
@@ -417,21 +450,21 @@ model FamilyInvite {
   createdAt   DateTime   @default(now())
   revokedAt   DateTime?
 
-  family      Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
-  createdBy   User              @relation("inviteCreator", fields: [createdById], references: [id])
-  usesLog     FamilyInviteUse[]
+  family    Family            @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  createdBy User              @relation("inviteCreator", fields: [createdById], references: [id])
+  usesLog   FamilyInviteUse[]
 
   @@index([familyId, createdAt])
 }
 
 model FamilyInviteUse {
-  id        String       @id @default(cuid())
-  inviteId  String
-  userId    String
-  usedAt    DateTime     @default(now())
+  id       String   @id @default(cuid())
+  inviteId String
+  userId   String
+  usedAt   DateTime @default(now())
 
-  invite    FamilyInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
-  user      User         @relation("inviteUser", fields: [userId], references: [id], onDelete: Cascade)
+  invite FamilyInvite @relation(fields: [inviteId], references: [id], onDelete: Cascade)
+  user   User         @relation("inviteUser", fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([inviteId, userId])
   @@index([userId])
@@ -458,4 +491,186 @@ model VerificationCode {
   createdAt  DateTime            @default(now())
 
   @@index([phone, purpose, createdAt])
+}
+
+// ============================================================
+// 异步 PDF 渲染任务（吊线图 / 册谱）
+// ============================================================
+
+enum PdfJobType {
+  LINEAGE_CHART
+  ALBUM
+}
+
+enum PdfJobStatus {
+  PENDING
+  RUNNING
+  DONE
+  FAILED
+  CANCELED
+}
+
+model PdfJob {
+  id            String       @id @default(cuid())
+  familyId      String
+  type          PdfJobType
+  status        PdfJobStatus @default(PENDING)
+  progress      Int          @default(0) // 0..100
+  // 输入参数（吊线图的 root 等）
+  params        Json?
+  // 结果与诊断
+  outputBytes   Bytes?
+  outputName    String?
+  error         String?
+  requestedById String
+  createdAt     DateTime     @default(now())
+  updatedAt     DateTime     @updatedAt
+  startedAt     DateTime?
+  finishedAt    DateTime?
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
+  @@index([status])
+}
+
+// ============================================================
+// 入族申请（公开家族的申请加入流程）
+// ============================================================
+
+enum JoinRequestStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  CANCELLED
+}
+
+model JoinRequest {
+  id          String            @id @default(cuid())
+  familyId    String
+  userId      String
+  message     String? // 申请人留言（向族长介绍自己 / 提供身份线索）
+  status      JoinRequestStatus @default(PENDING)
+  createdAt   DateTime          @default(now())
+  updatedAt   DateTime          @updatedAt
+  decidedAt   DateTime?
+  decidedById String?
+  decidedNote String? // 族长批准 / 拒绝的备注
+
+  family    Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  user      User   @relation("joinRequestUser", fields: [userId], references: [id], onDelete: Cascade)
+  decidedBy User?  @relation("joinRequestDecider", fields: [decidedById], references: [id], onDelete: SetNull)
+
+  // 同一用户对同一家族只持一条记录，状态可流转（拒绝后可再申请，将复用此行）
+  @@unique([familyId, userId])
+  @@index([familyId, status])
+  @@index([userId, status])
+}
+
+// ============================================================
+// 媒体/影像层：人物相册 / 老谱扫描件 / 家族影像
+// 文件落阿里云 OSS，库里只存元数据 + 公网 URL（见 lib/services/oss.ts）
+// ============================================================
+
+enum MediaKind {
+  PHOTO // 照片
+  DOCUMENT // 文档 / 老谱扫描件
+  AUDIO // 录音（口述史）
+  VIDEO // 视频
+}
+
+model Media {
+  id           String    @id @default(cuid())
+  familyId     String
+  personId     String? // 挂到某人物；null = 家族级影像
+  kind         MediaKind @default(PHOTO)
+  url          String // 公网可访问 URL
+  objectKey    String? // OSS object key，便于后续删除 / 重签名
+  name         String? // 原始文件名
+  mime         String?
+  size         Int? // 字节
+  width        Int?
+  height       Int?
+  caption      String? // 图注 / 说明
+  sortOrder    Int       @default(0)
+  uploadedById String
+  createdAt    DateTime  @default(now())
+
+  family Family  @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  person Person? @relation(fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
+  @@index([personId])
+}
+
+// ============================================================
+// 二维码采集：管理员发链接 / 二维码，族人无需登录自填，
+// 提交进 PendingSubmission 审核流（见 lib/services/submissions.ts）
+// ============================================================
+
+enum CollectMode {
+  PERSON_UPDATE // 补全 / 校正目标人物本人信息
+  ADD_CHILD // 为目标人物添加子女
+}
+
+model CollectionLink {
+  id          String      @id @default(cuid())
+  familyId    String
+  token       String      @unique // 公开链接 token
+  personId    String // 采集目标人物
+  mode        CollectMode @default(PERSON_UPDATE)
+  note        String? // 给填写人的说明
+  maxUses     Int? // null = 不限次
+  uses        Int         @default(0)
+  expiresAt   DateTime?
+  revokedAt   DateTime?
+  createdById String
+  createdAt   DateTime    @default(now())
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+  person Person @relation("collectTarget", fields: [personId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, createdAt])
+  @@index([personId])
+}
+
+// ============================================================
+// 册谱前置内容（封面 / 凡例 / 谱序 / 姓氏源流 / 族规 / 跋 / 自定义章节）
+// 数据驱动的章节系统：屏幕/打印（components/album）与 PDF（lib/pdf/album）
+// 统一读这份数据。无记录时由 lib/services/album-sections.ts 运行时回退到默认列表。
+// ============================================================
+
+enum AlbumSectionKind {
+  COVER // 封面（结构化：主/副标题、堂号、底图、版次、落款）
+  PREFACE // 谱序（可多篇，body=markdown）
+  FANLI // 凡例（body 空走模板）
+  YUANLIU // 姓氏源流（body 空走模板）
+  RULES // 族规家训（body 空走 family.familyRules）
+  ZIBEI // 字辈表（数据驱动）
+  COMPILERS // 修谱人员（数据驱动）
+  TULU // 世系图录（数据驱动）
+  PORTRAITS // 像赞（数据驱动）
+  POSTSCRIPT // 跋（body 空走模板）
+  CUSTOM_TEXT // 用户自定义文字章节（body=markdown）
+  CUSTOM_IMAGE // 用户自定义整页图片章节
+}
+
+model AlbumSection {
+  id        String           @id @default(cuid())
+  familyId  String
+  kind      AlbumSectionKind
+  title     String? // null → 渲染器用 kind 默认抬头
+  subtitle  String? // 仅 COVER：副标题 / 堂号
+  body      String? // markdown 正文；数据驱动章节留 null
+  signature String? // 落款，如"族裔 XX 谨序"
+  imageUrl  String? // 存 Media.url 字符串；展示前 ossSignIfOurs 重签名
+  order     Int
+  enabled   Boolean          @default(true)
+  appliesTo String[]         @default([]) // 适用版式，空=仅 complete；P2 跨版式用
+  createdAt DateTime         @default(now())
+  updatedAt DateTime         @updatedAt
+
+  family Family @relation(fields: [familyId], references: [id], onDelete: Cascade)
+
+  @@index([familyId, order])
 }

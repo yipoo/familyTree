@@ -12,10 +12,12 @@ interface NavItem {
 export function AdminSidebar({
   familyId,
   pendingCount,
+  joinPendingCount = 0,
   horizontal,
 }: {
   familyId: string;
   pendingCount: number;
+  joinPendingCount?: number;
   horizontal?: boolean;
 }) {
   const pathname = usePathname();
@@ -24,13 +26,23 @@ export function AdminSidebar({
   const items: NavItem[] = [
     { href: root, label: "成员" }, // 默认页 = 成员
     { href: `${root}/invites`, label: "邀请码" },
+    {
+      href: `${root}/join-requests`,
+      label: "入族申请",
+      badge: joinPendingCount,
+    },
     { href: `${root}/grants`, label: "子树管理员" },
     { href: `${root}/shares`, label: "分享链接" },
     { href: `${root}/generations`, label: "字辈表" },
+    { href: `${root}/branches`, label: "支系管理" },
+    { href: `${root}/print-info`, label: "印刷家谱信息" },
+    { href: `${root}/book`, label: "册谱编辑" },
     { href: `${root}/locations`, label: "居住地字典" },
+    { href: `${root}/collect`, label: "二维码采集" },
     { href: `${root}/submissions`, label: "待审提交", badge: pendingCount },
     { href: `${root}/migrations`, label: "支系迁徙" },
     { href: `${root}/import`, label: "数据导入" },
+    { href: `${root}/data-check`, label: "数据体检" },
     { href: `${root}/audit`, label: "审计日志" },
   ];
 
@@ -45,12 +57,16 @@ export function AdminSidebar({
               href={it.href}
               className={`rounded-full border px-2.5 py-1 transition ${
                 active
-                  ? "border-blue-500 bg-blue-50 text-blue-700 dark:border-blue-700 dark:bg-blue-950/40 dark:text-blue-300"
-                  : "border-zinc-200 text-zinc-600 hover:bg-zinc-100 dark:border-zinc-800 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                  ? "border-brand bg-brand-soft text-brand-soft-fg"
+                  : "border-border text-fg-muted hover:bg-muted hover:text-foreground"
               }`}
             >
               {it.label}
-              {it.badge ? <span className="ml-1 text-amber-600">{it.badge}</span> : null}
+              {it.badge ? (
+                <span className="ml-1 text-amber-600 dark:text-amber-400">
+                  {it.badge}
+                </span>
+              ) : null}
             </Link>
           );
         })}
@@ -66,10 +82,10 @@ export function AdminSidebar({
           <Link
             key={it.href}
             href={it.href}
-            className={`flex items-center justify-between rounded px-3 py-1.5 transition ${
+            className={`flex items-center justify-between rounded-md px-3 py-1.5 transition ${
               active
-                ? "bg-blue-100 font-medium text-blue-700 dark:bg-blue-950/50 dark:text-blue-300"
-                : "text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800"
+                ? "bg-brand-soft font-medium text-brand-soft-fg"
+                : "text-fg-muted hover:bg-muted hover:text-foreground"
             }`}
           >
             <span>{it.label}</span>

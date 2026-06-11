@@ -15,13 +15,14 @@ import { handleApiError, badRequest } from "@/lib/api/error";
 import { parseXlsxBuffer } from "@/lib/services/xlsx-import";
 import { dryRunImport, runImport } from "@/lib/services/xlsx-import-runner";
 import { writeAudit } from "@/lib/services/audit";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
 
 const MAX_BYTES = 20 * 1024 * 1024; // 20 MB
 
 // 单个文件可能很大，提高超时（Node runtime 默认 60s）
 export const maxDuration = 300;
 
-export async function POST(
+async function importXlsxHandler(
   req: Request,
   ctx: { params: Promise<{ familyId: string }> },
 ) {
@@ -88,3 +89,11 @@ export async function POST(
     return handleApiError(e);
   }
 }
+
+// 限流：Excel 导入是重操作，单 IP / 单用户每分钟 5 次足够；防止超大文件刷接口。
+export const POST = withRateLimit(importXlsxHandler, {
+  bucket: "import-xlsx",
+  limit: 5,
+  windowMs: 60_000,
+  withUser: true,
+});

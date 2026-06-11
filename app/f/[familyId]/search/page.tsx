@@ -4,7 +4,6 @@
  *
  * SSR 拉一些选项数据（branches / generationChars），客户端组件处理输入与请求。
  */
-import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 
 import { auth } from "@/auth";
@@ -34,19 +33,23 @@ export default async function AdvancedSearchPage({
   if (!family) notFound();
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <header className="border-b border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900 sm:px-8">
-        <div className="mx-auto flex max-w-5xl items-center gap-3">
-          <Link
-            href={`/f/${familyId}`}
-            className="text-sm text-zinc-500 hover:underline"
-          >
-            ← 返回家族
-          </Link>
-          <h1 className="text-base font-semibold">{family.name} · 高级搜索</h1>
+    <div>
+      <header className="border-b border-hairline bg-surface">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-3 px-3 py-5 sm:px-5 lg:px-6">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
+              高级搜索
+            </p>
+            <h1 className="mt-1 font-serif text-xl font-semibold text-foreground">
+              {family.name}
+            </h1>
+            <p className="mt-0.5 text-xs text-fg-muted">
+              按姓名 / 字辈 / 支系 / 居住地 / 在世状态 等多条件检索
+            </p>
+          </div>
         </div>
       </header>
-      <main className="mx-auto max-w-5xl p-4 sm:p-8">
+      <main className="mx-auto max-w-[1440px] p-3 sm:p-5 lg:p-6">
         <AdvancedSearchPanel
           familyId={familyId}
           branches={family.branches.map((b) => ({ id: b.id, name: b.name }))}

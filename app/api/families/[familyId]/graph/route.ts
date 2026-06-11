@@ -1,20 +1,27 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/db";
-import { layoutPaternalTree } from "@/lib/services/tree-layout";
+import {
+  layoutPaternalTree,
+  isSpacingPreset,
+  DEFAULT_SPACING,
+} from "@/lib/services/tree-layout";
 import { parseLineage } from "@/lib/services/lineage";
 import { authErrorResponse, requireFamilyRole } from "@/lib/auth/guard";
+import { computeKin5 } from "@/lib/services/kinship";
 
 /**
- * GET /api/families/[familyId]/graph?root=&focus=&upGen=3&lineage=paternal|maternal|all
+ * GET /api/families/[familyId]/graph?root=&focus=&upGen=3&lineage=paternal|maternal|all&mode=full|kin5
  *
  * 返回完整树谱布局：节点（含坐标）+ 边 + 世代轴信息 + 统计。
  *
  * 模式（互斥）：
- *   - 默认：从家族首支根开始，展示全部
+ *   - 默认（mode=full）：从家族首支根开始，展示全部
  *   - root=PID：以 PID 为布局根，展示其所有子孙（"仅看此分支"）
  *   - focus=PID&upGen=N：以 PID 向上 N 代直系祖先 + PID 全部后代为子集
  *     上行只保留直系（兄弟、堂亲不显示），下行保留全部。
  *     默认 upGen=3。
+ *   - mode=kin5&root=PID：近亲 5 代（root ±2 代直系 + 兄弟 + 配偶 + 侄甥 + 孙）
+ *     适合在大家族里"看清根人物的核心关系网"。详见 lib/services/kinship.ts。
  */
 export async function GET(
   req: Request,
@@ -32,6 +39,10 @@ export async function GET(
   const upGenRaw = Number(url.searchParams.get("upGen") ?? "3");
   const upGen = Number.isFinite(upGenRaw) && upGenRaw >= 0 ? Math.min(upGenRaw, 10) : 3;
   const lineage = parseLineage(url.searchParams.get("lineage") ?? undefined);
+  const spacingRaw = url.searchParams.get("spacing");
+  const spacing = isSpacingPreset(spacingRaw) ? spacingRaw : DEFAULT_SPACING;
+  const modeParam = url.searchParams.get("mode");
+  const isKin5 = modeParam === "kin5";
 
   const [family, persons, marriages, parentChild] = await Promise.all([
     prisma.family.findUnique({
@@ -160,7 +171,23 @@ export async function GET(
   const allowedPC = new Set<string>(); // 用 `${parentId}::${childId}` 标识
   const pcKey = (pid: string, cid: string) => `${pid}::${cid}`;
 
-  if (focusParam && ancestorChain) {
+  if (isKin5 && rootPersonId) {
+    // kin5 模式：完全替换允许集合
+    const kin = computeKin5({
+      rootPersonId,
+      persons: persons.map((p) => ({ id: p.id, gender: p.gender })),
+      parentChild: parentChild.map((pc) => ({
+        parentId: pc.parentId,
+        childId: pc.childId,
+      })),
+      marriages: marriages.map((m) => ({
+        husbandId: m.husbandId,
+        wifeId: m.wifeId,
+      })),
+    });
+    for (const id of kin.ids) allowedIds.add(id);
+    for (const e of kin.edges) allowedPC.add(e);
+  } else if (focusParam && ancestorChain) {
     // focus 模式：
     //   - 祖先链上每代仅保留与下一代的父子边（不含旁支兄弟）
     //   - focus 及其后代：完整保留
@@ -255,6 +282,7 @@ export async function GET(
       persons: filteredPersons,
       marriages: filteredMarriages,
       parentChild: filteredParentChild,
+      spacing,
     });
   }
 
@@ -322,13 +350,20 @@ export async function GET(
 
   const residenceByPersonId: Record<
     string,
-    { fullText: string; short: string; fromPersonId: string; inherited: boolean }
+    {
+      locationId: string;
+      fullText: string;
+      short: string;
+      fromPersonId: string;
+      inherited: boolean;
+    }
   > = {};
   for (const r of resolved) {
     if (!r.locationId || !r.fromPersonId) continue;
     const l = locById.get(r.locationId);
     if (!l) continue;
     residenceByPersonId[r.personId] = {
+      locationId: l.id,
       fullText: l.fullText,
       short: l.village || l.town || l.county || l.fullText,
       fromPersonId: r.fromPersonId,
@@ -348,6 +383,7 @@ export async function GET(
         rootPersonName,
         branchInfo,
         lineage,
+        mode: isKin5 ? "kin5" : "full",
         focusPersonId: focusParam ?? null,
         upGen: focusParam ? upGen : null,
         stats,

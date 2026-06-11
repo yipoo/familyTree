@@ -9,10 +9,10 @@ export default function NotFound() {
           该人物不存在、已被删除，或不属于当前家族。
         </p>
         <Link
-          href="/"
+          href="/dashboard"
           className="mt-4 inline-block rounded bg-blue-600 px-4 py-2 text-sm text-white hover:bg-blue-700"
         >
-          返回首页
+          返回我的家族
         </Link>
       </div>
     </div>

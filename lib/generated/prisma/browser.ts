@@ -107,3 +107,28 @@ export type FamilyInviteUse = Prisma.FamilyInviteUseModel
  * 
  */
 export type VerificationCode = Prisma.VerificationCodeModel
+/**
+ * Model PdfJob
+ * 
+ */
+export type PdfJob = Prisma.PdfJobModel
+/**
+ * Model JoinRequest
+ * 
+ */
+export type JoinRequest = Prisma.JoinRequestModel
+/**
+ * Model Media
+ * 
+ */
+export type Media = Prisma.MediaModel
+/**
+ * Model CollectionLink
+ * 
+ */
+export type CollectionLink = Prisma.CollectionLinkModel
+/**
+ * Model AlbumSection
+ * 
+ */
+export type AlbumSection = Prisma.AlbumSectionModel

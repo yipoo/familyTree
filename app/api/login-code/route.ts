@@ -16,12 +16,12 @@ import { encode } from "next-auth/jwt";
 import { prisma } from "@/lib/db";
 import { normalizePhone } from "@/lib/auth/password";
 import { verifyCode } from "@/lib/services/verification";
+import { withRateLimit } from "@/lib/rate-limit-middleware";
+import { publicUrl, sessionCookie } from "@/lib/api/public-url";
 
-const SESSION_COOKIE = "authjs.session-token";
 const SESSION_MAX_AGE = 60 * 60 * 24 * 30;
-const SALT = SESSION_COOKIE;
 
-export async function POST(req: Request) {
+async function loginCodeHandler(req: Request) {
   const formData = await req.formData();
   const phoneRaw = String(formData.get("phone") ?? "").trim();
   const codeRaw = String(formData.get("code") ?? "").trim();
@@ -29,11 +29,11 @@ export async function POST(req: Request) {
 
   const fail = (code: string, defaultNext = next) =>
     NextResponse.redirect(
-      new URL(
+      publicUrl(
+        req,
         `/login?error=${code}&mode=code&phone=${encodeURIComponent(
           phoneRaw,
         )}&next=${encodeURIComponent(defaultNext)}`,
-        req.url,
       ),
       303,
     );
@@ -71,6 +71,7 @@ export async function POST(req: Request) {
   const secret = process.env.AUTH_SECRET;
   if (!secret) throw new Error("AUTH_SECRET is not configured");
 
+  const cookie = sessionCookie(req);
   const encoded = await encode({
     token: {
       uid: user.id,
@@ -80,19 +81,27 @@ export async function POST(req: Request) {
       sub: user.id,
     },
     secret,
-    salt: SALT,
+    salt: cookie.name,
     maxAge: SESSION_MAX_AGE,
   });
 
   // 首次注册引导到 /me?welcome=1（除非外部明确要求 next）
   const target = firstTime && next === "/" ? "/me?welcome=1" : next;
-  const res = NextResponse.redirect(new URL(target, req.url), 303);
-  res.cookies.set(SESSION_COOKIE, encoded, {
+  const targetUrl = publicUrl(req, target);
+  const res = NextResponse.redirect(targetUrl, 303);
+  res.cookies.set(cookie.name, encoded, {
     httpOnly: true,
     sameSite: "lax",
     path: "/",
     maxAge: SESSION_MAX_AGE,
-    secure: req.url.startsWith("https://"),
+    secure: cookie.secure,
   });
   return res;
 }
+
+// 限流：单 IP 每分钟最多 10 次验证码登录尝试。
+export const POST = withRateLimit(loginCodeHandler, {
+  bucket: "login-code",
+  limit: 10,
+  windowMs: 60_000,
+});

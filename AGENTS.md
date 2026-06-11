@@ -66,6 +66,13 @@ export async function POST(req: Request, ctx: { params: Promise<{ familyId: stri
 - 导出器：`lib/services/exporters.ts`（JSON / CSV / GEDCOM）
 - 家族统计：`lib/services/family-stats.ts`
 - Excel 解析与导入：`lib/services/xlsx-import.ts` + `xlsx-import-runner.ts`
+- 五服图（本宗九族服制）：`lib/services/wufu.ts`
+- 族谱圆（同心圆径向布局）：`lib/services/radial-chart.ts`
+- 数据体检 / 智能纠错：`lib/services/data-check.ts`（生卒/世代/重复一致性检查）
+- 媒体/影像（阿里云 OSS 封装）：`lib/services/oss.ts`（需 `OSS_*` env；`ossConfigured()` 判可用）
+- AI 文本网关（百炼 / Qwen，OpenAI 兼容）：`lib/services/llm.ts`（需 `DASHSCOPE_API_KEY`）
+- AI 人物传记：`lib/services/biography.ts`（纯 prompt 装配可单测）
+- 待审提交 / 二维码采集：`lib/services/submissions.ts`（`person-update` / `person-add-child`，采集带 `contributor`）
 
 ### 测试
 

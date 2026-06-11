@@ -30,7 +30,11 @@ export type FamilyMinAggregateOutputType = {
   name: string | null
   founderName: string | null
   description: string | null
+  familyRules: string | null
+  editionInfo: string | null
+  surnameOrigin: string | null
   ownerId: string | null
+  isPublic: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -42,7 +46,11 @@ export type FamilyMaxAggregateOutputType = {
   name: string | null
   founderName: string | null
   description: string | null
+  familyRules: string | null
+  editionInfo: string | null
+  surnameOrigin: string | null
   ownerId: string | null
+  isPublic: boolean | null
   createdAt: Date | null
   updatedAt: Date | null
   deletedAt: Date | null
@@ -54,7 +62,11 @@ export type FamilyCountAggregateOutputType = {
   name: number
   founderName: number
   description: number
+  familyRules: number
+  editionInfo: number
+  surnameOrigin: number
   ownerId: number
+  isPublic: number
   createdAt: number
   updatedAt: number
   deletedAt: number
@@ -68,7 +80,11 @@ export type FamilyMinAggregateInputType = {
   name?: true
   founderName?: true
   description?: true
+  familyRules?: true
+  editionInfo?: true
+  surnameOrigin?: true
   ownerId?: true
+  isPublic?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -80,7 +96,11 @@ export type FamilyMaxAggregateInputType = {
   name?: true
   founderName?: true
   description?: true
+  familyRules?: true
+  editionInfo?: true
+  surnameOrigin?: true
   ownerId?: true
+  isPublic?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -92,7 +112,11 @@ export type FamilyCountAggregateInputType = {
   name?: true
   founderName?: true
   description?: true
+  familyRules?: true
+  editionInfo?: true
+  surnameOrigin?: true
   ownerId?: true
+  isPublic?: true
   createdAt?: true
   updatedAt?: true
   deletedAt?: true
@@ -177,7 +201,11 @@ export type FamilyGroupByOutputType = {
   name: string
   founderName: string | null
   description: string | null
+  familyRules: string | null
+  editionInfo: string | null
+  surnameOrigin: string | null
   ownerId: string
+  isPublic: boolean
   createdAt: Date
   updatedAt: Date
   deletedAt: Date | null
@@ -210,7 +238,11 @@ export type FamilyWhereInput = {
   name?: Prisma.StringFilter<"Family"> | string
   founderName?: Prisma.StringNullableFilter<"Family"> | string | null
   description?: Prisma.StringNullableFilter<"Family"> | string | null
+  familyRules?: Prisma.StringNullableFilter<"Family"> | string | null
+  editionInfo?: Prisma.StringNullableFilter<"Family"> | string | null
+  surnameOrigin?: Prisma.StringNullableFilter<"Family"> | string | null
   ownerId?: Prisma.StringFilter<"Family"> | string
+  isPublic?: Prisma.BoolFilter<"Family"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Family"> | Date | string | null
@@ -226,6 +258,11 @@ export type FamilyWhereInput = {
   subtreeAdmins?: Prisma.SubtreeAdminListRelationFilter
   invites?: Prisma.FamilyInviteListRelationFilter
   submissions?: Prisma.PendingSubmissionListRelationFilter
+  pdfJobs?: Prisma.PdfJobListRelationFilter
+  joinRequests?: Prisma.JoinRequestListRelationFilter
+  media?: Prisma.MediaListRelationFilter
+  collectionLinks?: Prisma.CollectionLinkListRelationFilter
+  albumSections?: Prisma.AlbumSectionListRelationFilter
 }
 
 export type FamilyOrderByWithRelationInput = {
@@ -234,7 +271,11 @@ export type FamilyOrderByWithRelationInput = {
   name?: Prisma.SortOrder
   founderName?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  familyRules?: Prisma.SortOrderInput | Prisma.SortOrder
+  editionInfo?: Prisma.SortOrderInput | Prisma.SortOrder
+  surnameOrigin?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -250,6 +291,11 @@ export type FamilyOrderByWithRelationInput = {
   subtreeAdmins?: Prisma.SubtreeAdminOrderByRelationAggregateInput
   invites?: Prisma.FamilyInviteOrderByRelationAggregateInput
   submissions?: Prisma.PendingSubmissionOrderByRelationAggregateInput
+  pdfJobs?: Prisma.PdfJobOrderByRelationAggregateInput
+  joinRequests?: Prisma.JoinRequestOrderByRelationAggregateInput
+  media?: Prisma.MediaOrderByRelationAggregateInput
+  collectionLinks?: Prisma.CollectionLinkOrderByRelationAggregateInput
+  albumSections?: Prisma.AlbumSectionOrderByRelationAggregateInput
 }
 
 export type FamilyWhereUniqueInput = Prisma.AtLeast<{
@@ -261,7 +307,11 @@ export type FamilyWhereUniqueInput = Prisma.AtLeast<{
   name?: Prisma.StringFilter<"Family"> | string
   founderName?: Prisma.StringNullableFilter<"Family"> | string | null
   description?: Prisma.StringNullableFilter<"Family"> | string | null
+  familyRules?: Prisma.StringNullableFilter<"Family"> | string | null
+  editionInfo?: Prisma.StringNullableFilter<"Family"> | string | null
+  surnameOrigin?: Prisma.StringNullableFilter<"Family"> | string | null
   ownerId?: Prisma.StringFilter<"Family"> | string
+  isPublic?: Prisma.BoolFilter<"Family"> | boolean
   createdAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   updatedAt?: Prisma.DateTimeFilter<"Family"> | Date | string
   deletedAt?: Prisma.DateTimeNullableFilter<"Family"> | Date | string | null
@@ -277,6 +327,11 @@ export type FamilyWhereUniqueInput = Prisma.AtLeast<{
   subtreeAdmins?: Prisma.SubtreeAdminListRelationFilter
   invites?: Prisma.FamilyInviteListRelationFilter
   submissions?: Prisma.PendingSubmissionListRelationFilter
+  pdfJobs?: Prisma.PdfJobListRelationFilter
+  joinRequests?: Prisma.JoinRequestListRelationFilter
+  media?: Prisma.MediaListRelationFilter
+  collectionLinks?: Prisma.CollectionLinkListRelationFilter
+  albumSections?: Prisma.AlbumSectionListRelationFilter
 }, "id">
 
 export type FamilyOrderByWithAggregationInput = {
@@ -285,7 +340,11 @@ export type FamilyOrderByWithAggregationInput = {
   name?: Prisma.SortOrder
   founderName?: Prisma.SortOrderInput | Prisma.SortOrder
   description?: Prisma.SortOrderInput | Prisma.SortOrder
+  familyRules?: Prisma.SortOrderInput | Prisma.SortOrder
+  editionInfo?: Prisma.SortOrderInput | Prisma.SortOrder
+  surnameOrigin?: Prisma.SortOrderInput | Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrderInput | Prisma.SortOrder
@@ -303,7 +362,11 @@ export type FamilyScalarWhereWithAggregatesInput = {
   name?: Prisma.StringWithAggregatesFilter<"Family"> | string
   founderName?: Prisma.StringNullableWithAggregatesFilter<"Family"> | string | null
   description?: Prisma.StringNullableWithAggregatesFilter<"Family"> | string | null
+  familyRules?: Prisma.StringNullableWithAggregatesFilter<"Family"> | string | null
+  editionInfo?: Prisma.StringNullableWithAggregatesFilter<"Family"> | string | null
+  surnameOrigin?: Prisma.StringNullableWithAggregatesFilter<"Family"> | string | null
   ownerId?: Prisma.StringWithAggregatesFilter<"Family"> | string
+  isPublic?: Prisma.BoolWithAggregatesFilter<"Family"> | boolean
   createdAt?: Prisma.DateTimeWithAggregatesFilter<"Family"> | Date | string
   updatedAt?: Prisma.DateTimeWithAggregatesFilter<"Family"> | Date | string
   deletedAt?: Prisma.DateTimeNullableWithAggregatesFilter<"Family"> | Date | string | null
@@ -315,7 +378,11 @@ export type FamilyCreateInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -331,6 +398,11 @@ export type FamilyCreateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateInput = {
@@ -339,7 +411,11 @@ export type FamilyUncheckedCreateInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -355,6 +431,11 @@ export type FamilyUncheckedCreateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUpdateInput = {
@@ -363,7 +444,11 @@ export type FamilyUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -379,6 +464,11 @@ export type FamilyUpdateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateInput = {
@@ -387,7 +477,11 @@ export type FamilyUncheckedUpdateInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -403,6 +497,11 @@ export type FamilyUncheckedUpdateInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateManyInput = {
@@ -411,7 +510,11 @@ export type FamilyCreateManyInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -423,7 +526,11 @@ export type FamilyUpdateManyMutationInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -435,7 +542,11 @@ export type FamilyUncheckedUpdateManyInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -447,7 +558,11 @@ export type FamilyCountOrderByAggregateInput = {
   name?: Prisma.SortOrder
   founderName?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  familyRules?: Prisma.SortOrder
+  editionInfo?: Prisma.SortOrder
+  surnameOrigin?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -459,7 +574,11 @@ export type FamilyMaxOrderByAggregateInput = {
   name?: Prisma.SortOrder
   founderName?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  familyRules?: Prisma.SortOrder
+  editionInfo?: Prisma.SortOrder
+  surnameOrigin?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -471,7 +590,11 @@ export type FamilyMinOrderByAggregateInput = {
   name?: Prisma.SortOrder
   founderName?: Prisma.SortOrder
   description?: Prisma.SortOrder
+  familyRules?: Prisma.SortOrder
+  editionInfo?: Prisma.SortOrder
+  surnameOrigin?: Prisma.SortOrder
   ownerId?: Prisma.SortOrder
+  isPublic?: Prisma.SortOrder
   createdAt?: Prisma.SortOrder
   updatedAt?: Prisma.SortOrder
   deletedAt?: Prisma.SortOrder
@@ -480,6 +603,10 @@ export type FamilyMinOrderByAggregateInput = {
 export type FamilyScalarRelationFilter = {
   is?: Prisma.FamilyWhereInput
   isNot?: Prisma.FamilyWhereInput
+}
+
+export type BoolFieldUpdateOperationsInput = {
+  set?: boolean
 }
 
 export type NullableDateTimeFieldUpdateOperationsInput = {
@@ -654,13 +781,87 @@ export type FamilyUpdateOneRequiredWithoutInvitesNestedInput = {
   update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutInvitesInput, Prisma.FamilyUpdateWithoutInvitesInput>, Prisma.FamilyUncheckedUpdateWithoutInvitesInput>
 }
 
+export type FamilyCreateNestedOneWithoutPdfJobsInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutPdfJobsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+}
+
+export type FamilyUpdateOneRequiredWithoutPdfJobsNestedInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutPdfJobsInput
+  upsert?: Prisma.FamilyUpsertWithoutPdfJobsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutPdfJobsInput, Prisma.FamilyUpdateWithoutPdfJobsInput>, Prisma.FamilyUncheckedUpdateWithoutPdfJobsInput>
+}
+
+export type FamilyCreateNestedOneWithoutJoinRequestsInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutJoinRequestsInput, Prisma.FamilyUncheckedCreateWithoutJoinRequestsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutJoinRequestsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+}
+
+export type FamilyUpdateOneRequiredWithoutJoinRequestsNestedInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutJoinRequestsInput, Prisma.FamilyUncheckedCreateWithoutJoinRequestsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutJoinRequestsInput
+  upsert?: Prisma.FamilyUpsertWithoutJoinRequestsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutJoinRequestsInput, Prisma.FamilyUpdateWithoutJoinRequestsInput>, Prisma.FamilyUncheckedUpdateWithoutJoinRequestsInput>
+}
+
+export type FamilyCreateNestedOneWithoutMediaInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutMediaInput, Prisma.FamilyUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutMediaInput
+  connect?: Prisma.FamilyWhereUniqueInput
+}
+
+export type FamilyUpdateOneRequiredWithoutMediaNestedInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutMediaInput, Prisma.FamilyUncheckedCreateWithoutMediaInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutMediaInput
+  upsert?: Prisma.FamilyUpsertWithoutMediaInput
+  connect?: Prisma.FamilyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutMediaInput, Prisma.FamilyUpdateWithoutMediaInput>, Prisma.FamilyUncheckedUpdateWithoutMediaInput>
+}
+
+export type FamilyCreateNestedOneWithoutCollectionLinksInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutCollectionLinksInput, Prisma.FamilyUncheckedCreateWithoutCollectionLinksInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutCollectionLinksInput
+  connect?: Prisma.FamilyWhereUniqueInput
+}
+
+export type FamilyUpdateOneRequiredWithoutCollectionLinksNestedInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutCollectionLinksInput, Prisma.FamilyUncheckedCreateWithoutCollectionLinksInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutCollectionLinksInput
+  upsert?: Prisma.FamilyUpsertWithoutCollectionLinksInput
+  connect?: Prisma.FamilyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutCollectionLinksInput, Prisma.FamilyUpdateWithoutCollectionLinksInput>, Prisma.FamilyUncheckedUpdateWithoutCollectionLinksInput>
+}
+
+export type FamilyCreateNestedOneWithoutAlbumSectionsInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutAlbumSectionsInput, Prisma.FamilyUncheckedCreateWithoutAlbumSectionsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutAlbumSectionsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+}
+
+export type FamilyUpdateOneRequiredWithoutAlbumSectionsNestedInput = {
+  create?: Prisma.XOR<Prisma.FamilyCreateWithoutAlbumSectionsInput, Prisma.FamilyUncheckedCreateWithoutAlbumSectionsInput>
+  connectOrCreate?: Prisma.FamilyCreateOrConnectWithoutAlbumSectionsInput
+  upsert?: Prisma.FamilyUpsertWithoutAlbumSectionsInput
+  connect?: Prisma.FamilyWhereUniqueInput
+  update?: Prisma.XOR<Prisma.XOR<Prisma.FamilyUpdateToOneWithWhereWithoutAlbumSectionsInput, Prisma.FamilyUpdateWithoutAlbumSectionsInput>, Prisma.FamilyUncheckedUpdateWithoutAlbumSectionsInput>
+}
+
 export type FamilyCreateWithoutMembersInput = {
   id?: string
   surname: string
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -675,6 +876,11 @@ export type FamilyCreateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutMembersInput = {
@@ -683,7 +889,11 @@ export type FamilyUncheckedCreateWithoutMembersInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -698,6 +908,11 @@ export type FamilyUncheckedCreateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutMembersInput = {
@@ -722,7 +937,11 @@ export type FamilyUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -737,6 +956,11 @@ export type FamilyUpdateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutMembersInput = {
@@ -745,7 +969,11 @@ export type FamilyUncheckedUpdateWithoutMembersInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -760,6 +988,11 @@ export type FamilyUncheckedUpdateWithoutMembersInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutGenerationNamesInput = {
@@ -768,7 +1001,11 @@ export type FamilyCreateWithoutGenerationNamesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -783,6 +1020,11 @@ export type FamilyCreateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutGenerationNamesInput = {
@@ -791,7 +1033,11 @@ export type FamilyUncheckedCreateWithoutGenerationNamesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -806,6 +1052,11 @@ export type FamilyUncheckedCreateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutGenerationNamesInput = {
@@ -830,7 +1081,11 @@ export type FamilyUpdateWithoutGenerationNamesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -845,6 +1100,11 @@ export type FamilyUpdateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutGenerationNamesInput = {
@@ -853,7 +1113,11 @@ export type FamilyUncheckedUpdateWithoutGenerationNamesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -868,6 +1132,11 @@ export type FamilyUncheckedUpdateWithoutGenerationNamesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutPersonsInput = {
@@ -876,7 +1145,11 @@ export type FamilyCreateWithoutPersonsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -891,6 +1164,11 @@ export type FamilyCreateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutPersonsInput = {
@@ -899,7 +1177,11 @@ export type FamilyUncheckedCreateWithoutPersonsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -914,6 +1196,11 @@ export type FamilyUncheckedCreateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutPersonsInput = {
@@ -938,7 +1225,11 @@ export type FamilyUpdateWithoutPersonsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -953,6 +1244,11 @@ export type FamilyUpdateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutPersonsInput = {
@@ -961,7 +1257,11 @@ export type FamilyUncheckedUpdateWithoutPersonsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -976,6 +1276,11 @@ export type FamilyUncheckedUpdateWithoutPersonsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutMarriagesInput = {
@@ -984,7 +1289,11 @@ export type FamilyCreateWithoutMarriagesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -999,6 +1308,11 @@ export type FamilyCreateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutMarriagesInput = {
@@ -1007,7 +1321,11 @@ export type FamilyUncheckedCreateWithoutMarriagesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1022,6 +1340,11 @@ export type FamilyUncheckedCreateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutMarriagesInput = {
@@ -1046,7 +1369,11 @@ export type FamilyUpdateWithoutMarriagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1061,6 +1388,11 @@ export type FamilyUpdateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutMarriagesInput = {
@@ -1069,7 +1401,11 @@ export type FamilyUncheckedUpdateWithoutMarriagesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1084,6 +1420,11 @@ export type FamilyUncheckedUpdateWithoutMarriagesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutParentChildInput = {
@@ -1092,7 +1433,11 @@ export type FamilyCreateWithoutParentChildInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1107,6 +1452,11 @@ export type FamilyCreateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutParentChildInput = {
@@ -1115,7 +1465,11 @@ export type FamilyUncheckedCreateWithoutParentChildInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1130,6 +1484,11 @@ export type FamilyUncheckedCreateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutParentChildInput = {
@@ -1154,7 +1513,11 @@ export type FamilyUpdateWithoutParentChildInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1169,6 +1532,11 @@ export type FamilyUpdateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutParentChildInput = {
@@ -1177,7 +1545,11 @@ export type FamilyUncheckedUpdateWithoutParentChildInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1192,6 +1564,11 @@ export type FamilyUncheckedUpdateWithoutParentChildInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutBranchesInput = {
@@ -1200,7 +1577,11 @@ export type FamilyCreateWithoutBranchesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1215,6 +1596,11 @@ export type FamilyCreateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutBranchesInput = {
@@ -1223,7 +1609,11 @@ export type FamilyUncheckedCreateWithoutBranchesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1238,6 +1628,11 @@ export type FamilyUncheckedCreateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutBranchesInput = {
@@ -1262,7 +1657,11 @@ export type FamilyUpdateWithoutBranchesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1277,6 +1676,11 @@ export type FamilyUpdateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutBranchesInput = {
@@ -1285,7 +1689,11 @@ export type FamilyUncheckedUpdateWithoutBranchesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1300,6 +1708,11 @@ export type FamilyUncheckedUpdateWithoutBranchesInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutMigrationsInput = {
@@ -1308,7 +1721,11 @@ export type FamilyCreateWithoutMigrationsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1323,6 +1740,11 @@ export type FamilyCreateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutMigrationsInput = {
@@ -1331,7 +1753,11 @@ export type FamilyUncheckedCreateWithoutMigrationsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1346,6 +1772,11 @@ export type FamilyUncheckedCreateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutMigrationsInput = {
@@ -1370,7 +1801,11 @@ export type FamilyUpdateWithoutMigrationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1385,6 +1820,11 @@ export type FamilyUpdateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutMigrationsInput = {
@@ -1393,7 +1833,11 @@ export type FamilyUncheckedUpdateWithoutMigrationsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1408,6 +1852,11 @@ export type FamilyUncheckedUpdateWithoutMigrationsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutShareLinksInput = {
@@ -1416,7 +1865,11 @@ export type FamilyCreateWithoutShareLinksInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1431,6 +1884,11 @@ export type FamilyCreateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutShareLinksInput = {
@@ -1439,7 +1897,11 @@ export type FamilyUncheckedCreateWithoutShareLinksInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1454,6 +1916,11 @@ export type FamilyUncheckedCreateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutShareLinksInput = {
@@ -1478,7 +1945,11 @@ export type FamilyUpdateWithoutShareLinksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1493,6 +1964,11 @@ export type FamilyUpdateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutShareLinksInput = {
@@ -1501,7 +1977,11 @@ export type FamilyUncheckedUpdateWithoutShareLinksInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1516,6 +1996,11 @@ export type FamilyUncheckedUpdateWithoutShareLinksInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutAuditLogsInput = {
@@ -1524,7 +2009,11 @@ export type FamilyCreateWithoutAuditLogsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1539,6 +2028,11 @@ export type FamilyCreateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutAuditLogsInput = {
@@ -1547,7 +2041,11 @@ export type FamilyUncheckedCreateWithoutAuditLogsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1562,6 +2060,11 @@ export type FamilyUncheckedCreateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutAuditLogsInput = {
@@ -1586,7 +2089,11 @@ export type FamilyUpdateWithoutAuditLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1601,6 +2108,11 @@ export type FamilyUpdateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutAuditLogsInput = {
@@ -1609,7 +2121,11 @@ export type FamilyUncheckedUpdateWithoutAuditLogsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1624,6 +2140,11 @@ export type FamilyUncheckedUpdateWithoutAuditLogsInput = {
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutSubmissionsInput = {
@@ -1632,7 +2153,11 @@ export type FamilyCreateWithoutSubmissionsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1647,6 +2172,11 @@ export type FamilyCreateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutSubmissionsInput = {
@@ -1655,7 +2185,11 @@ export type FamilyUncheckedCreateWithoutSubmissionsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1670,6 +2204,11 @@ export type FamilyUncheckedCreateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutSubmissionsInput = {
@@ -1694,7 +2233,11 @@ export type FamilyUpdateWithoutSubmissionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1709,6 +2252,11 @@ export type FamilyUpdateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutSubmissionsInput = {
@@ -1717,7 +2265,11 @@ export type FamilyUncheckedUpdateWithoutSubmissionsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1732,6 +2284,11 @@ export type FamilyUncheckedUpdateWithoutSubmissionsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutSubtreeAdminsInput = {
@@ -1740,7 +2297,11 @@ export type FamilyCreateWithoutSubtreeAdminsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1755,6 +2316,11 @@ export type FamilyCreateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutSubtreeAdminsInput = {
@@ -1763,7 +2329,11 @@ export type FamilyUncheckedCreateWithoutSubtreeAdminsInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1778,6 +2348,11 @@ export type FamilyUncheckedCreateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
   invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutSubtreeAdminsInput = {
@@ -1802,7 +2377,11 @@ export type FamilyUpdateWithoutSubtreeAdminsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1817,6 +2396,11 @@ export type FamilyUpdateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutSubtreeAdminsInput = {
@@ -1825,7 +2409,11 @@ export type FamilyUncheckedUpdateWithoutSubtreeAdminsInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1840,6 +2428,11 @@ export type FamilyUncheckedUpdateWithoutSubtreeAdminsInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
   invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyCreateWithoutInvitesInput = {
@@ -1848,7 +2441,11 @@ export type FamilyCreateWithoutInvitesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1863,6 +2460,11 @@ export type FamilyCreateWithoutInvitesInput = {
   auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyUncheckedCreateWithoutInvitesInput = {
@@ -1871,7 +2473,11 @@ export type FamilyUncheckedCreateWithoutInvitesInput = {
   name: string
   founderName?: string | null
   description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
   ownerId: string
+  isPublic?: boolean
   createdAt?: Date | string
   updatedAt?: Date | string
   deletedAt?: Date | string | null
@@ -1886,6 +2492,11 @@ export type FamilyUncheckedCreateWithoutInvitesInput = {
   auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
   submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
 }
 
 export type FamilyCreateOrConnectWithoutInvitesInput = {
@@ -1910,7 +2521,11 @@ export type FamilyUpdateWithoutInvitesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1925,6 +2540,11 @@ export type FamilyUpdateWithoutInvitesInput = {
   auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
 }
 
 export type FamilyUncheckedUpdateWithoutInvitesInput = {
@@ -1933,7 +2553,11 @@ export type FamilyUncheckedUpdateWithoutInvitesInput = {
   name?: Prisma.StringFieldUpdateOperationsInput | string
   founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
   ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
   createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
   deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
@@ -1948,6 +2572,731 @@ export type FamilyUncheckedUpdateWithoutInvitesInput = {
   auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
   subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
   submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyCreateWithoutPdfJobsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyUncheckedCreateWithoutPdfJobsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameUncheckedCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonUncheckedCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageUncheckedCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildUncheckedCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkUncheckedCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyCreateOrConnectWithoutPdfJobsInput = {
+  where: Prisma.FamilyWhereUniqueInput
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+}
+
+export type FamilyUpsertWithoutPdfJobsInput = {
+  update: Prisma.XOR<Prisma.FamilyUpdateWithoutPdfJobsInput, Prisma.FamilyUncheckedUpdateWithoutPdfJobsInput>
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutPdfJobsInput, Prisma.FamilyUncheckedCreateWithoutPdfJobsInput>
+  where?: Prisma.FamilyWhereInput
+}
+
+export type FamilyUpdateToOneWithWhereWithoutPdfJobsInput = {
+  where?: Prisma.FamilyWhereInput
+  data: Prisma.XOR<Prisma.FamilyUpdateWithoutPdfJobsInput, Prisma.FamilyUncheckedUpdateWithoutPdfJobsInput>
+}
+
+export type FamilyUpdateWithoutPdfJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyUncheckedUpdateWithoutPdfJobsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUncheckedUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUncheckedUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUncheckedUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUncheckedUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyCreateWithoutJoinRequestsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyUncheckedCreateWithoutJoinRequestsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameUncheckedCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonUncheckedCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageUncheckedCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildUncheckedCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkUncheckedCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyCreateOrConnectWithoutJoinRequestsInput = {
+  where: Prisma.FamilyWhereUniqueInput
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutJoinRequestsInput, Prisma.FamilyUncheckedCreateWithoutJoinRequestsInput>
+}
+
+export type FamilyUpsertWithoutJoinRequestsInput = {
+  update: Prisma.XOR<Prisma.FamilyUpdateWithoutJoinRequestsInput, Prisma.FamilyUncheckedUpdateWithoutJoinRequestsInput>
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutJoinRequestsInput, Prisma.FamilyUncheckedCreateWithoutJoinRequestsInput>
+  where?: Prisma.FamilyWhereInput
+}
+
+export type FamilyUpdateToOneWithWhereWithoutJoinRequestsInput = {
+  where?: Prisma.FamilyWhereInput
+  data: Prisma.XOR<Prisma.FamilyUpdateWithoutJoinRequestsInput, Prisma.FamilyUncheckedUpdateWithoutJoinRequestsInput>
+}
+
+export type FamilyUpdateWithoutJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyUncheckedUpdateWithoutJoinRequestsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUncheckedUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUncheckedUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUncheckedUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUncheckedUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyCreateWithoutMediaInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyUncheckedCreateWithoutMediaInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameUncheckedCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonUncheckedCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageUncheckedCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildUncheckedCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkUncheckedCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyCreateOrConnectWithoutMediaInput = {
+  where: Prisma.FamilyWhereUniqueInput
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutMediaInput, Prisma.FamilyUncheckedCreateWithoutMediaInput>
+}
+
+export type FamilyUpsertWithoutMediaInput = {
+  update: Prisma.XOR<Prisma.FamilyUpdateWithoutMediaInput, Prisma.FamilyUncheckedUpdateWithoutMediaInput>
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutMediaInput, Prisma.FamilyUncheckedCreateWithoutMediaInput>
+  where?: Prisma.FamilyWhereInput
+}
+
+export type FamilyUpdateToOneWithWhereWithoutMediaInput = {
+  where?: Prisma.FamilyWhereInput
+  data: Prisma.XOR<Prisma.FamilyUpdateWithoutMediaInput, Prisma.FamilyUncheckedUpdateWithoutMediaInput>
+}
+
+export type FamilyUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyUncheckedUpdateWithoutMediaInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUncheckedUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUncheckedUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUncheckedUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUncheckedUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyCreateWithoutCollectionLinksInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyUncheckedCreateWithoutCollectionLinksInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameUncheckedCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonUncheckedCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageUncheckedCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildUncheckedCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkUncheckedCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  albumSections?: Prisma.AlbumSectionUncheckedCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyCreateOrConnectWithoutCollectionLinksInput = {
+  where: Prisma.FamilyWhereUniqueInput
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutCollectionLinksInput, Prisma.FamilyUncheckedCreateWithoutCollectionLinksInput>
+}
+
+export type FamilyUpsertWithoutCollectionLinksInput = {
+  update: Prisma.XOR<Prisma.FamilyUpdateWithoutCollectionLinksInput, Prisma.FamilyUncheckedUpdateWithoutCollectionLinksInput>
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutCollectionLinksInput, Prisma.FamilyUncheckedCreateWithoutCollectionLinksInput>
+  where?: Prisma.FamilyWhereInput
+}
+
+export type FamilyUpdateToOneWithWhereWithoutCollectionLinksInput = {
+  where?: Prisma.FamilyWhereInput
+  data: Prisma.XOR<Prisma.FamilyUpdateWithoutCollectionLinksInput, Prisma.FamilyUncheckedUpdateWithoutCollectionLinksInput>
+}
+
+export type FamilyUpdateWithoutCollectionLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyUncheckedUpdateWithoutCollectionLinksInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUncheckedUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUncheckedUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUncheckedUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUncheckedUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  albumSections?: Prisma.AlbumSectionUncheckedUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyCreateWithoutAlbumSectionsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyUncheckedCreateWithoutAlbumSectionsInput = {
+  id?: string
+  surname: string
+  name: string
+  founderName?: string | null
+  description?: string | null
+  familyRules?: string | null
+  editionInfo?: string | null
+  surnameOrigin?: string | null
+  ownerId: string
+  isPublic?: boolean
+  createdAt?: Date | string
+  updatedAt?: Date | string
+  deletedAt?: Date | string | null
+  members?: Prisma.FamilyMemberUncheckedCreateNestedManyWithoutFamilyInput
+  generationNames?: Prisma.GenerationNameUncheckedCreateNestedManyWithoutFamilyInput
+  persons?: Prisma.PersonUncheckedCreateNestedManyWithoutFamilyInput
+  branches?: Prisma.BranchUncheckedCreateNestedManyWithoutFamilyInput
+  marriages?: Prisma.MarriageUncheckedCreateNestedManyWithoutFamilyInput
+  parentChild?: Prisma.ParentChildUncheckedCreateNestedManyWithoutFamilyInput
+  migrations?: Prisma.MigrationUncheckedCreateNestedManyWithoutFamilyInput
+  shareLinks?: Prisma.ShareLinkUncheckedCreateNestedManyWithoutFamilyInput
+  auditLogs?: Prisma.AuditLogUncheckedCreateNestedManyWithoutFamilyInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedCreateNestedManyWithoutFamilyInput
+  invites?: Prisma.FamilyInviteUncheckedCreateNestedManyWithoutFamilyInput
+  submissions?: Prisma.PendingSubmissionUncheckedCreateNestedManyWithoutFamilyInput
+  pdfJobs?: Prisma.PdfJobUncheckedCreateNestedManyWithoutFamilyInput
+  joinRequests?: Prisma.JoinRequestUncheckedCreateNestedManyWithoutFamilyInput
+  media?: Prisma.MediaUncheckedCreateNestedManyWithoutFamilyInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedCreateNestedManyWithoutFamilyInput
+}
+
+export type FamilyCreateOrConnectWithoutAlbumSectionsInput = {
+  where: Prisma.FamilyWhereUniqueInput
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutAlbumSectionsInput, Prisma.FamilyUncheckedCreateWithoutAlbumSectionsInput>
+}
+
+export type FamilyUpsertWithoutAlbumSectionsInput = {
+  update: Prisma.XOR<Prisma.FamilyUpdateWithoutAlbumSectionsInput, Prisma.FamilyUncheckedUpdateWithoutAlbumSectionsInput>
+  create: Prisma.XOR<Prisma.FamilyCreateWithoutAlbumSectionsInput, Prisma.FamilyUncheckedCreateWithoutAlbumSectionsInput>
+  where?: Prisma.FamilyWhereInput
+}
+
+export type FamilyUpdateToOneWithWhereWithoutAlbumSectionsInput = {
+  where?: Prisma.FamilyWhereInput
+  data: Prisma.XOR<Prisma.FamilyUpdateWithoutAlbumSectionsInput, Prisma.FamilyUncheckedUpdateWithoutAlbumSectionsInput>
+}
+
+export type FamilyUpdateWithoutAlbumSectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUpdateManyWithoutFamilyNestedInput
+}
+
+export type FamilyUncheckedUpdateWithoutAlbumSectionsInput = {
+  id?: Prisma.StringFieldUpdateOperationsInput | string
+  surname?: Prisma.StringFieldUpdateOperationsInput | string
+  name?: Prisma.StringFieldUpdateOperationsInput | string
+  founderName?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  description?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  familyRules?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  editionInfo?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  surnameOrigin?: Prisma.NullableStringFieldUpdateOperationsInput | string | null
+  ownerId?: Prisma.StringFieldUpdateOperationsInput | string
+  isPublic?: Prisma.BoolFieldUpdateOperationsInput | boolean
+  createdAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  updatedAt?: Prisma.DateTimeFieldUpdateOperationsInput | Date | string
+  deletedAt?: Prisma.NullableDateTimeFieldUpdateOperationsInput | Date | string | null
+  members?: Prisma.FamilyMemberUncheckedUpdateManyWithoutFamilyNestedInput
+  generationNames?: Prisma.GenerationNameUncheckedUpdateManyWithoutFamilyNestedInput
+  persons?: Prisma.PersonUncheckedUpdateManyWithoutFamilyNestedInput
+  branches?: Prisma.BranchUncheckedUpdateManyWithoutFamilyNestedInput
+  marriages?: Prisma.MarriageUncheckedUpdateManyWithoutFamilyNestedInput
+  parentChild?: Prisma.ParentChildUncheckedUpdateManyWithoutFamilyNestedInput
+  migrations?: Prisma.MigrationUncheckedUpdateManyWithoutFamilyNestedInput
+  shareLinks?: Prisma.ShareLinkUncheckedUpdateManyWithoutFamilyNestedInput
+  auditLogs?: Prisma.AuditLogUncheckedUpdateManyWithoutFamilyNestedInput
+  subtreeAdmins?: Prisma.SubtreeAdminUncheckedUpdateManyWithoutFamilyNestedInput
+  invites?: Prisma.FamilyInviteUncheckedUpdateManyWithoutFamilyNestedInput
+  submissions?: Prisma.PendingSubmissionUncheckedUpdateManyWithoutFamilyNestedInput
+  pdfJobs?: Prisma.PdfJobUncheckedUpdateManyWithoutFamilyNestedInput
+  joinRequests?: Prisma.JoinRequestUncheckedUpdateManyWithoutFamilyNestedInput
+  media?: Prisma.MediaUncheckedUpdateManyWithoutFamilyNestedInput
+  collectionLinks?: Prisma.CollectionLinkUncheckedUpdateManyWithoutFamilyNestedInput
 }
 
 
@@ -1968,6 +3317,11 @@ export type FamilyCountOutputType = {
   subtreeAdmins: number
   invites: number
   submissions: number
+  pdfJobs: number
+  joinRequests: number
+  media: number
+  collectionLinks: number
+  albumSections: number
 }
 
 export type FamilyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
@@ -1983,6 +3337,11 @@ export type FamilyCountOutputTypeSelect<ExtArgs extends runtime.Types.Extensions
   subtreeAdmins?: boolean | FamilyCountOutputTypeCountSubtreeAdminsArgs
   invites?: boolean | FamilyCountOutputTypeCountInvitesArgs
   submissions?: boolean | FamilyCountOutputTypeCountSubmissionsArgs
+  pdfJobs?: boolean | FamilyCountOutputTypeCountPdfJobsArgs
+  joinRequests?: boolean | FamilyCountOutputTypeCountJoinRequestsArgs
+  media?: boolean | FamilyCountOutputTypeCountMediaArgs
+  collectionLinks?: boolean | FamilyCountOutputTypeCountCollectionLinksArgs
+  albumSections?: boolean | FamilyCountOutputTypeCountAlbumSectionsArgs
 }
 
 /**
@@ -2079,6 +3438,41 @@ export type FamilyCountOutputTypeCountSubmissionsArgs<ExtArgs extends runtime.Ty
   where?: Prisma.PendingSubmissionWhereInput
 }
 
+/**
+ * FamilyCountOutputType without action
+ */
+export type FamilyCountOutputTypeCountPdfJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.PdfJobWhereInput
+}
+
+/**
+ * FamilyCountOutputType without action
+ */
+export type FamilyCountOutputTypeCountJoinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.JoinRequestWhereInput
+}
+
+/**
+ * FamilyCountOutputType without action
+ */
+export type FamilyCountOutputTypeCountMediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.MediaWhereInput
+}
+
+/**
+ * FamilyCountOutputType without action
+ */
+export type FamilyCountOutputTypeCountCollectionLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.CollectionLinkWhereInput
+}
+
+/**
+ * FamilyCountOutputType without action
+ */
+export type FamilyCountOutputTypeCountAlbumSectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  where?: Prisma.AlbumSectionWhereInput
+}
+
 
 export type FamilySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetSelect<{
   id?: boolean
@@ -2086,7 +3480,11 @@ export type FamilySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   name?: boolean
   founderName?: boolean
   description?: boolean
+  familyRules?: boolean
+  editionInfo?: boolean
+  surnameOrigin?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -2102,6 +3500,11 @@ export type FamilySelect<ExtArgs extends runtime.Types.Extensions.InternalArgs =
   subtreeAdmins?: boolean | Prisma.Family$subtreeAdminsArgs<ExtArgs>
   invites?: boolean | Prisma.Family$invitesArgs<ExtArgs>
   submissions?: boolean | Prisma.Family$submissionsArgs<ExtArgs>
+  pdfJobs?: boolean | Prisma.Family$pdfJobsArgs<ExtArgs>
+  joinRequests?: boolean | Prisma.Family$joinRequestsArgs<ExtArgs>
+  media?: boolean | Prisma.Family$mediaArgs<ExtArgs>
+  collectionLinks?: boolean | Prisma.Family$collectionLinksArgs<ExtArgs>
+  albumSections?: boolean | Prisma.Family$albumSectionsArgs<ExtArgs>
   _count?: boolean | Prisma.FamilyCountOutputTypeDefaultArgs<ExtArgs>
 }, ExtArgs["result"]["family"]>
 
@@ -2111,7 +3514,11 @@ export type FamilySelectCreateManyAndReturn<ExtArgs extends runtime.Types.Extens
   name?: boolean
   founderName?: boolean
   description?: boolean
+  familyRules?: boolean
+  editionInfo?: boolean
+  surnameOrigin?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -2123,7 +3530,11 @@ export type FamilySelectUpdateManyAndReturn<ExtArgs extends runtime.Types.Extens
   name?: boolean
   founderName?: boolean
   description?: boolean
+  familyRules?: boolean
+  editionInfo?: boolean
+  surnameOrigin?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
@@ -2135,13 +3546,17 @@ export type FamilySelectScalar = {
   name?: boolean
   founderName?: boolean
   description?: boolean
+  familyRules?: boolean
+  editionInfo?: boolean
+  surnameOrigin?: boolean
   ownerId?: boolean
+  isPublic?: boolean
   createdAt?: boolean
   updatedAt?: boolean
   deletedAt?: boolean
 }
 
-export type FamilyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "surname" | "name" | "founderName" | "description" | "ownerId" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["family"]>
+export type FamilyOmit<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = runtime.Types.Extensions.GetOmit<"id" | "surname" | "name" | "founderName" | "description" | "familyRules" | "editionInfo" | "surnameOrigin" | "ownerId" | "isPublic" | "createdAt" | "updatedAt" | "deletedAt", ExtArgs["result"]["family"]>
 export type FamilyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
   members?: boolean | Prisma.Family$membersArgs<ExtArgs>
   generationNames?: boolean | Prisma.Family$generationNamesArgs<ExtArgs>
@@ -2155,6 +3570,11 @@ export type FamilyInclude<ExtArgs extends runtime.Types.Extensions.InternalArgs 
   subtreeAdmins?: boolean | Prisma.Family$subtreeAdminsArgs<ExtArgs>
   invites?: boolean | Prisma.Family$invitesArgs<ExtArgs>
   submissions?: boolean | Prisma.Family$submissionsArgs<ExtArgs>
+  pdfJobs?: boolean | Prisma.Family$pdfJobsArgs<ExtArgs>
+  joinRequests?: boolean | Prisma.Family$joinRequestsArgs<ExtArgs>
+  media?: boolean | Prisma.Family$mediaArgs<ExtArgs>
+  collectionLinks?: boolean | Prisma.Family$collectionLinksArgs<ExtArgs>
+  albumSections?: boolean | Prisma.Family$albumSectionsArgs<ExtArgs>
   _count?: boolean | Prisma.FamilyCountOutputTypeDefaultArgs<ExtArgs>
 }
 export type FamilyIncludeCreateManyAndReturn<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {}
@@ -2175,6 +3595,11 @@ export type $FamilyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     subtreeAdmins: Prisma.$SubtreeAdminPayload<ExtArgs>[]
     invites: Prisma.$FamilyInvitePayload<ExtArgs>[]
     submissions: Prisma.$PendingSubmissionPayload<ExtArgs>[]
+    pdfJobs: Prisma.$PdfJobPayload<ExtArgs>[]
+    joinRequests: Prisma.$JoinRequestPayload<ExtArgs>[]
+    media: Prisma.$MediaPayload<ExtArgs>[]
+    collectionLinks: Prisma.$CollectionLinkPayload<ExtArgs>[]
+    albumSections: Prisma.$AlbumSectionPayload<ExtArgs>[]
   }
   scalars: runtime.Types.Extensions.GetPayloadResult<{
     id: string
@@ -2182,7 +3607,23 @@ export type $FamilyPayload<ExtArgs extends runtime.Types.Extensions.InternalArgs
     name: string
     founderName: string | null
     description: string | null
+    /**
+     * *
+     *    * 族规家训：印刷家谱的"家训"章节正文（多行 markdown 风格纯文本）
+     */
+    familyRules: string | null
+    /**
+     * *
+     *    * 修谱版次：如"初修"、"续修"、"三续"、"民国版重修"等；用于册谱封面
+     */
+    editionInfo: string | null
+    /**
+     * *
+     *    * 姓氏源流：传统家谱的源流叙述；为空时自动用 description 或模板文
+     */
+    surnameOrigin: string | null
     ownerId: string
+    isPublic: boolean
     createdAt: Date
     updatedAt: Date
     deletedAt: Date | null
@@ -2592,6 +4033,11 @@ export interface Prisma__FamilyClient<T, Null = never, ExtArgs extends runtime.T
   subtreeAdmins<T extends Prisma.Family$subtreeAdminsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$subtreeAdminsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$SubtreeAdminPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   invites<T extends Prisma.Family$invitesArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$invitesArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$FamilyInvitePayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   submissions<T extends Prisma.Family$submissionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$submissionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PendingSubmissionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  pdfJobs<T extends Prisma.Family$pdfJobsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$pdfJobsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$PdfJobPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  joinRequests<T extends Prisma.Family$joinRequestsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$joinRequestsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$JoinRequestPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  media<T extends Prisma.Family$mediaArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$mediaArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$MediaPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  collectionLinks<T extends Prisma.Family$collectionLinksArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$collectionLinksArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$CollectionLinkPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
+  albumSections<T extends Prisma.Family$albumSectionsArgs<ExtArgs> = {}>(args?: Prisma.Subset<T, Prisma.Family$albumSectionsArgs<ExtArgs>>): Prisma.PrismaPromise<runtime.Types.Result.GetResult<Prisma.$AlbumSectionPayload<ExtArgs>, T, "findMany", GlobalOmitOptions> | Null>
   /**
    * Attaches callbacks for the resolution and/or rejection of the Promise.
    * @param onfulfilled The callback to execute when the Promise is resolved.
@@ -2626,7 +4072,11 @@ export interface FamilyFieldRefs {
   readonly name: Prisma.FieldRef<"Family", 'String'>
   readonly founderName: Prisma.FieldRef<"Family", 'String'>
   readonly description: Prisma.FieldRef<"Family", 'String'>
+  readonly familyRules: Prisma.FieldRef<"Family", 'String'>
+  readonly editionInfo: Prisma.FieldRef<"Family", 'String'>
+  readonly surnameOrigin: Prisma.FieldRef<"Family", 'String'>
   readonly ownerId: Prisma.FieldRef<"Family", 'String'>
+  readonly isPublic: Prisma.FieldRef<"Family", 'Boolean'>
   readonly createdAt: Prisma.FieldRef<"Family", 'DateTime'>
   readonly updatedAt: Prisma.FieldRef<"Family", 'DateTime'>
   readonly deletedAt: Prisma.FieldRef<"Family", 'DateTime'>
@@ -3308,6 +4758,126 @@ export type Family$submissionsArgs<ExtArgs extends runtime.Types.Extensions.Inte
   take?: number
   skip?: number
   distinct?: Prisma.PendingSubmissionScalarFieldEnum | Prisma.PendingSubmissionScalarFieldEnum[]
+}
+
+/**
+ * Family.pdfJobs
+ */
+export type Family$pdfJobsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the PdfJob
+   */
+  select?: Prisma.PdfJobSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the PdfJob
+   */
+  omit?: Prisma.PdfJobOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.PdfJobInclude<ExtArgs> | null
+  where?: Prisma.PdfJobWhereInput
+  orderBy?: Prisma.PdfJobOrderByWithRelationInput | Prisma.PdfJobOrderByWithRelationInput[]
+  cursor?: Prisma.PdfJobWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.PdfJobScalarFieldEnum | Prisma.PdfJobScalarFieldEnum[]
+}
+
+/**
+ * Family.joinRequests
+ */
+export type Family$joinRequestsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the JoinRequest
+   */
+  select?: Prisma.JoinRequestSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the JoinRequest
+   */
+  omit?: Prisma.JoinRequestOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.JoinRequestInclude<ExtArgs> | null
+  where?: Prisma.JoinRequestWhereInput
+  orderBy?: Prisma.JoinRequestOrderByWithRelationInput | Prisma.JoinRequestOrderByWithRelationInput[]
+  cursor?: Prisma.JoinRequestWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.JoinRequestScalarFieldEnum | Prisma.JoinRequestScalarFieldEnum[]
+}
+
+/**
+ * Family.media
+ */
+export type Family$mediaArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the Media
+   */
+  select?: Prisma.MediaSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the Media
+   */
+  omit?: Prisma.MediaOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.MediaInclude<ExtArgs> | null
+  where?: Prisma.MediaWhereInput
+  orderBy?: Prisma.MediaOrderByWithRelationInput | Prisma.MediaOrderByWithRelationInput[]
+  cursor?: Prisma.MediaWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.MediaScalarFieldEnum | Prisma.MediaScalarFieldEnum[]
+}
+
+/**
+ * Family.collectionLinks
+ */
+export type Family$collectionLinksArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the CollectionLink
+   */
+  select?: Prisma.CollectionLinkSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the CollectionLink
+   */
+  omit?: Prisma.CollectionLinkOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.CollectionLinkInclude<ExtArgs> | null
+  where?: Prisma.CollectionLinkWhereInput
+  orderBy?: Prisma.CollectionLinkOrderByWithRelationInput | Prisma.CollectionLinkOrderByWithRelationInput[]
+  cursor?: Prisma.CollectionLinkWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.CollectionLinkScalarFieldEnum | Prisma.CollectionLinkScalarFieldEnum[]
+}
+
+/**
+ * Family.albumSections
+ */
+export type Family$albumSectionsArgs<ExtArgs extends runtime.Types.Extensions.InternalArgs = runtime.Types.Extensions.DefaultArgs> = {
+  /**
+   * Select specific fields to fetch from the AlbumSection
+   */
+  select?: Prisma.AlbumSectionSelect<ExtArgs> | null
+  /**
+   * Omit specific fields from the AlbumSection
+   */
+  omit?: Prisma.AlbumSectionOmit<ExtArgs> | null
+  /**
+   * Choose, which related nodes to fetch as well
+   */
+  include?: Prisma.AlbumSectionInclude<ExtArgs> | null
+  where?: Prisma.AlbumSectionWhereInput
+  orderBy?: Prisma.AlbumSectionOrderByWithRelationInput | Prisma.AlbumSectionOrderByWithRelationInput[]
+  cursor?: Prisma.AlbumSectionWhereUniqueInput
+  take?: number
+  skip?: number
+  distinct?: Prisma.AlbumSectionScalarFieldEnum | Prisma.AlbumSectionScalarFieldEnum[]
 }
 
 /**

@@ -24,6 +24,8 @@ import { canWriteOnPerson } from "@/lib/auth/guard";
 import type { Gender, MarriageType } from "@/lib/generated/prisma/enums";
 import { PersonDetailActions } from "./PersonDetailActions";
 import { MigrationsPanel } from "@/components/migrations/MigrationsPanel";
+import { MediaGallery } from "@/components/media/MediaGallery";
+import { ossConfigured } from "@/lib/services/oss";
 
 export const dynamic = "force-dynamic";
 
@@ -77,8 +79,8 @@ export default async function PersonDetailPage({
       <div className="mx-auto max-w-2xl p-6 text-center">
         <h1 className="text-lg font-semibold">无权访问</h1>
         <p className="mt-2 text-sm text-zinc-500">该家族不在你的成员列表中。</p>
-        <Link href="/" className="mt-4 inline-block text-blue-600 hover:underline">
-          返回首页
+        <Link href="/dashboard" className="mt-4 inline-block text-blue-600 hover:underline">
+          返回我的家族
         </Link>
       </div>
     );
@@ -238,64 +240,88 @@ export default async function PersonDetailPage({
     .map((r) => r.child);
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <header className="border-b border-zinc-200 bg-white px-4 py-5 dark:border-zinc-800 dark:bg-zinc-900 sm:px-8">
-        <div className="mx-auto max-w-4xl">
-          <nav className="text-xs text-zinc-500">
-            <Link href="/" className="hover:underline">
-              首页
+    <div>
+      <header className="border-b border-hairline bg-surface">
+        <div className="mx-auto max-w-[1440px] px-3 py-5 sm:px-5 lg:px-6">
+          <nav aria-label="面包屑" className="text-xs text-fg-subtle">
+            <Link href="/" className="transition hover:text-foreground">
+              我的家族
             </Link>
             <span className="mx-1">/</span>
-            <Link href={`/f/${familyId}`} className="hover:underline">
+            <Link href={`/f/${familyId}`} className="transition hover:text-foreground">
               {person.family.name}
             </Link>
             <span className="mx-1">/</span>
             <Link
               href={`/f/${familyId}/tree?focus=${person.id}`}
-              className="hover:underline"
+              className="transition hover:text-foreground"
             >
-              树视图
+              树谱
             </Link>
             <span className="mx-1">/</span>
-            <span>人物</span>
+            <span className="text-foreground">人物</span>
           </nav>
-          <div className="mt-2 flex flex-wrap items-baseline gap-x-3 gap-y-1">
-            <h1 className="text-2xl font-semibold text-zinc-900 dark:text-zinc-50">
-              {person.name}
-              {person.alias && (
-                <span className="ml-2 text-base font-normal text-zinc-500">
-                  （{person.alias}）
-                </span>
-              )}
-            </h1>
-            <span className="text-sm text-zinc-600 dark:text-zinc-400">
-              第 {person.generation} 世
-              {person.generationChar && ` · 字辈 ${person.generationChar}`}
-            </span>
-            {person.birthOrder && (
-              <span className="text-xs text-zinc-500">行 {person.birthOrder}</span>
-            )}
-            {person.isMarriedIn && (
-              <span className="rounded bg-pink-50 px-1.5 py-0.5 text-xs text-pink-700 dark:bg-pink-950 dark:text-pink-200">
-                嫁入
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            {person.avatarUrl ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={person.avatarUrl}
+                alt={person.name}
+                className="h-12 w-12 shrink-0 rounded-lg object-cover shadow-md"
+              />
+            ) : (
+              <span
+                aria-hidden
+                className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-lg text-lg font-semibold shadow-md ${
+                  person.gender === "FEMALE"
+                    ? "bg-pink-500 text-white"
+                    : person.gender === "MALE"
+                    ? "bg-brand text-brand-fg"
+                    : "bg-muted text-fg-muted"
+                }`}
+                style={{ fontFamily: "var(--font-serif)" }}
+              >
+                {person.name?.[0] ?? "氏"}
               </span>
             )}
-            <span
-              className={`rounded px-1.5 py-0.5 text-xs ${
-                person.status === "DECEASED"
-                  ? "bg-zinc-200 text-zinc-700 dark:bg-zinc-800 dark:text-zinc-300"
-                  : person.status === "ALIVE"
-                    ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300"
-                    : "bg-amber-50 text-amber-700 dark:bg-amber-950 dark:text-amber-300"
-              }`}
-            >
-              {STATUS_LABEL[person.status] ?? person.status}
-            </span>
+            <div className="min-w-0">
+              <h1 className="font-serif text-2xl font-semibold tracking-tight text-foreground">
+                {person.name}
+                {person.alias && (
+                  <span className="ml-2 text-base font-normal text-fg-subtle">
+                    （{person.alias}）
+                  </span>
+                )}
+              </h1>
+              <div className="mt-1 flex flex-wrap items-center gap-2 text-xs text-fg-muted">
+                <span>第 {person.generation} 世</span>
+                {person.generationChar && (
+                  <span>字辈 {person.generationChar}</span>
+                )}
+                {person.birthOrder && <span>行 {person.birthOrder}</span>}
+                {person.isMarriedIn && (
+                  <span className="rounded bg-pink-50 px-1.5 py-0.5 text-pink-700 dark:bg-pink-950/40 dark:text-pink-200">
+                    嫁入
+                  </span>
+                )}
+                <span
+                  className={`rounded px-1.5 py-0.5 ${
+                    person.status === "DECEASED"
+                      ? "bg-muted text-fg-muted"
+                      : person.status === "ALIVE"
+                      ? "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/40 dark:text-emerald-300"
+                      : "bg-amber-50 text-amber-700 dark:bg-amber-950/40 dark:text-amber-300"
+                  }`}
+                >
+                  {STATUS_LABEL[person.status] ?? person.status}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-4xl px-4 py-6 sm:px-8">
+      <main className="mx-auto max-w-[1440px] px-3 py-6 sm:px-5 lg:px-6">
         <div className="grid gap-4 md:grid-cols-3">
           {/* ---------------- 主信息 ---------------- */}
           <section className="md:col-span-2 space-y-4">
@@ -464,6 +490,14 @@ export default async function PersonDetailPage({
                 canEdit={canEdit}
               />
             </Card>
+
+            {/* 影像相册：照片 / 文档 / 老谱扫描件 / 录音 */}
+            <MediaGallery
+              familyId={familyId}
+              personId={personId}
+              canWrite={canEdit}
+              ossReady={ossConfigured()}
+            />
           </section>
 
           {/* ---------------- 边栏 ---------------- */}

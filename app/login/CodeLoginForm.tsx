@@ -142,13 +142,13 @@ export function CodeLoginForm({ next, initialPhone, initialError }: Props) {
 
       <div className="mt-4 flex items-center justify-between text-xs">
         <Link
-          href={`/login${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}`}
+          href={`/login${next !== "/dashboard" ? `?next=${encodeURIComponent(next)}` : ""}`}
           className="text-blue-600 hover:underline"
         >
           ← 用密码登录
         </Link>
         <Link
-          href={`/register${next !== "/" ? `?next=${encodeURIComponent(next)}` : ""}`}
+          href={`/register${next !== "/dashboard" ? `?next=${encodeURIComponent(next)}` : ""}`}
           className="text-zinc-500 hover:underline"
         >
           注册

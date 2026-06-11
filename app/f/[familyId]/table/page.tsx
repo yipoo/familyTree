@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/db";
 import { buildFamilyUnits } from "@/lib/services/family-units";
@@ -71,26 +70,25 @@ export default async function DetailTablePage({
   );
 
   return (
-    <div className="min-h-screen bg-zinc-50 dark:bg-zinc-950">
-      <header className="border-b border-zinc-200 bg-white px-4 py-4 dark:border-zinc-800 dark:bg-zinc-900 sm:px-6">
-        <div className="mx-auto flex max-w-6xl flex-wrap items-baseline gap-x-4 gap-y-1">
-          <Link
-            href={`/f/${family.id}`}
-            className="text-sm text-zinc-500 hover:underline"
-          >
-            ←
-          </Link>
-          <h1 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-            {family.name} · 详细图
-          </h1>
-          <LineageTabs />
-          <span className="ml-auto text-xs text-zinc-500">
-            {units.length} 个家庭单元
-          </span>
+    <div className="print:bg-white">
+      <header className="border-b border-hairline bg-surface print:hidden">
+        <div className="mx-auto flex max-w-[1440px] flex-wrap items-end justify-between gap-3 px-3 py-5 sm:px-5 lg:px-6">
+          <div>
+            <p className="text-xs font-medium uppercase tracking-wider text-fg-subtle">
+              详细图
+            </p>
+            <h1 className="mt-1 font-serif text-xl font-semibold text-foreground">
+              {family.name}
+            </h1>
+          </div>
+          <div className="flex flex-wrap items-center gap-3 text-xs text-fg-muted">
+            <LineageTabs />
+            <span>{units.length} 个家庭单元</span>
+          </div>
         </div>
       </header>
 
-      <main className="mx-auto max-w-6xl px-3 py-5 sm:px-6">
+      <main className="mx-auto max-w-[1440px] px-3 py-5 sm:px-5 lg:px-6">
         {generations.map((g) => {
           const arr = byGen.get(g)!;
           return (

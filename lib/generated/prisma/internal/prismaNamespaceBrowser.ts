@@ -68,7 +68,12 @@ export const ModelName = {
   SubtreeAdmin: 'SubtreeAdmin',
   FamilyInvite: 'FamilyInvite',
   FamilyInviteUse: 'FamilyInviteUse',
-  VerificationCode: 'VerificationCode'
+  VerificationCode: 'VerificationCode',
+  PdfJob: 'PdfJob',
+  JoinRequest: 'JoinRequest',
+  Media: 'Media',
+  CollectionLink: 'CollectionLink',
+  AlbumSection: 'AlbumSection'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -95,6 +100,8 @@ export const UserScalarFieldEnum = {
   name: 'name',
   avatarUrl: 'avatarUrl',
   platformRole: 'platformRole',
+  wechatOpenId: 'wechatOpenId',
+  wechatUnionId: 'wechatUnionId',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt'
 } as const
@@ -108,7 +115,11 @@ export const FamilyScalarFieldEnum = {
   name: 'name',
   founderName: 'founderName',
   description: 'description',
+  familyRules: 'familyRules',
+  editionInfo: 'editionInfo',
+  surnameOrigin: 'surnameOrigin',
   ownerId: 'ownerId',
+  isPublic: 'isPublic',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -165,6 +176,7 @@ export const PersonScalarFieldEnum = {
   biography: 'biography',
   isMarriedIn: 'isMarriedIn',
   residenceId: 'residenceId',
+  contactPhoneHash: 'contactPhoneHash',
   createdAt: 'createdAt',
   updatedAt: 'updatedAt',
   deletedAt: 'deletedAt'
@@ -352,6 +364,100 @@ export const VerificationCodeScalarFieldEnum = {
 } as const
 
 export type VerificationCodeScalarFieldEnum = (typeof VerificationCodeScalarFieldEnum)[keyof typeof VerificationCodeScalarFieldEnum]
+
+
+export const PdfJobScalarFieldEnum = {
+  id: 'id',
+  familyId: 'familyId',
+  type: 'type',
+  status: 'status',
+  progress: 'progress',
+  params: 'params',
+  outputBytes: 'outputBytes',
+  outputName: 'outputName',
+  error: 'error',
+  requestedById: 'requestedById',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  startedAt: 'startedAt',
+  finishedAt: 'finishedAt'
+} as const
+
+export type PdfJobScalarFieldEnum = (typeof PdfJobScalarFieldEnum)[keyof typeof PdfJobScalarFieldEnum]
+
+
+export const JoinRequestScalarFieldEnum = {
+  id: 'id',
+  familyId: 'familyId',
+  userId: 'userId',
+  message: 'message',
+  status: 'status',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt',
+  decidedAt: 'decidedAt',
+  decidedById: 'decidedById',
+  decidedNote: 'decidedNote'
+} as const
+
+export type JoinRequestScalarFieldEnum = (typeof JoinRequestScalarFieldEnum)[keyof typeof JoinRequestScalarFieldEnum]
+
+
+export const MediaScalarFieldEnum = {
+  id: 'id',
+  familyId: 'familyId',
+  personId: 'personId',
+  kind: 'kind',
+  url: 'url',
+  objectKey: 'objectKey',
+  name: 'name',
+  mime: 'mime',
+  size: 'size',
+  width: 'width',
+  height: 'height',
+  caption: 'caption',
+  sortOrder: 'sortOrder',
+  uploadedById: 'uploadedById',
+  createdAt: 'createdAt'
+} as const
+
+export type MediaScalarFieldEnum = (typeof MediaScalarFieldEnum)[keyof typeof MediaScalarFieldEnum]
+
+
+export const CollectionLinkScalarFieldEnum = {
+  id: 'id',
+  familyId: 'familyId',
+  token: 'token',
+  personId: 'personId',
+  mode: 'mode',
+  note: 'note',
+  maxUses: 'maxUses',
+  uses: 'uses',
+  expiresAt: 'expiresAt',
+  revokedAt: 'revokedAt',
+  createdById: 'createdById',
+  createdAt: 'createdAt'
+} as const
+
+export type CollectionLinkScalarFieldEnum = (typeof CollectionLinkScalarFieldEnum)[keyof typeof CollectionLinkScalarFieldEnum]
+
+
+export const AlbumSectionScalarFieldEnum = {
+  id: 'id',
+  familyId: 'familyId',
+  kind: 'kind',
+  title: 'title',
+  subtitle: 'subtitle',
+  body: 'body',
+  signature: 'signature',
+  imageUrl: 'imageUrl',
+  order: 'order',
+  enabled: 'enabled',
+  appliesTo: 'appliesTo',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AlbumSectionScalarFieldEnum = (typeof AlbumSectionScalarFieldEnum)[keyof typeof AlbumSectionScalarFieldEnum]
 
 
 export const SortOrder = {

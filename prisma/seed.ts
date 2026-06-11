@@ -4,6 +4,10 @@
  *           docs/吊线图.pdf（地点与迁徙）
  *
  * 字辈序列（部分已知）：... 良(15) 允(16) 贤(17) 方(18) 正(19) 维(20) 先(21) 克(22)
+ *
+ * **重要：本脚本永远只写入 DATABASE_URL_DEMO 指向的库。**
+ * 这是为了防止误在生产跑时把所有真实用户和家族 deleteMany 掉。
+ * 如未配置 DATABASE_URL_DEMO，脚本直接退出。
  */
 import "dotenv/config";
 import { PrismaPg } from "@prisma/adapter-pg";
@@ -17,7 +21,26 @@ import {
   MigrationScope,
 } from "../lib/generated/prisma/enums";
 
-const adapter = new PrismaPg({ connectionString: process.env.DATABASE_URL });
+const demoUrl = process.env.DATABASE_URL_DEMO;
+if (!demoUrl) {
+  console.error(
+    "❌ DATABASE_URL_DEMO 未配置。\n" +
+      "   seed 只能写 demo 库，拒绝执行。请先在 .env 中设置 DATABASE_URL_DEMO，例如：\n" +
+      "     DATABASE_URL_DEMO=\"postgresql://user:pass@localhost:5432/family_tree_demo\"\n" +
+      "   然后运行：\n" +
+      "     pnpm db:demo:reset",
+  );
+  process.exit(1);
+}
+if (demoUrl === process.env.DATABASE_URL) {
+  console.error(
+    "❌ DATABASE_URL_DEMO 与 DATABASE_URL 指向同一个库，拒绝执行。\n" +
+      "   demo 必须使用独立 database（可同实例）。",
+  );
+  process.exit(1);
+}
+
+const adapter = new PrismaPg({ connectionString: demoUrl });
 const prisma = new PrismaClient({ adapter });
 
 // ------------------------------------------------------------
@@ -128,6 +151,10 @@ async function main() {
     isMarriedIn?: boolean;
     status?: LifeStatus;
     branchId?: string | null;
+    alias?: string;
+    birthYear?: number;
+    deathYear?: number;
+    biography?: string;
   }) {
     return prisma.person.create({
       data: {
@@ -140,6 +167,10 @@ async function main() {
         isMarriedIn: opts.isMarriedIn ?? false,
         status: opts.status ?? LifeStatus.ALIVE,
         branchId: opts.branchId ?? null,
+        alias: opts.alias,
+        birthYear: opts.birthYear,
+        deathYear: opts.deathYear,
+        biography: opts.biography,
       },
     });
   }
@@ -178,10 +209,30 @@ async function main() {
    * 一个家庭单元：父 + 母（可多个） + 子女（按出生顺序）
    * 返回所有创建的子女，便于继续向下展开
    */
+  type WifeOpt = {
+    name: string;
+    surnameOnly?: boolean;
+    type?: MarriageType;
+    status?: LifeStatus;
+    alias?: string;
+    birthYear?: number;
+    deathYear?: number;
+    biography?: string;
+  };
+  type ChildOpt = {
+    name: string;
+    gender: Gender;
+    status?: LifeStatus;
+    alias?: string;
+    birthYear?: number;
+    deathYear?: number;
+    biography?: string;
+  };
+
   async function addFamilyUnit(opts: {
     husbandId: string;
-    wives: { name: string; surnameOnly?: boolean; type?: MarriageType; status?: LifeStatus }[];
-    children: { name: string; gender: Gender; status?: LifeStatus }[];
+    wives: WifeOpt[];
+    children: ChildOpt[];
     childGeneration: number;
     childMotherIndex?: number; // 子女归属于第几位妻子（默认 0 = 原配）
     branchId?: string;
@@ -198,6 +249,10 @@ async function main() {
         isMarriedIn: true,
         status: w.status,
         branchId: opts.branchId,
+        alias: w.alias,
+        birthYear: w.birthYear,
+        deathYear: w.deathYear,
+        biography: w.biography,
       });
       wifeIds.push(wife.id);
       await addMarriage({
@@ -220,6 +275,10 @@ async function main() {
         generation: opts.childGeneration,
         status: c.status,
         branchId: opts.branchId,
+        alias: c.alias,
+        birthYear: c.birthYear,
+        deathYear: c.deathYear,
+        biography: c.biography,
       });
       result[c.name] = child.id;
       await addParentChild(opts.husbandId, child.id, i + 1);
@@ -235,6 +294,12 @@ async function main() {
     name: "训贤",
     gender: Gender.MALE,
     generation: 17,
+    alias: "雅之",
+    birthYear: 1898,
+    deathYear: 1972,
+    status: LifeStatus.DECEASED,
+    biography:
+      "生于光绪二十四年。1927 年因家族分居，自丁河套迁至张牌坊立户，是十七世训贤支始祖。务农一生，育有四子。",
   });
 
   // 创建支系
@@ -283,12 +348,46 @@ async function main() {
   // 17世训贤 配 卞氏 子四
   const gen18 = await addFamilyUnit({
     husbandId: xunxian.id,
-    wives: [{ name: "卞氏" }],
+    wives: [
+      {
+        name: "卞氏",
+        birthYear: 1902,
+        deathYear: 1968,
+        status: LifeStatus.DECEASED,
+        biography: "出生于濉溪本地卞家庄，与训贤公育有四子。一生勤俭，操持家务。",
+      },
+    ],
     children: [
-      { name: "方儒", gender: Gender.MALE },
-      { name: "方祥", gender: Gender.MALE },
-      { name: "方明", gender: Gender.MALE },
-      { name: "方亮", gender: Gender.MALE },
+      {
+        name: "方儒",
+        gender: Gender.MALE,
+        alias: "学斋",
+        birthYear: 1924,
+        deathYear: 2003,
+        status: LifeStatus.DECEASED,
+        biography:
+          "训贤公长子。少时入私塾，写得一手好字。1949 年后任村会计，育有正华、正中。",
+      },
+      {
+        name: "方祥",
+        gender: Gender.MALE,
+        birthYear: 1928,
+        deathYear: 2011,
+        status: LifeStatus.DECEASED,
+      },
+      {
+        name: "方明",
+        gender: Gender.MALE,
+        birthYear: 1931,
+        deathYear: 2018,
+        status: LifeStatus.DECEASED,
+      },
+      {
+        name: "方亮",
+        gender: Gender.MALE,
+        birthYear: 1936,
+        status: LifeStatus.ALIVE,
+      },
     ],
     childGeneration: 18,
     branchId: branch.id,
@@ -347,10 +446,31 @@ async function main() {
   const gen20_zhong = await addFamilyUnit({
     husbandId: gen19_ru["正中"],
     wives: [
-      { name: "张道侠", surnameOnly: false, status: LifeStatus.DECEASED },
-      { name: "卞爱莲", surnameOnly: false, type: MarriageType.SECONDARY },
+      {
+        name: "张道侠",
+        surnameOnly: false,
+        status: LifeStatus.DECEASED,
+        birthYear: 1962,
+        deathYear: 1995,
+        biography:
+          "正中公原配。与正中公育有维龙。1995 年因病早逝，年仅 33 岁。",
+      },
+      {
+        name: "卞爱莲",
+        surnameOnly: false,
+        type: MarriageType.SECONDARY,
+        birthYear: 1965,
+        biography: "正中公继配，无所出，悉心抚育维龙长大。",
+      },
     ],
-    children: [{ name: "维龙", gender: Gender.MALE }],
+    children: [
+      {
+        name: "维龙",
+        gender: Gender.MALE,
+        birthYear: 1988,
+        biography: "正中公长子，自幼随继母长大。现在县城从事建材生意。",
+      },
+    ],
     childGeneration: 20,
     childMotherIndex: 0, // 维龙是张道侠所出
     branchId: branch.id,

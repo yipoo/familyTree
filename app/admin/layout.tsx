@@ -27,10 +27,10 @@ export default async function AdminLayout({
             该页面仅限 SUPERADMIN 平台管理员访问。
           </p>
           <Link
-            href="/"
+            href="/dashboard"
             className="mt-4 inline-block rounded bg-blue-600 px-4 py-2 text-sm text-white"
           >
-            返回首页
+            返回我的家族
           </Link>
         </div>
       </div>
@@ -65,7 +65,7 @@ export default async function AdminLayout({
             ))}
           </nav>
           <div className="ml-auto flex items-center gap-3 text-sm">
-            <Link href="/" className="text-zinc-500 hover:underline">
+            <Link href="/dashboard" className="text-zinc-500 hover:underline">
               ← 回应用
             </Link>
             <span className="text-zinc-700 dark:text-zinc-300">{me.name}</span>

@@ -7,6 +7,7 @@ import {
   requireWriteOnPerson,
 } from "@/lib/auth/guard";
 import { writeAudit } from "@/lib/services/audit";
+import { hashPhone } from "@/lib/services/phone";
 
 interface PatchBody {
   name?: string;
@@ -19,6 +20,9 @@ interface PatchBody {
   biography?: string | null;
   note?: string | null;
   isMarriedIn?: boolean;
+  avatarUrl?: string | null;
+  /** 在世族人联系手机号（明文传入，仅存哈希用于小程序自动定位；"" / null 清除） */
+  contactPhone?: string | null;
 }
 
 export async function GET(
@@ -68,6 +72,9 @@ export async function PATCH(
   if (body.biography !== undefined) data.biography = body.biography;
   if (body.note !== undefined) data.note = body.note;
   if (body.isMarriedIn !== undefined) data.isMarriedIn = body.isMarriedIn;
+  if (body.avatarUrl !== undefined) data.avatarUrl = body.avatarUrl;
+  if (body.contactPhone !== undefined)
+    data.contactPhoneHash = body.contactPhone ? hashPhone(body.contactPhone) : null;
 
   const before = await prisma.person.findFirst({
     where: { id: personId, familyId, deletedAt: null },
@@ -78,9 +85,21 @@ export async function PATCH(
       { status: 404 },
     );
   }
-  const after = await prisma.person.update({
-    where: { id: personId },
-    data,
+  // 排行调整：人物自身的 Person.birthOrder 和 ParentChild.birthOrder（关系侧）
+  // 是双写关系——添加亲属时一起填的。tree / 详细图 排序读的是 ParentChild.birthOrder，
+  // 所以编辑这里若不同步关系行，画面排序不会变。一起更新保持一致。
+  const after = await prisma.$transaction(async (tx) => {
+    const updated = await tx.person.update({
+      where: { id: personId },
+      data,
+    });
+    if (body.birthOrder !== undefined) {
+      await tx.parentChild.updateMany({
+        where: { familyId, childId: personId },
+        data: { birthOrder: body.birthOrder ?? null },
+      });
+    }
+    return updated;
   });
   await writeAudit({
     familyId,

@@ -1,8 +1,12 @@
 /**
- * 用 @react-pdf/renderer 渲染册谱 PDF。
+ * 用 @react-pdf/renderer 渲染册谱「合编本」PDF（数据驱动），版式对齐屏幕端
+ * components/album/CompletePages.tsx。
  *
- * A4 竖版，页眉 / 页码 / 各卷标题 / 人物条目正文。
- * 自动分页（react-pdf 的内置流式布局）。
+ * A4 竖版：封面（竖排毛笔题名）→ 前置章节（按 book.sections 的 order：凡例/谱序/源流/
+ * 字辈/修谱人员/像赞/跋…）→ 世系图录（每块「吊线图一页 + 欧式详录一页」配对）。
+ * 正文用世系图录（吊线图 + 欧式详录），非牒记式。文本/模板/自辈/修谱人员/像赞与屏幕端
+ * 共享同一份数据与文案（lib/services/album-templates.ts、lib/markdown、book.members/portraits）；
+ * 吊线图分块与欧式详录由 lib/services/lineage-chunks.ts 预算（book.lineageChunks）。
  */
 import * as React from "react";
 import {
@@ -10,17 +14,56 @@ import {
   Page,
   View,
   Text,
+  Image,
   StyleSheet,
   pdf,
+  type DocumentProps,
 } from "@react-pdf/renderer";
 
-import { type AlbumBook, formatPersonEntryText } from "@/lib/services/album";
-import { ensureCjkFont } from "@/lib/pdf/fonts";
+import { type AlbumBook } from "@/lib/services/album";
+import { packLineageChunks, packDetailWeight, DETAIL_COLS } from "@/lib/services/lineage-chunks";
+import { fitSectionTypography, countBlockChars } from "@/lib/services/album-typo";
+import { ensureCjkFont, ensureBrushFont } from "@/lib/pdf/fonts";
+import { parseMarkdown } from "@/lib/markdown/parse";
+import { MarkdownPdf } from "@/lib/pdf/markdown-pdf";
+import { AlbumVerticalLineage } from "@/lib/pdf/album-lineage";
+import { defaultTitleForKind, type ResolvedSection } from "@/lib/services/album-sections";
+import {
+  fanliItems,
+  yuanliuContent,
+  postscriptContent,
+} from "@/lib/services/album-templates";
+import { AlbumSectionKind } from "@/lib/generated/prisma/enums";
 
 export async function renderAlbumPdf(book: AlbumBook): Promise<Buffer> {
   const fontFamily = ensureCjkFont();
-  const stream = await pdf(<AlbumDocument book={book} fontFamily={fontFamily} />).toBuffer();
-  return await streamToBuffer(stream);
+  try {
+    return await renderDoc(<AlbumDocument book={book} fontFamily={fontFamily} />);
+  } catch (e) {
+    // 防御性兜底：超大族谱崩溃根因（动态 bottom 页脚）已修复（见 Footer 用 top 锚点；
+    // 世系图录按块分页，无超高 View），正常不应再触发；保留此回退以防未知边界。
+    console.error("[pdf] 完整册谱渲染失败，回退到仅前置内容版：", e);
+    return await renderDoc(
+      <AlbumDocument
+        book={{ ...book, volumes: [], lineageChunks: [] }}
+        fontFamily={fontFamily}
+        degraded
+      />,
+    );
+  }
+}
+
+/**
+ * 严格渲染：不回退，布局异常直接抛出。供测试 / 诊断脚本验证完整渲染是否成功。
+ */
+export async function renderAlbumPdfStrict(book: AlbumBook): Promise<Buffer> {
+  const fontFamily = ensureCjkFont();
+  return renderDoc(<AlbumDocument book={book} fontFamily={fontFamily} />);
+}
+
+async function renderDoc(doc: React.ReactElement<DocumentProps>): Promise<Buffer> {
+  const stream = await pdf(doc).toBuffer();
+  return streamToBuffer(stream);
 }
 
 function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
@@ -32,15 +75,34 @@ function streamToBuffer(stream: NodeJS.ReadableStream): Promise<Buffer> {
   });
 }
 
+/** PDF 端只稳定支持 jpg/png；其它格式渲染占位，避免整本 PDF 崩溃。 */
+function isPdfSafeImage(url: string): boolean {
+  return /\.(jpe?g|png)(\?|#|$)/i.test(url);
+}
+
 function AlbumDocument({
   book,
   fontFamily,
+  degraded,
 }: {
   book: AlbumBook;
   fontFamily: string;
+  /** 兜底模式：完整渲染失败后只出前置内容 + 说明页。 */
+  degraded?: boolean;
 }) {
   const styles = makeStyles(fontFamily);
-  const titleZh = ["一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+  const brush = ensureBrushFont();
+
+  // 前置章节：与 HTML 合编本同一过滤规则；封面单独处理
+  const cover = book.sections.find(
+    (s) => s.kind === AlbumSectionKind.COVER && s.enabled,
+  );
+  const active = book.sections.filter(
+    (s) =>
+      s.enabled &&
+      s.kind !== AlbumSectionKind.COVER &&
+      (s.appliesTo.length === 0 || s.appliesTo.includes("complete")),
+  );
 
   return (
     <Document
@@ -51,74 +113,435 @@ function AlbumDocument({
       {/* 封面 */}
       <Page size="A4" style={styles.coverPage}>
         <View style={styles.coverInner}>
-          <Text style={styles.coverSurname}>{book.family.surname} 氏家族</Text>
-          <Text style={styles.coverTitle}>{book.family.name}</Text>
+          {cover?.imageUrl && isPdfSafeImage(cover.imageUrl) && (
+            // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf <Image> 无 alt 属性
+            <Image src={cover.imageUrl} style={styles.coverImage} />
+          )}
+          <Text style={styles.coverSurname}>
+            {book.family.surname} 氏{cover?.subtitle ? ` · ${cover.subtitle}` : "家族"}
+          </Text>
+          {/* 竖排毛笔题名（题签框）：每字一行自上而下 */}
+          <View style={styles.coverTitleFrame}>
+            {Array.from(cover?.title?.trim() || book.family.name).map((ch, i) => (
+              <Text key={i} style={[styles.coverTitleChar, { fontFamily: brush }]}>
+                {ch}
+              </Text>
+            ))}
+          </View>
+          {book.family.editionInfo && (
+            <Text style={[styles.coverEdition, { fontFamily: brush }]}>
+              ·{book.family.editionInfo}·
+            </Text>
+          )}
           {book.family.founderName && (
             <Text style={styles.coverFounder}>始祖 · {book.family.founderName}</Text>
           )}
           <Text style={styles.coverMeta}>
-            生成于 {new Date(book.generatedAt).toLocaleString("zh-CN")}
+            {cover?.signature?.trim() ||
+              `${new Date(book.generatedAt).getFullYear()} 年 修 · 收录 ${book.totalPersons} 人`}
           </Text>
         </View>
       </Page>
 
-      {/* 序 + 字辈表 */}
-      {(book.family.description || book.generationNames.length > 0) && (
-        <Page size="A4" style={styles.page} wrap>
-          <Header title={book.family.name} fontFamily={fontFamily} />
-          <Text style={styles.h2}>序</Text>
-          {book.family.description && (
-            <Text style={styles.body}>{book.family.description}</Text>
-          )}
-          {book.generationNames.length > 0 && (
-            <View style={{ marginTop: 12 }}>
-              <Text style={styles.h3}>字辈表</Text>
-              <View style={styles.charList}>
-                {book.generationNames.map((g) => (
-                  <View key={g.generation} style={styles.charCell}>
-                    <Text style={styles.charGen}>{g.generation}世</Text>
-                    <Text style={styles.charCh}>{g.character}</Text>
+      {/* 前置章节（按 order）。世系图录：图录页组配对（1995 谱紧凑版式）——
+          小块打包后，图页纵向堆 1~3 张小图，详录页表格连排，仍图右录左。 */}
+      {active.flatMap((sec, i) => {
+        if (sec.kind === AlbumSectionKind.TULU) {
+          if (book.lineageChunks.length === 0) return [];
+          const genChars: Record<string, string> = Object.fromEntries(
+            book.generationNames.map((g) => [String(g.generation), g.character]),
+          );
+          const tuluTitle = sec.title?.trim() || "世系图录";
+          const packs = packLineageChunks(book.lineageChunks);
+          const pages: React.JSX.Element[] = [
+            // 分隔页（与 HTML 合编本 sectionDivider 一致）
+            <Page key="tulu-divider" size="A4" style={styles.page}>
+              <Header title={book.family.name} fontFamily={fontFamily} />
+              <View style={styles.dividerInner}>
+                <Text style={styles.dividerJuan}>卷之</Text>
+                <Text style={styles.dividerTitle}>{tuluTitle}</Text>
+                <Text style={styles.dividerNote}>
+                  图者见族脉之大势，录者详各人之名讳、配偶、子嗣。图页或并数小图，
+                  录页表格连排，与图一一对应；按图索骥，览者了然。
+                </Text>
+              </View>
+              <Footer />
+            </Page>,
+          ];
+          for (const pk of packs) {
+            const n = pk.chunks.length;
+            // 按各块竖排布局实高加权分配版面（小支占少、大支占多）
+            const usable = 640 - n * 16;
+            const totalVH = pk.chunks.reduce((s, c) => s + c.vertical.height, 0) || 1;
+            pages.push(
+              <Page key={`tulu-chart-${pk.index}`} size="A4" style={styles.page} wrap>
+                <Header title={book.family.name} fontFamily={fontFamily} />
+                <Text style={styles.secTitle}>{pk.chunks[0]?.branchName ?? "统宗"} · {tuluTitle} 之{pk.index}</Text>
+                {pk.chunks.map((chunk) => (
+                  <View key={chunk.rootId}>
+                    <Text style={styles.subtitle}>
+                      自 {chunk.startGen} 世 · {chunk.rootName} 公支 · {chunk.maleIds.length} 人
+                      {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接（后嗣另图）` : ""}
+                    </Text>
+                    <AlbumVerticalLineage
+                      layout={chunk.vertical}
+                      generationChars={genChars}
+                      fontFamily={fontFamily}
+                      contentW={483}
+                      contentH={Math.max(60, Math.floor((chunk.vertical.height / totalVH) * usable))}
+                    />
                   </View>
                 ))}
-              </View>
-            </View>
-          )}
+                <Footer />
+              </Page>,
+              <PackDetailPage
+                key={`tulu-detail-${pk.index}`}
+                pack={pk}
+                styles={styles}
+                fontFamily={fontFamily}
+                familyName={book.family.name}
+                title={`${pk.chunks[0]?.branchName ?? "统宗"} · 世系详录 之${pk.index}`}
+              />,
+            );
+          }
+          return pages;
+        }
+        return [
+          <SectionPage
+            key={sec.id ?? `sec-${i}`}
+            sec={sec}
+            book={book}
+            styles={styles}
+            fontFamily={fontFamily}
+          />,
+        ];
+      })}
+
+      {/* 兜底模式说明页 */}
+      {degraded && (
+        <Page size="A4" style={styles.page}>
+          <Header title={book.family.name} fontFamily={fontFamily} />
+          <Text style={styles.secTitle}>说 明</Text>
+          <Text style={styles.indentBody}>
+            本族世系传内容较多，PDF 完整排版暂未能导出，此版仅含封面与前置内容。
+            完整世系请在网页端「册谱」查看与打印，或联系管理员。
+          </Text>
           <Footer />
         </Page>
       )}
 
-      {/* 各卷 */}
-      {book.volumes.map((vol, vi) => (
-        <Page key={vol.branchId ?? `__no_${vi}`} size="A4" style={styles.page} wrap>
-          <Header title={book.family.name} fontFamily={fontFamily} />
-          <Text style={styles.h2}>
-            卷之{titleZh[vi] ?? vi + 1}　{vol.branchName}
-          </Text>
-          <Text style={styles.subtitle}>收录 {vol.count} 人</Text>
-          {vol.chapters.map((ch) => (
-            <View key={ch.generation} style={styles.chapter} wrap>
-              <Text style={styles.h3}>
-                第 {ch.generation} 世{ch.generationChar ? `·${ch.generationChar}` : ""}
-                <Text style={styles.subtle}>　 {ch.entries.length} 人</Text>
-              </Text>
-              {ch.entries.map((e, ei) => (
-                <View key={e.id} style={styles.entry} wrap={false}>
-                  <Text style={styles.body}>
-                    <Text style={styles.entryNum}>{ei + 1}. </Text>
-                    {formatPersonEntryText(e)}
-                  </Text>
-                </View>
-              ))}
-              {ch.entries.length === 0 && (
-                <Text style={styles.subtle}>本世暂无</Text>
-              )}
-            </View>
-          ))}
-          <Footer />
-        </Page>
-      ))}
+      {/* 正文即「世系图录」（吊线图 + 欧式详录，见上方 TULU 分派），与屏幕合编本一致。
+          旧版「牒记式世系传」已按需求改用世系图录替换，不再在此渲染。 */}
     </Document>
   );
+}
+
+/**
+ * 「欧式详录」一页：与前一张吊线图一一对应。detailRows 已由
+ * lib/services/lineage-chunks.ts:buildDetailRows 算好（5 列、父子靠列位对齐）。
+ * 逐行渲染、每行 wrap={false}，行间交给 <Page wrap> 自然跨页（不会出现超高 View）。
+ */
+/** 录页：页组内各块紧凑详录连排（6 列与图块 6 代对齐；格内名/注/妻/子嗣）。 */
+function PackDetailPage({
+  pack,
+  styles,
+  fontFamily,
+  familyName,
+  title,
+}: {
+  pack: ReturnType<typeof packLineageChunks>[number];
+  styles: ReturnType<typeof makeStyles>;
+  fontFamily: string;
+  familyName: string;
+  title: string;
+}) {
+  // 组加权行超预算（单块大组）时按比例缩小字号，保证录页不溢出到下一物理页
+  const k = Math.max(0.62, Math.min(1, 18 / Math.max(packDetailWeight(pack.chunks), 1)));
+  return (
+    <Page size="A4" style={styles.page} wrap>
+      <Header title={familyName} fontFamily={fontFamily} />
+      <Text style={styles.secTitle}>{title}</Text>
+      {pack.chunks.map((chunk) => (
+        <View key={chunk.rootId} style={{ marginBottom: 8 }}>
+          <Text style={styles.subtitle}>
+            自 {chunk.startGen} 世「{chunk.rootName}」起
+          </Text>
+          <View style={styles.detailHeaderRow}>
+            {Array.from({ length: DETAIL_COLS }, (_, c) => (
+              <Text key={c} style={styles.detailHeaderCell}>
+                {chunk.startGen + c} 世
+              </Text>
+            ))}
+          </View>
+          {/* 方格表（与 HTML TuluDetailTable 同构：共边框网格，空格也画框；
+              名/注/妻一行，子嗣换行小字） */}
+          <View style={styles.detailGrid}>
+            {chunk.detailRows.map((row, ri) => (
+              <View key={ri} style={styles.detailRow} wrap={false}>
+                {Array.from({ length: DETAIL_COLS }, (_, c) => {
+                  const cell = row.find((x) => x.col === c);
+                  return (
+                    <View key={c} style={styles.detailSlot}>
+                      {cell ? (
+                        <>
+                          <Text style={[styles.detailName, { fontSize: 8 * k }]}>
+                            {cell.name}
+                            {cell.generationChar ? (
+                              <Text style={[styles.detailGenChar, { fontSize: 6 * k }]}>
+                                {" "}
+                                {cell.generationChar}
+                              </Text>
+                            ) : null}
+                            {cell.annotation ? (
+                              <Text style={[styles.detailAnno, { fontSize: 6.5 * k }]}>
+                                {" "}
+                                {cell.annotation}
+                              </Text>
+                            ) : null}
+                            {cell.wives.length > 0 ? (
+                              <Text style={[styles.detailWives, { fontSize: 6.5 * k }]}>
+                                　妻{cell.wives.join("、")}
+                              </Text>
+                            ) : null}
+                          </Text>
+                          {cell.sons.length > 0 ? (
+                            <Text style={[styles.detailSons, { fontSize: 6.5 * k }]}>
+                              子{numToHan(cell.sons.length)}：{cell.sons.join("　")}
+                            </Text>
+                          ) : null}
+                        </>
+                      ) : null}
+                    </View>
+                  );
+                })}
+              </View>
+            ))}
+          </View>
+        </View>
+      ))}
+      <Footer />
+    </Page>
+  );
+}
+
+/** 单个前置章节 → 一张 <Page wrap>（react-pdf 自动分页溢出内容）。无内容返回 null。 */
+function SectionPage({
+  sec,
+  book,
+  styles,
+  fontFamily,
+}: {
+  sec: ResolvedSection;
+  book: AlbumBook;
+  styles: ReturnType<typeof makeStyles>;
+  fontFamily: string;
+}) {
+  const title = sec.title?.trim() || defaultTitleForKind(sec.kind);
+  const hasBody = !!sec.body && sec.body.trim().length > 0;
+
+  const content = renderSectionContent(sec, book, styles, fontFamily, hasBody);
+  if (content === null) return null;
+
+  return (
+    <Page size="A4" style={styles.page} wrap>
+      <Header title={book.family.name} fontFamily={fontFamily} />
+      <Text style={styles.secTitle}>{title}</Text>
+      {content}
+      {sec.signature?.trim() && !hasBody && (
+        <Text style={styles.signature}>{sec.signature}</Text>
+      )}
+      <Footer />
+    </Page>
+  );
+}
+
+function renderSectionContent(
+  sec: ResolvedSection,
+  book: AlbumBook,
+  styles: ReturnType<typeof makeStyles>,
+  fontFamily: string,
+  hasBody: boolean,
+): React.ReactNode | null {
+  const md = (src: string) => (
+    <MarkdownPdf blocks={parseMarkdown(src)} fontFamily={fontFamily} />
+  );
+  if (hasBody) {
+    // 自适应排版（与 HTML 同档位）：字少用大号楷体铺满，字多降档；正文用书法体
+    const blocks = parseMarkdown(sec.body!);
+    const typo = fitSectionTypography(countBlockChars(blocks));
+    const brush = ensureBrushFont();
+    return (
+      <>
+        <MarkdownPdf
+          blocks={blocks}
+          fontFamily={brush}
+          baseSize={typo.pdfFontPt}
+          lineHeight={typo.pdfLineHeight}
+        />
+        {sec.signature?.trim() && (
+          <Text
+            style={[
+              styles.signature,
+              { fontFamily: brush, fontSize: Math.max(9, typo.pdfFontPt - 2) },
+            ]}
+          >
+            {sec.signature}
+          </Text>
+        )}
+      </>
+    );
+  }
+
+  switch (sec.kind) {
+    case AlbumSectionKind.FANLI:
+      return (
+        <View>
+          {fanliItems(book, book.compilerCount).map((it, i) => (
+            <View key={i} style={styles.li}>
+              <Text style={styles.liNum}>{i + 1}、</Text>
+              <Text style={styles.liText}>{it}</Text>
+            </View>
+          ))}
+        </View>
+      );
+    case AlbumSectionKind.PREFACE:
+      return book.family.description ? (
+        <Text style={styles.indentBody}>{book.family.description}</Text>
+      ) : null;
+    case AlbumSectionKind.YUANLIU: {
+      const c = yuanliuContent(book);
+      if (c.kind === "custom") return <Text style={styles.body}>{c.text}</Text>;
+      return (
+        <View>
+          {c.paragraphs.map((p, i) => (
+            <Text key={i} style={styles.indentBody}>
+              {p}
+            </Text>
+          ))}
+          <Text style={styles.note}>{c.note}</Text>
+        </View>
+      );
+    }
+    case AlbumSectionKind.RULES: {
+      // familyRules 为 markdown 兼容纯文本：与有 body 章节一致走自适应楷体排版
+      if (!book.family.familyRules) return null;
+      const rulesBlocks = parseMarkdown(book.family.familyRules);
+      const rulesTypo = fitSectionTypography(countBlockChars(rulesBlocks));
+      return (
+        <MarkdownPdf
+          blocks={rulesBlocks}
+          fontFamily={ensureBrushFont()}
+          baseSize={rulesTypo.pdfFontPt}
+          lineHeight={rulesTypo.pdfLineHeight}
+        />
+      );
+    }
+    case AlbumSectionKind.POSTSCRIPT: {
+      const c = postscriptContent(book);
+      return (
+        <View>
+          {c.paragraphs.map((p, i) => (
+            <Text key={i} style={styles.indentBody}>
+              {p}
+            </Text>
+          ))}
+          <Text style={styles.signature}>{c.date}</Text>
+        </View>
+      );
+    }
+    case AlbumSectionKind.ZIBEI:
+      return book.generationNames.length > 0 ? (
+        <View style={styles.charList}>
+          {book.generationNames.map((g) => (
+            <View key={g.generation} style={styles.charCell}>
+              <Text style={styles.charGen}>{g.generation}世</Text>
+              <Text style={styles.charCh}>{g.character}</Text>
+            </View>
+          ))}
+        </View>
+      ) : null;
+    case AlbumSectionKind.CUSTOM_IMAGE:
+      if (!sec.imageUrl) return null;
+      return isPdfSafeImage(sec.imageUrl) ? (
+        <View style={styles.imageWrap}>
+          {/* eslint-disable-next-line jsx-a11y/alt-text -- react-pdf <Image> 无 alt 属性 */}
+          <Image src={sec.imageUrl} style={styles.sectionImage} />
+          {sec.body?.trim() && <Text style={styles.caption}>{sec.body}</Text>}
+        </View>
+      ) : (
+        <Text style={styles.note}>（图片格式 PDF 不支持，请改用 JPG / PNG）</Text>
+      );
+    case AlbumSectionKind.COMPILERS:
+      return book.members.length > 0 ? (
+        <View>
+          <Text style={styles.note}>本族续修，赖如下族人共襄此举，谨录其名以志：</Text>
+          {book.members.map((m, i) => (
+            <View key={i} style={styles.compilerRow} wrap={false}>
+              <Text style={styles.compilerName}>{m.name}</Text>
+              <Text style={styles.compilerRole}>{roleLabel(m.role)}</Text>
+              <Text style={styles.compilerDate}>
+                入修 {m.joinedAt.toLocaleDateString("zh-CN")}
+              </Text>
+            </View>
+          ))}
+        </View>
+      ) : null;
+    case AlbumSectionKind.PORTRAITS:
+      return book.portraits.length > 0 ? (
+        <>
+          {book.portraits.map((p) => (
+            <View key={p.id} style={styles.portrait} wrap={false}>
+              <Text style={styles.portraitTitle}>{p.name} 像赞</Text>
+              <View style={styles.portraitBody}>
+                {isPdfSafeImage(p.avatarUrl) ? (
+                  // eslint-disable-next-line jsx-a11y/alt-text -- react-pdf <Image> 无 alt 属性
+                  <Image src={p.avatarUrl} style={styles.portraitImg} />
+                ) : (
+                  <Text style={styles.note}>（头像格式 PDF 不支持）</Text>
+                )}
+                <View style={styles.portraitText}>
+                  <Text style={styles.subtle}>
+                    第 {p.generation} 世{p.generationChar ? ` · ${p.generationChar}` : ""}
+                  </Text>
+                  {p.biography ? (
+                    <Text style={styles.body}>{p.biography}</Text>
+                  ) : (
+                    <Text style={styles.subtle}>（暂无传略）</Text>
+                  )}
+                </View>
+              </View>
+            </View>
+          ))}
+        </>
+      ) : null;
+    // 世系图录（TULU）在上方 active.flatMap 里特殊分派（吊线图 + 欧式详录），不走这里
+    case AlbumSectionKind.TULU:
+    case AlbumSectionKind.CUSTOM_TEXT: // 无 body 的自定义章节不出页
+    case AlbumSectionKind.COVER:
+    default:
+      return null;
+  }
+}
+
+/** 子嗣数 → 汉字（与 HTML TuluDetailTable.numToHan 同构） */
+function numToHan(n: number): string {
+  const map = ["零", "一", "二", "三", "四", "五", "六", "七", "八", "九", "十"];
+  if (n <= 10) return map[n];
+  if (n < 20) return "十" + map[n - 10];
+  return String(n);
+}
+
+function roleLabel(role: string): string {
+  switch (role) {
+    case "OWNER":
+      return "主修";
+    case "ADMIN":
+      return "协修";
+    case "MEMBER":
+      return "采访";
+    default:
+      return "助修";
+  }
 }
 
 function Header({ title, fontFamily }: { title: string; fontFamily: string }) {
@@ -130,12 +553,19 @@ function Header({ title, fontFamily }: { title: string; fontFamily: string }) {
   );
 }
 
+/** A4 竖版高度（pt）。全册所有 <Page> 都用 size="A4"，故页脚定位可据此常量计算。 */
+const A4_HEIGHT_PT = 841.89;
+
 function Footer() {
   return (
     <Text
       style={{
         position: "absolute",
-        bottom: 24,
+        // 关键：用 top 定位而非 bottom。带 render 的动态页脚会触发 react-pdf 对
+        // 每页做 relayout，而分页中的「下一页」box.height 被 omit 成 auto 高度；
+        // 此时 bottom 锚点会据未定义的页高算出垃圾坐标（unsupported number:
+        // -9.44e+21）并整本崩溃。改用从页顶固定偏移即可规避（页高恒为 A4）。
+        top: A4_HEIGHT_PT - 32,
         left: 0,
         right: 0,
         textAlign: "center",
@@ -152,22 +582,31 @@ function makeStyles(fontFamily: string) {
   return StyleSheet.create({
     coverPage: {
       backgroundColor: "#ffffff",
-      paddingTop: 200,
+      paddingTop: 160,
       paddingHorizontal: 60,
       fontFamily,
     },
     coverInner: { alignItems: "center" },
+    coverImage: { width: 120, height: 120, objectFit: "contain", marginBottom: 18 },
     coverSurname: { fontSize: 14, color: "#64748b", letterSpacing: 4, fontFamily },
-    coverTitle: {
-      marginTop: 18,
-      fontSize: 36,
-      fontWeight: 700,
-      letterSpacing: 8,
-      color: "#0f172a",
-      fontFamily,
+    coverTitleFrame: {
+      marginTop: 22,
+      alignItems: "center",
+      borderWidth: 2,
+      borderColor: "#27272a",
+      paddingVertical: 18,
+      paddingHorizontal: 18,
     },
-    coverFounder: { marginTop: 24, fontSize: 14, color: "#475569", fontFamily },
-    coverMeta: { marginTop: 80, fontSize: 9, color: "#94a3b8", fontFamily },
+    coverTitleChar: {
+      fontSize: 40,
+      fontWeight: 700,
+      color: "#0f172a",
+      lineHeight: 1.18,
+      textAlign: "center",
+    },
+    coverEdition: { marginTop: 14, fontSize: 13, letterSpacing: 4, color: "#475569", fontFamily },
+    coverFounder: { marginTop: 18, fontSize: 14, color: "#475569", fontFamily },
+    coverMeta: { marginTop: 60, fontSize: 9, color: "#94a3b8", fontFamily },
 
     page: {
       paddingTop: 56,
@@ -191,29 +630,18 @@ function makeStyles(fontFamily: string) {
       textAlign: "center",
       fontFamily,
     },
-    h2: {
+    secTitle: {
       marginTop: 8,
-      fontSize: 16,
+      marginBottom: 12,
+      fontSize: 18,
       fontWeight: 700,
+      letterSpacing: 6,
+      textAlign: "center",
       color: "#0f172a",
-      fontFamily,
-    },
-    h3: {
-      marginTop: 12,
-      marginBottom: 6,
-      fontSize: 12,
-      fontWeight: 700,
-      color: "#1e293b",
-      borderBottomWidth: 0.5,
-      borderBottomColor: "#cbd5e1",
-      paddingBottom: 2,
       fontFamily,
     },
     subtitle: { marginTop: 2, fontSize: 9, color: "#64748b", fontFamily },
     subtle: { fontSize: 9, color: "#94a3b8", fontFamily },
-    chapter: { marginBottom: 8 },
-    entry: { marginBottom: 4 },
-    entryNum: { color: "#94a3b8", fontFamily },
     body: {
       fontSize: 10,
       lineHeight: 1.7,
@@ -221,6 +649,20 @@ function makeStyles(fontFamily: string) {
       textAlign: "justify",
       fontFamily,
     },
+    indentBody: {
+      fontSize: 10,
+      lineHeight: 1.8,
+      color: "#0f172a",
+      textAlign: "justify",
+      textIndent: 20,
+      marginBottom: 6,
+      fontFamily,
+    },
+    note: { marginTop: 8, fontSize: 9, color: "#94a3b8", lineHeight: 1.6, fontFamily },
+    signature: { marginTop: 16, fontSize: 9, color: "#64748b", textAlign: "right", fontFamily },
+    li: { flexDirection: "row", marginBottom: 6 },
+    liNum: { width: 24, fontSize: 10, color: "#64748b", fontFamily },
+    liText: { flex: 1, fontSize: 10, lineHeight: 1.7, color: "#0f172a", fontFamily },
     charList: { flexDirection: "row", flexWrap: "wrap", gap: 4, marginTop: 4 },
     charCell: {
       borderWidth: 0.5,
@@ -234,5 +676,104 @@ function makeStyles(fontFamily: string) {
     },
     charGen: { fontSize: 7, color: "#64748b", fontFamily },
     charCh: { fontSize: 11, fontWeight: 700, fontFamily },
+    imageWrap: { alignItems: "center", marginTop: 8 },
+    sectionImage: { maxWidth: "100%", maxHeight: 560, objectFit: "contain" },
+    caption: { marginTop: 6, fontSize: 9, color: "#64748b", textAlign: "center", fontFamily },
+
+    // 修谱人员
+    compilerRow: {
+      flexDirection: "row",
+      alignItems: "baseline",
+      gap: 8,
+      marginBottom: 6,
+      borderBottomWidth: 0.5,
+      borderBottomColor: "#e2e8f0",
+      paddingBottom: 4,
+    },
+    compilerName: { fontSize: 11, fontWeight: 700, color: "#0f172a", fontFamily },
+    compilerRole: {
+      fontSize: 8,
+      color: "#475569",
+      backgroundColor: "#f1f5f9",
+      paddingHorizontal: 4,
+      paddingVertical: 1,
+      borderRadius: 2,
+      fontFamily,
+    },
+    compilerDate: { marginLeft: "auto", fontSize: 8, color: "#94a3b8", fontFamily },
+
+    // 像赞
+    portrait: { marginBottom: 18 },
+    portraitTitle: {
+      fontSize: 12,
+      fontWeight: 700,
+      textAlign: "center",
+      marginBottom: 6,
+      paddingBottom: 2,
+      borderBottomWidth: 0.5,
+      borderBottomColor: "#cbd5e1",
+      color: "#0f172a",
+      fontFamily,
+    },
+    portraitBody: { flexDirection: "row", gap: 12 },
+    portraitImg: { width: 120, height: 150, objectFit: "cover", borderRadius: 2 },
+    portraitText: { flex: 1 },
+
+    // 世系图录·分隔页
+    dividerInner: { marginTop: 220, alignItems: "center" },
+    dividerJuan: { fontSize: 12, letterSpacing: 6, color: "#64748b", fontFamily },
+    dividerTitle: {
+      marginTop: 16,
+      fontSize: 26,
+      fontWeight: 700,
+      letterSpacing: 8,
+      color: "#0f172a",
+      fontFamily,
+    },
+    dividerNote: {
+      marginTop: 32,
+      maxWidth: 360,
+      fontSize: 9,
+      lineHeight: 1.9,
+      color: "#475569",
+      textAlign: "center",
+      fontFamily,
+    },
+
+    // 世系图录·欧式详录（5 列网格）
+    detailHeaderRow: {
+      flexDirection: "row",
+      marginTop: 10,
+      borderBottomWidth: 0.5,
+      borderBottomColor: "#cbd5e1",
+      paddingBottom: 2,
+    },
+    detailHeaderCell: {
+      width: `${100 / 6}%`,
+      fontSize: 8,
+      color: "#64748b",
+      textAlign: "center",
+      fontFamily,
+    },
+    detailGrid: {
+      marginTop: 2,
+      borderLeftWidth: 0.5,
+      borderTopWidth: 0.5,
+      borderColor: "#cbd5e1",
+    },
+    detailRow: { flexDirection: "row" },
+    detailSlot: {
+      width: `${100 / 6}%`,
+      borderRightWidth: 0.5,
+      borderBottomWidth: 0.5,
+      borderColor: "#cbd5e1",
+      paddingHorizontal: 2,
+      paddingVertical: 1.5,
+    },
+    detailName: { fontSize: 8, lineHeight: 1.45, fontWeight: 700, color: "#0f172a", fontFamily },
+    detailGenChar: { fontSize: 6, color: "#94a3b8", fontFamily },
+    detailAnno: { fontSize: 6.5, color: "#64748b", fontFamily },
+    detailSons: { fontSize: 6.5, lineHeight: 1.4, color: "#71717a", marginTop: 1, fontFamily },
+    detailWives: { fontSize: 6.5, color: "#9f1239", fontFamily },
   });
 }
