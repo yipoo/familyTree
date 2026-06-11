@@ -64,7 +64,8 @@ export default async function AlbumStylePage({
     );
   }
 
-  const book = await buildAlbumBook(familyId);
+  // 合编本需要图录分块（含房支标注）；其它体例不付此成本
+  const book = await buildAlbumBook(familyId, { withLineage: style === "complete" });
   if (!book) notFound();
 
   let build: AlbumBuild;

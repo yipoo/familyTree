@@ -390,13 +390,34 @@ export async function buildAlbumBook(
     });
   }
 
-  // 世系图录吊线图分块（仅 PDF 需要；普通页面不付出成本）
-  const lineageChunks: LineageChunk[] = opts.withLineage
+  // 世系图录吊线图分块（仅 PDF 需要；普通页面不付出成本）。
+  // 分块后按"房支"标注并排序（统宗块在前，各门按门祖行第为序）——图录据此分门
+  // 成节、打包不跨门（参照 1995 四修谱按房支分目的体例）。
+  let lineageChunks: LineageChunk[] = opts.withLineage
     ? chunkLineage({
         tree: buildTreeData({ persons, parentChild, marriages }),
         ...toLineageInputs({ persons, parentChild, marriages }),
       })
     : [];
+  if (lineageChunks.length > 0 && family.branches.length > 0) {
+    const personBranch = new Map(persons.map((p) => [p.id, p.branchId]));
+    const branchName = new Map(family.branches.map((b) => [b.id, b.name]));
+    const rootOrder = new Map<string, number>();
+    for (const b of family.branches) {
+      const rp = persons.find((p) => p.id === b.rootPersonId);
+      rootOrder.set(b.id, rp?.birthOrder ?? 99);
+    }
+    const orderOf = (c: LineageChunk): number => {
+      const bid = personBranch.get(c.rootId);
+      return bid ? (rootOrder.get(bid) ?? 99) : 0; // 统宗（未归门）在前
+    };
+    lineageChunks = lineageChunks
+      .map((c) => {
+        const bid = personBranch.get(c.rootId);
+        return bid ? { ...c, branchName: branchName.get(bid) } : c;
+      })
+      .sort((a, b) => orderOf(a) - orderOf(b));
+  }
 
   return {
     family: {

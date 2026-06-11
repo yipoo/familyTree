@@ -21,37 +21,26 @@ export function MarkdownBlocks({ blocks }: { blocks: Block[] }) {
   );
 }
 
+/**
+ * 字号/行高一律继承外层容器（em / inherit）——由 markdownSectionPages 按章节
+ * 字数选档（lib/services/album-typo.ts），实现"少字大号铺满、多字降档分页"。
+ */
 function BlockView({ block }: { block: Block }) {
   if (block.t === "heading") {
     const cls =
       block.level === 1
-        ? "mt-4 mb-2 text-lg font-semibold text-zinc-900"
+        ? "mt-[1.1em] mb-[0.5em] text-[1.25em] font-semibold text-zinc-900"
         : block.level === 2
-          ? "mt-3 mb-1.5 text-base font-semibold text-zinc-900"
-          : "mt-2 mb-1 text-sm font-semibold text-zinc-800";
+          ? "mt-[0.9em] mb-[0.4em] text-[1.12em] font-semibold text-zinc-900"
+          : "mt-[0.7em] mb-[0.3em] text-[1em] font-semibold text-zinc-800";
     const inner = <Inlines inlines={block.inlines} />;
-    const style = { fontFamily: "var(--font-serif)" };
-    if (block.level === 1)
-      return (
-        <h3 className={cls} style={style}>
-          {inner}
-        </h3>
-      );
-    if (block.level === 2)
-      return (
-        <h4 className={cls} style={style}>
-          {inner}
-        </h4>
-      );
-    return (
-      <h5 className={cls} style={style}>
-        {inner}
-      </h5>
-    );
+    if (block.level === 1) return <h3 className={cls}>{inner}</h3>;
+    if (block.level === 2) return <h4 className={cls}>{inner}</h4>;
+    return <h5 className={cls}>{inner}</h5>;
   }
 
   if (block.t === "list") {
-    const cls = "my-1.5 ml-5 space-y-1 text-[13px] leading-7 text-zinc-800";
+    const cls = "my-[0.4em] ml-[1.6em] space-y-[0.25em] text-zinc-800";
     const items = block.items.map((it, i) => (
       <li key={i}>
         <Inlines inlines={it} />
@@ -66,7 +55,7 @@ function BlockView({ block }: { block: Block }) {
 
   // para
   return (
-    <p className="my-1.5 indent-8 text-[13px] leading-7 text-zinc-800">
+    <p className="my-[0.4em] indent-[2em] text-zinc-800">
       <Inlines inlines={block.inlines} />
     </p>
   );

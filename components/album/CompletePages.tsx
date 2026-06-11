@@ -37,6 +37,7 @@ import { parseMarkdown } from "@/lib/markdown/parse";
 import { paginateBlocks } from "@/lib/markdown/paginate";
 import { MarkdownBlocks } from "./MarkdownBlocks";
 import { computeToc } from "@/lib/services/album-toc";
+import { fitSectionTypography, countBlockChars } from "@/lib/services/album-typo";
 import { defaultTitleForKind, type ResolvedSection } from "@/lib/services/album-sections";
 import { fanliItems } from "@/lib/services/album-templates";
 import { AlbumSectionKind } from "@/lib/generated/prisma/enums";
@@ -74,13 +75,19 @@ export function buildCompletePages(input: {
     book.generationNames.map((g) => [g.generation, g.character]),
   );
 
-  // 世系图录所需：每张吊线图后紧跟其欧式详录（含妻室），一一对应
-  const lineageInputs = toLineageInputs({
-    persons: input.persons,
-    parentChild: input.parentChild,
-    marriages: input.marriages,
-  });
-  const chunks = chunkLineage({ tree, ...lineageInputs });
+  // 世系图录分块：优先用 book.lineageChunks（buildAlbumBook withLineage 装载，
+  // 含房支 branchName 标注与按门排序）；book 未带时回退页面端自算（无门标注）。
+  const chunks =
+    book.lineageChunks.length > 0
+      ? book.lineageChunks
+      : chunkLineage({
+          tree,
+          ...toLineageInputs({
+            persons: input.persons,
+            parentChild: input.parentChild,
+            marriages: input.marriages,
+          }),
+        });
 
   const ctx: SectionCtx = {
     book,
@@ -208,8 +215,12 @@ function renderSection(sec: ResolvedSection, ctx: SectionCtx): RenderedSection |
       };
     case AlbumSectionKind.RULES:
       if (hasBody) return { title, pages: markdownSectionPages(title, sec) };
+      // familyRules 是 markdown 兼容纯文本：走同一自适应排版（楷体/档位），与有 body 章节一致
       return book.family.familyRules
-        ? { title, pages: familyRulesPages(book.family.familyRules) }
+        ? {
+            title,
+            pages: markdownSectionPages(title, { ...sec, body: book.family.familyRules }),
+          }
         : null;
     case AlbumSectionKind.POSTSCRIPT:
       return {
@@ -359,7 +370,7 @@ function packChartPage(
         className="mb-1 border-b border-zinc-300 pb-1 text-center text-sm font-medium text-zinc-900"
         style={{ fontFamily: "var(--font-serif)" }}
       >
-        {familyName} · 世系图 之{pk.index}
+        {familyName} · {pk.chunks[0]?.branchName ?? "统宗"} · 世系图 之{pk.index}
       </h3>
       <div className="flex min-h-0 flex-1 flex-col gap-1">
         {pk.chunks.map((c) => (
@@ -390,7 +401,7 @@ function packDetailPage(pk: LineagePack, familyName: string) {
         className="mb-2 border-b border-zinc-300 pb-1 text-center text-sm font-medium text-zinc-900"
         style={{ fontFamily: "var(--font-serif)" }}
       >
-        {familyName} · 世系详录 之{pk.index}
+        {familyName} · {pk.chunks[0]?.branchName ?? "统宗"} · 世系详录 之{pk.index}
       </h3>
       <div className="min-h-0 flex-1 overflow-hidden">
         {pk.chunks.map((c) => (
@@ -404,28 +415,47 @@ function packDetailPage(pk: LineagePack, familyName: string) {
   );
 }
 
-/** 用户填了 markdown 正文时的章节渲染：标题 + markdown 分页 + 落款。 */
+/**
+ * 用户填了 markdown 正文时的章节渲染：标题 + markdown 分页 + 落款。
+ * 排版自适应：按章节字数选档（album-typo）——字少用大号楷体铺满页面、
+ * 字多逐档缩小再分页；正文用书法体（--font-brush 楷体栈）。
+ */
 function markdownSectionPages(title: string, sec: ResolvedSection): React.ReactNode[] {
-  const pageBlocks = paginateBlocks(parseMarkdown(sec.body ?? ""));
+  const blocksAll = parseMarkdown(sec.body ?? "");
+  const typo = fitSectionTypography(countBlockChars(blocksAll));
+  const pageBlocks = paginateBlocks(blocksAll, {
+    linesPerPage: typo.linesPerPage,
+    charsPerLine: typo.charsPerLine,
+  });
   return pageBlocks.map((blocks, i) => (
     <div className="flex h-full flex-col" key={i}>
       {i === 0 ? (
         <h2
           className="mb-4 border-b border-zinc-300 pb-2 text-center text-2xl font-semibold tracking-widest text-zinc-900"
-          style={{ fontFamily: "var(--font-serif)" }}
+          style={{ fontFamily: "var(--font-brush)" }}
         >
           {title}
         </h2>
       ) : (
         <p className="mb-3 text-xs text-zinc-500">{title}（接前页）</p>
       )}
-      <div className="flex-1">
+      <div
+        className="flex-1"
+        style={{
+          fontFamily: "var(--font-brush)",
+          fontSize: `${typo.htmlFontPx}px`,
+          lineHeight: typo.htmlLineHeight,
+        }}
+      >
         <MarkdownBlocks blocks={blocks} />
       </div>
       {i === pageBlocks.length - 1 && sec.signature && (
         <p
-          className="mt-6 text-right text-xs text-zinc-500"
-          style={{ fontFamily: "var(--font-serif)" }}
+          className="mt-6 text-right text-zinc-600"
+          style={{
+            fontFamily: "var(--font-brush)",
+            fontSize: `${Math.max(12, typo.htmlFontPx - 4)}px`,
+          }}
         >
           {sec.signature}
         </p>

@@ -13,11 +13,16 @@ import type { Block, Inline } from "@/lib/markdown/parse";
 export function MarkdownPdf({
   blocks,
   fontFamily,
+  baseSize = 10,
+  lineHeight = 1.7,
 }: {
   blocks: Block[];
   fontFamily: string;
+  /** 正文基准字号（pt），由章节自适应档位决定（album-typo） */
+  baseSize?: number;
+  lineHeight?: number;
 }) {
-  const s = makeStyles(fontFamily);
+  const s = makeStyles(fontFamily, baseSize, lineHeight);
   return (
     <View>
       {blocks.map((b, i) => (
@@ -86,16 +91,16 @@ function Inlines({
   );
 }
 
-function makeStyles(fontFamily: string) {
+function makeStyles(fontFamily: string, fs = 10, lh = 1.7) {
   return StyleSheet.create({
-    h1: { fontSize: 14, fontWeight: 700, marginTop: 8, marginBottom: 4, color: "#0f172a", fontFamily },
-    h2: { fontSize: 12, fontWeight: 700, marginTop: 6, marginBottom: 3, color: "#1e293b", fontFamily },
-    h3: { fontSize: 11, fontWeight: 700, marginTop: 4, marginBottom: 2, color: "#1e293b", fontFamily },
-    para: { fontSize: 10, lineHeight: 1.7, marginBottom: 4, textAlign: "justify", color: "#0f172a", fontFamily },
+    h1: { fontSize: fs * 1.3, fontWeight: 700, marginTop: 8, marginBottom: 4, color: "#0f172a", fontFamily },
+    h2: { fontSize: fs * 1.15, fontWeight: 700, marginTop: 6, marginBottom: 3, color: "#1e293b", fontFamily },
+    h3: { fontSize: fs * 1.05, fontWeight: 700, marginTop: 4, marginBottom: 2, color: "#1e293b", fontFamily },
+    para: { fontSize: fs, lineHeight: lh, marginBottom: 4, textAlign: "justify", color: "#0f172a", fontFamily },
     strong: { fontWeight: 700, fontFamily },
     list: { marginTop: 2, marginBottom: 4 },
     li: { flexDirection: "row", marginBottom: 2 },
-    bullet: { fontSize: 10, color: "#475569", fontFamily },
-    liText: { flex: 1, fontSize: 10, lineHeight: 1.6, color: "#0f172a", fontFamily },
+    bullet: { fontSize: fs, color: "#475569", fontFamily },
+    liText: { flex: 1, fontSize: fs, lineHeight: lh, color: "#0f172a", fontFamily },
   });
 }

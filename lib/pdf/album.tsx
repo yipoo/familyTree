@@ -22,6 +22,7 @@ import {
 
 import { type AlbumBook } from "@/lib/services/album";
 import { packLineageChunks, DETAIL_COLS } from "@/lib/services/lineage-chunks";
+import { fitSectionTypography, countBlockChars } from "@/lib/services/album-typo";
 import { ensureCjkFont, ensureBrushFont } from "@/lib/pdf/fonts";
 import { parseMarkdown } from "@/lib/markdown/parse";
 import { MarkdownPdf } from "@/lib/pdf/markdown-pdf";
@@ -173,7 +174,7 @@ function AlbumDocument({
             pages.push(
               <Page key={`tulu-chart-${pk.index}`} size="A4" style={styles.page} wrap>
                 <Header title={book.family.name} fontFamily={fontFamily} />
-                <Text style={styles.secTitle}>{tuluTitle} 之{pk.index}</Text>
+                <Text style={styles.secTitle}>{pk.chunks[0]?.branchName ?? "统宗"} · {tuluTitle} 之{pk.index}</Text>
                 {pk.chunks.map((chunk) => (
                   <View key={chunk.rootId}>
                     <Text style={styles.subtitle}>
@@ -197,7 +198,7 @@ function AlbumDocument({
                 styles={styles}
                 fontFamily={fontFamily}
                 familyName={book.family.name}
-                title={`世系详录 之${pk.index}`}
+                title={`${pk.chunks[0]?.branchName ?? "统宗"} · 世系详录 之${pk.index}`}
               />,
             );
           }
@@ -349,10 +350,28 @@ function renderSectionContent(
     <MarkdownPdf blocks={parseMarkdown(src)} fontFamily={fontFamily} />
   );
   if (hasBody) {
+    // 自适应排版（与 HTML 同档位）：字少用大号楷体铺满，字多降档；正文用书法体
+    const blocks = parseMarkdown(sec.body!);
+    const typo = fitSectionTypography(countBlockChars(blocks));
+    const brush = ensureBrushFont();
     return (
       <>
-        {md(sec.body!)}
-        {sec.signature?.trim() && <Text style={styles.signature}>{sec.signature}</Text>}
+        <MarkdownPdf
+          blocks={blocks}
+          fontFamily={brush}
+          baseSize={typo.pdfFontPt}
+          lineHeight={typo.pdfLineHeight}
+        />
+        {sec.signature?.trim() && (
+          <Text
+            style={[
+              styles.signature,
+              { fontFamily: brush, fontSize: Math.max(9, typo.pdfFontPt - 2) },
+            ]}
+          >
+            {sec.signature}
+          </Text>
+        )}
       </>
     );
   }
@@ -387,10 +406,20 @@ function renderSectionContent(
         </View>
       );
     }
-    case AlbumSectionKind.RULES:
-      return book.family.familyRules ? (
-        <Text style={styles.body}>{book.family.familyRules}</Text>
-      ) : null;
+    case AlbumSectionKind.RULES: {
+      // familyRules 为 markdown 兼容纯文本：与有 body 章节一致走自适应楷体排版
+      if (!book.family.familyRules) return null;
+      const rulesBlocks = parseMarkdown(book.family.familyRules);
+      const rulesTypo = fitSectionTypography(countBlockChars(rulesBlocks));
+      return (
+        <MarkdownPdf
+          blocks={rulesBlocks}
+          fontFamily={ensureBrushFont()}
+          baseSize={rulesTypo.pdfFontPt}
+          lineHeight={rulesTypo.pdfLineHeight}
+        />
+      );
+    }
     case AlbumSectionKind.POSTSCRIPT: {
       const c = postscriptContent(book);
       return (

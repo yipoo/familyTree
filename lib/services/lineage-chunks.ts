@@ -66,8 +66,10 @@ export interface LineageChunk {
   maleIds: string[];
   layout: ReturnType<typeof layoutLineageChart>;
   continuationCount: number;
-  /** 与本图一一对应的欧式详录（5 列横排，父子靠位置对齐）。 */
+  /** 与本图一一对应的欧式详录（按列横排，父子靠位置对齐）。 */
   detailRows: OuyangDetailRow[];
+  /** 所属房支名（按块根人物的支系归属标注；buildAlbumBook 装载时填充），统宗块为空。 */
+  branchName?: string;
 }
 
 /**
@@ -323,7 +325,8 @@ export function packLineageChunks(
 
   for (const c of chunks) {
     const n = c.maleIds.length;
-    if (cur.length > 0 && (persons + n > maxPersons || cur.length >= maxChunks)) {
+    const crossBranch = cur.length > 0 && cur[0].branchName !== c.branchName;
+    if (cur.length > 0 && (persons + n > maxPersons || cur.length >= maxChunks || crossBranch)) {
       flush();
     }
     cur.push(c);
