@@ -152,7 +152,7 @@ export function AlbumVerticalLineage({
   const vw = layout.width + V_GEN_COL + V_PAD * 2;
   const vh = layout.height + V_PAD * 2;
   const scale = Math.min(contentW / vw, contentH / vh, 1);
-  const firstGen = layout.nodes[0]?.generation ?? 1;
+  const firstGen = layout.startGen;
   const rowH = layout.rows > 0 ? layout.height / layout.rows : 0;
   // 居中放置
   const offX = (contentW - vw * scale) / 2;
@@ -201,17 +201,6 @@ export function AlbumVerticalLineage({
                   {ch}
                 </PdfText>
               ))}
-              {n.isContinuation && (
-                <PdfText
-                  x={n.x}
-                  y={n.y + (Math.min(n.name.length, 4) + 1) * V_CHAR_H - 3}
-                  style={{ fontSize: 8, fontFamily }}
-                  textAnchor="middle"
-                  fill="#a1a1aa"
-                >
-                  ⋮
-                </PdfText>
-              )}
             </React.Fragment>
           ))}
         </G>

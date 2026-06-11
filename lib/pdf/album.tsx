@@ -181,7 +181,7 @@ function AlbumDocument({
                   <View key={chunk.rootId}>
                     <Text style={styles.subtitle}>
                       自 {chunk.startGen} 世 · {chunk.rootName} 公支 · {chunk.maleIds.length} 人
-                      {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接（⋮ 后嗣另图）` : ""}
+                      {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接（后嗣另图）` : ""}
                     </Text>
                     <AlbumVerticalLineage
                       layout={chunk.vertical}

@@ -126,7 +126,7 @@ function mkChunk(id: string, persons: number): LineageChunk {
     maleIds: Array.from({ length: persons }, (_, i) => `${id}-${i}`),
     layout: { nodes: [], lines: [], generations: [], yByGen: {}, width: 100, height: 100 } as never,
     continuationCount: 0, continuationIds: [], detailRows: [],
-    vertical: { nodes: [], links: [], width: 0, height: 0, rows: 0 },
+    vertical: { nodes: [], links: [], width: 0, height: 0, rows: 0, startGen: 1 },
   };
 }
 
@@ -183,7 +183,7 @@ describe("layoutVerticalChunk（竖排吊线布局）", () => {
     const at = (id: string) => v.nodes.find((n) => n.id === id)!;
     expect(at("a1").x).toBe(at("a").x); // 独孙与父同列
     expect(at("r").x).toBeCloseTo((at("a").x + at("b").x) / 2); // 父居中
-    expect(at("b").x - at("a").x).toBe(V_COL_W); // 叶距一列
+    expect(at("a").x - at("b").x).toBe(V_COL_W); // 长子居右（传统谱右起），叶距一列
     expect(at("a").y).toBeGreaterThan(at("r").y); // 子行在下
     expect(v.rows).toBe(3);
   });
@@ -200,5 +200,17 @@ describe("layoutVerticalChunk（竖排吊线布局）", () => {
     const v = layoutVerticalChunk("r", males, childrenOf, personById, new Set(["a1"]));
     expect(v.nodes.find((n) => n.id === "a1")!.isContinuation).toBe(true);
     expect(v.nodes.find((n) => n.id === "r")!.isContinuation).toBe(false);
+  });
+});
+
+describe("layoutVerticalChunk·标尺与长幼序", () => {
+  const personById = new Map([
+    ["r", { id: "r", name: "始祖", alias: null, generation: 6, generationChar: null, gender: "MALE" as const, isMarriedIn: false, birthOrder: null, birthYear: null, deathYear: null, status: "ALIVE", succession: null }],
+    ["a", { id: "a", name: "长子", alias: null, generation: 7, generationChar: null, gender: "MALE" as const, isMarriedIn: false, birthOrder: null, birthYear: null, deathYear: null, status: "ALIVE", succession: null }],
+    ["b", { id: "b", name: "次子", alias: null, generation: 7, generationChar: null, gender: "MALE" as const, isMarriedIn: false, birthOrder: null, birthYear: null, deathYear: null, status: "ALIVE", succession: null }],
+  ]);
+  it("startGen=根世（标尺自根世起，而非最深叶）", () => {
+    const v = layoutVerticalChunk("r", new Set(["r", "a", "b"]), new Map([["r", ["a", "b"]]]), personById, new Set());
+    expect(v.startGen).toBe(6);
   });
 });

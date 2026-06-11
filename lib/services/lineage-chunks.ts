@@ -105,6 +105,8 @@ export interface VerticalLayout {
   width: number;
   height: number;
   rows: number;
+  /** 首行（根）的绝对世代，供世代标尺自根世起标注。 */
+  startGen: number;
 }
 
 export const V_COL_W = 34; // 每人一列的宽度
@@ -114,9 +116,10 @@ const V_LINE_AREA = 24; // 名字区底部到下一代名字区顶部的连线�
 const V_ROW_H = V_NAME_MAX * V_CHAR_H + V_LINE_AREA;
 
 /**
- * 竖排吊线布局：叶子按长幼（childrenOf 序）自左而右等距排列，父居诸子横向中点
- * 上方；名字竖排（顶对齐，底部随名字长短自然参差），父底引短竖线接横担，再分
- * 竖线下达各子名顶——线长随代距与名长自然变化，正合传统印刷谱之风。纯函数可单测。
+ * 竖排吊线布局：叶子等距排列、父居诸子横向中点上方；名字竖排（顶对齐，底部随
+ * 名字长短自然参差），父底引短竖线接横担，再分竖线下达各子名顶——线长随代距与
+ * 名长自然变化，正合传统印刷谱之风。布局完成后整体水平镜像，使**长子居最右**
+ * （传统谱自右向左序长幼）。纯函数可单测。
  */
 export function layoutVerticalChunk(
   rootId: string,
@@ -166,12 +169,20 @@ export function layoutVerticalChunk(
 
   place(rootId, 0);
   const rows = maxDepth + 1;
+  const width = Math.max(nextLeafX, V_COL_W);
+  // 水平镜像：childrenOf 序为长幼（长子先），镜像后长子居最右（传统谱右起）
+  for (const n of nodes) n.x = width - n.x;
+  for (const l of links) {
+    l.x1 = width - l.x1;
+    l.x2 = width - l.x2;
+  }
   return {
     nodes,
     links,
-    width: Math.max(nextLeafX, V_COL_W),
+    width,
     height: rows * V_ROW_H - V_LINE_AREA / 2,
     rows,
+    startGen: rootGen,
   };
 }
 

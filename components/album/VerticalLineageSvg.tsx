@@ -27,7 +27,7 @@ export function VerticalLineageSvg({
 }) {
   const vw = layout.width + GEN_COL + PAD * 2;
   const vh = layout.height + PAD * 2;
-  const firstGen = layout.nodes[0]?.generation ?? 1;
+  const firstGen = layout.startGen;
   const rowH = layout.rows > 0 ? layout.height / layout.rows : 0;
 
   return (
@@ -89,16 +89,6 @@ export function VerticalLineageSvg({
                   {ch}
                 </tspan>
               ))}
-              {n.isContinuation && (
-                <tspan
-                  x={n.x}
-                  dy={V_CHAR_H}
-                  fontSize={9}
-                  fill="#a1a1aa"
-                >
-                  ⋮
-                </tspan>
-              )}
             </text>
           ))}
         </g>

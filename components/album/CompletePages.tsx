@@ -385,7 +385,7 @@ function packChartPage(
           >
             <p className="shrink-0 text-[10px] text-zinc-400">
               自 {c.startGen} 世「{c.rootName}」起 · {c.maleIds.length} 人
-              {c.continuationCount > 0 ? ` · ${c.continuationCount} 处续接（⋮ 后嗣另图）` : ""}
+              {c.continuationCount > 0 ? ` · ${c.continuationCount} 处续接（后嗣另图）` : ""}
             </p>
             <div className="min-h-0 flex-1">
               <VerticalLineageSvg layout={c.vertical} generationChars={strChars} fit="contain" />
