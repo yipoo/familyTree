@@ -29,44 +29,55 @@ export function TuluDetailTable({ chunk }: { chunk: LineageChunk }) {
           <span key={c}>{chunk.startGen + c} 世</span>
         ))}
       </div>
-      {chunk.detailRows.map((row, ri) => (
-        <div
-          key={ri}
-          className="grid border-b border-dotted border-zinc-200"
-          style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
-        >
-          {Array.from({ length: cols }, (_, c) => {
-            const cell = row.find((x) => x.col === c);
-            return (
-              <div key={c} className="min-w-0 px-0.5 py-0.5">
-                {cell && (
-                  <p className="text-[10px] leading-4 text-zinc-800">
-                    <span
-                      className="font-semibold text-zinc-900"
-                      style={{ fontFamily: "var(--font-serif)" }}
-                    >
-                      {cell.name}
-                    </span>
-                    {cell.annotation && (
-                      <span className="text-zinc-500"> {cell.annotation}</span>
-                    )}
-                    {cell.wives.length > 0 && (
-                      <span className="text-zinc-600">
-                        　妻{cell.wives.join("、")}
-                      </span>
-                    )}
-                    {cell.sons.length > 0 && (
-                      <span className="text-zinc-600">
-                        　子{numToHan(cell.sons.length)}：{cell.sons.join(" ")}
-                      </span>
-                    )}
-                  </p>
-                )}
-              </div>
-            );
-          })}
-        </div>
-      ))}
+      {/* 方格表（参照 1995 谱 p27：每格框线清晰；名/妻一行，子嗣换行异字体） */}
+      <div className="border-l border-t border-zinc-300">
+        {chunk.detailRows.map((row, ri) => (
+          <div
+            key={ri}
+            className="grid"
+            style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}
+          >
+            {Array.from({ length: cols }, (_, c) => {
+              const cell = row.find((x) => x.col === c);
+              return (
+                <div
+                  key={c}
+                  className="min-w-0 border-b border-r border-zinc-300 px-1 py-0.5"
+                >
+                  {cell && (
+                    <>
+                      <p className="text-[10px] leading-4 text-zinc-800">
+                        <span
+                          className="text-[11px] font-semibold text-zinc-900"
+                          style={{ fontFamily: "var(--font-serif)" }}
+                        >
+                          {cell.name}
+                        </span>
+                        {cell.annotation && (
+                          <span className="text-zinc-500"> {cell.annotation}</span>
+                        )}
+                        {cell.wives.length > 0 && (
+                          <span
+                            className="text-zinc-700"
+                            style={{ fontFamily: "var(--font-serif)" }}
+                          >
+                            　妻{cell.wives.join("、")}
+                          </span>
+                        )}
+                      </p>
+                      {cell.sons.length > 0 && (
+                        <p className="font-sans text-[9px] leading-[1.5] text-zinc-500">
+                          子{numToHan(cell.sons.length)}：{cell.sons.join("　")}
+                        </p>
+                      )}
+                    </>
+                  )}
+                </div>
+              );
+            })}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

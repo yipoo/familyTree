@@ -68,8 +68,111 @@ export interface LineageChunk {
   continuationCount: number;
   /** 与本图一一对应的欧式详录（按列横排，父子靠位置对齐）。 */
   detailRows: OuyangDetailRow[];
+  /** 续接点（第末代仍有子嗣、后嗣另图者）id。 */
+  continuationIds: string[];
+  /** 竖排吊线布局（名字竖排无框、细线连接，仿传统印刷谱），合编本图录用。 */
+  vertical: VerticalLayout;
   /** 所属房支名（按块根人物的支系归属标注；buildAlbumBook 装载时填充），统宗块为空。 */
   branchName?: string;
+}
+
+// ── 竖排吊线布局（仿 1995 谱世系图：竖排名字、无框、父居子中上方） ──
+
+export interface VerticalNode {
+  id: string;
+  /** 名字（截取前 NAME_MAX_CHARS 字竖排） */
+  name: string;
+  /** 名字列中心 x */
+  x: number;
+  /** 名字区顶部 y */
+  y: number;
+  /** 世代（绝对） */
+  generation: number;
+  /** 是否续接点（后嗣另图，名下画省略标记） */
+  isContinuation: boolean;
+}
+
+export interface VerticalLink {
+  x1: number;
+  y1: number;
+  x2: number;
+  y2: number;
+}
+
+export interface VerticalLayout {
+  nodes: VerticalNode[];
+  links: VerticalLink[];
+  width: number;
+  height: number;
+  rows: number;
+}
+
+export const V_COL_W = 34; // 每人一列的宽度
+export const V_CHAR_H = 15; // 竖排单字高
+export const V_NAME_MAX = 4; // 名字最多取 4 字
+const V_LINE_AREA = 24; // 名字区底部到下一代名字区顶部的连线区高
+const V_ROW_H = V_NAME_MAX * V_CHAR_H + V_LINE_AREA;
+
+/**
+ * 竖排吊线布局：叶子按长幼（childrenOf 序）自左而右等距排列，父居诸子横向中点
+ * 上方；名字竖排（顶对齐，底部随名字长短自然参差），父底引短竖线接横担，再分
+ * 竖线下达各子名顶——线长随代距与名长自然变化，正合传统印刷谱之风。纯函数可单测。
+ */
+export function layoutVerticalChunk(
+  rootId: string,
+  maleSet: Set<string>,
+  childrenOf: Map<string, string[]>,
+  personById: Map<string, LineagePerson>,
+  continuationIds: Set<string>,
+): VerticalLayout {
+  const nodes: VerticalNode[] = [];
+  const links: VerticalLink[] = [];
+  const rootGen = personById.get(rootId)?.generation ?? 1;
+
+  let nextLeafX = 0;
+  let maxDepth = 0;
+
+  /** 后序布局：返回该子树根的中心 x。 */
+  const place = (id: string, depth: number): number => {
+    const p = personById.get(id);
+    maxDepth = Math.max(maxDepth, depth);
+    const kids = (childrenOf.get(id) ?? []).filter((k) => maleSet.has(k));
+    let x: number;
+    if (kids.length === 0) {
+      x = nextLeafX + V_COL_W / 2;
+      nextLeafX += V_COL_W;
+    } else {
+      const xs = kids.map((k) => place(k, depth + 1));
+      x = (xs[0] + xs[xs.length - 1]) / 2;
+      // 连线：父名底 → 横担 → 各子名顶
+      const nameLen = Math.min(p?.name.length ?? 2, V_NAME_MAX);
+      const parentBottom = depth * V_ROW_H + nameLen * V_CHAR_H + 2;
+      const busY = depth * V_ROW_H + V_NAME_MAX * V_CHAR_H + V_LINE_AREA / 2;
+      const childTop = (depth + 1) * V_ROW_H - 2;
+      links.push({ x1: x, y1: parentBottom, x2: x, y2: busY });
+      if (kids.length > 1) links.push({ x1: xs[0], y1: busY, x2: xs[xs.length - 1], y2: busY });
+      for (const cx of xs) links.push({ x1: cx, y1: busY, x2: cx, y2: childTop });
+    }
+    nodes.push({
+      id,
+      name: (p?.name ?? "—").slice(0, V_NAME_MAX),
+      x,
+      y: depth * V_ROW_H,
+      generation: rootGen + depth,
+      isContinuation: continuationIds.has(id),
+    });
+    return x;
+  };
+
+  place(rootId, 0);
+  const rows = maxDepth + 1;
+  return {
+    nodes,
+    links,
+    width: Math.max(nextLeafX, V_COL_W),
+    height: rows * V_ROW_H - V_LINE_AREA / 2,
+    rows,
+  };
 }
 
 /**
@@ -170,6 +273,14 @@ export function chunkLineage(input: {
         maleIds: [...chunkMales],
         layout,
         continuationCount: continuations.length,
+        continuationIds: [...continuations],
+        vertical: layoutVerticalChunk(
+          rootId,
+          chunkMales,
+          input.tree.childrenOf,
+          personById,
+          new Set(continuations),
+        ),
         detailRows: buildDetailRows(
           rootId,
           root.generation,

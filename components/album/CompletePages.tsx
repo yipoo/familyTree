@@ -24,7 +24,7 @@ import {
   packLineageChunks,
   type LineagePack,
 } from "@/lib/services/lineage-chunks";
-import { LineageChartSvg } from "@/components/charts/LineageChartSvg";
+import { VerticalLineageSvg } from "./VerticalLineageSvg";
 import { TuluDetailTable } from "./TuluDetailTable";
 import {
   buildTreeData,
@@ -354,7 +354,11 @@ function buildTuluSection(title: string, ctx: SectionCtx): RenderedSection | nul
   return { title, pages, index, isTulu: true };
 }
 
-/** 图页：堆叠页组内的 1~3 张小吊线图（contain 等比缩入各自高度配额）。 */
+/**
+ * 图页：堆叠页组内的 1~3 张竖排吊线图（仿 1995 谱：竖名无框、细吊线）。
+ * 各块高度按其内容（竖排布局实高）加权分配——小支占少、大支占多，
+ * 避免"块小字巨大、块大缩一团"的机械等分。
+ */
 function packChartPage(
   pk: LineagePack,
   generationChars: Record<number, string>,
@@ -363,7 +367,7 @@ function packChartPage(
   const strChars: Record<string, string> = Object.fromEntries(
     Object.entries(generationChars).map(([k, v]) => [String(k), v]),
   );
-  const n = pk.chunks.length;
+  const totalH = pk.chunks.reduce((s, c) => s + c.vertical.height, 0) || 1;
   return (
     <div className="flex h-full flex-col" key={`pack-chart-${pk.index}`}>
       <h3
@@ -372,20 +376,20 @@ function packChartPage(
       >
         {familyName} · {pk.chunks[0]?.branchName ?? "统宗"} · 世系图 之{pk.index}
       </h3>
-      <div className="flex min-h-0 flex-1 flex-col gap-1">
+      <div className="flex min-h-0 flex-1 flex-col">
         {pk.chunks.map((c) => (
-          <div key={c.rootId} className="min-h-0" style={{ height: `${100 / n}%` }}>
-            <LineageChartSvg
-              layout={c.layout}
-              title={`自 ${c.startGen} 世 · ${c.rootName} 公支`}
-              subtitle={
-                c.continuationCount > 0
-                  ? `${c.maleIds.length} 人 · ${c.continuationCount} 处续接（后嗣另图）`
-                  : `${c.maleIds.length} 人`
-              }
-              generationChars={strChars}
-              fit="contain"
-            />
+          <div
+            key={c.rootId}
+            className="flex min-h-0 flex-col"
+            style={{ height: `${(c.vertical.height / totalH) * 100}%` }}
+          >
+            <p className="shrink-0 text-[10px] text-zinc-400">
+              自 {c.startGen} 世「{c.rootName}」起 · {c.maleIds.length} 人
+              {c.continuationCount > 0 ? ` · ${c.continuationCount} 处续接（⋮ 后嗣另图）` : ""}
+            </p>
+            <div className="min-h-0 flex-1">
+              <VerticalLineageSvg layout={c.vertical} generationChars={strChars} fit="contain" />
+            </div>
           </div>
         ))}
       </div>

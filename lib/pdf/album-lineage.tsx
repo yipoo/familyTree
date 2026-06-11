@@ -120,3 +120,102 @@ export function AlbumLineageChart({
     </Svg>
   );
 }
+
+// ── 竖排吊线图（仿 1995 谱：竖排名字、无框、细线）──
+
+import {
+  V_CHAR_H,
+  type VerticalLayout,
+} from "@/lib/services/lineage-chunks";
+
+const V_GEN_COL = 34;
+const V_PAD = 6;
+
+/**
+ * 竖排吊线图（react-pdf 版）：与屏幕端 components/album/VerticalLineageSvg 消费
+ * 同一份 VerticalLayout。名字逐字纵排（react-pdf 无 writing-mode），整图等比缩入
+ * 给定内容区。
+ */
+export function AlbumVerticalLineage({
+  layout,
+  generationChars,
+  fontFamily,
+  contentW,
+  contentH,
+}: {
+  layout: VerticalLayout;
+  generationChars: Record<string, string>;
+  fontFamily: string;
+  contentW: number;
+  contentH: number;
+}) {
+  const vw = layout.width + V_GEN_COL + V_PAD * 2;
+  const vh = layout.height + V_PAD * 2;
+  const scale = Math.min(contentW / vw, contentH / vh, 1);
+  const firstGen = layout.nodes[0]?.generation ?? 1;
+  const rowH = layout.rows > 0 ? layout.height / layout.rows : 0;
+  // 居中放置
+  const offX = (contentW - vw * scale) / 2;
+
+  return (
+    <Svg width={contentW} height={contentH} viewBox={`0 0 ${contentW} ${contentH}`}>
+      <G transform={`translate(${offX + V_PAD * scale}, ${V_PAD * scale}) scale(${scale})`}>
+        {Array.from({ length: layout.rows }, (_, r) => {
+          const gen = firstGen + r;
+          const ch = generationChars[String(gen)];
+          return (
+            <PdfText
+              key={`g${r}`}
+              x={2}
+              y={r * rowH + 11}
+              style={{ fontSize: 8, fontFamily }}
+              fill="#a1a1aa"
+            >
+              {`${gen}世${ch ? `·${ch}` : ""}`}
+            </PdfText>
+          );
+        })}
+        <G transform={`translate(${V_GEN_COL}, 0)`}>
+          {layout.links.map((l, i) => (
+            <PdfLine
+              key={`l${i}`}
+              x1={l.x1}
+              y1={l.y1}
+              x2={l.x2}
+              y2={l.y2}
+              stroke="#52525b"
+              strokeWidth={0.9}
+            />
+          ))}
+          {layout.nodes.map((n) => (
+            <React.Fragment key={n.id}>
+              {Array.from(n.name).map((ch, i) => (
+                <PdfText
+                  key={i}
+                  x={n.x}
+                  y={n.y + (i + 1) * V_CHAR_H - 3}
+                  style={{ fontSize: 12, fontFamily }}
+                  textAnchor="middle"
+                  fill="#18181b"
+                >
+                  {ch}
+                </PdfText>
+              ))}
+              {n.isContinuation && (
+                <PdfText
+                  x={n.x}
+                  y={n.y + (Math.min(n.name.length, 4) + 1) * V_CHAR_H - 3}
+                  style={{ fontSize: 8, fontFamily }}
+                  textAnchor="middle"
+                  fill="#a1a1aa"
+                >
+                  ⋮
+                </PdfText>
+              )}
+            </React.Fragment>
+          ))}
+        </G>
+      </G>
+    </Svg>
+  );
+}

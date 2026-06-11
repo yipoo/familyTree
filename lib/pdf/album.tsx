@@ -26,7 +26,7 @@ import { fitSectionTypography, countBlockChars } from "@/lib/services/album-typo
 import { ensureCjkFont, ensureBrushFont } from "@/lib/pdf/fonts";
 import { parseMarkdown } from "@/lib/markdown/parse";
 import { MarkdownPdf } from "@/lib/pdf/markdown-pdf";
-import { AlbumLineageChart } from "@/lib/pdf/album-lineage";
+import { AlbumVerticalLineage } from "@/lib/pdf/album-lineage";
 import { defaultTitleForKind, type ResolvedSection } from "@/lib/services/album-sections";
 import {
   fanliItems,
@@ -170,7 +170,9 @@ function AlbumDocument({
           ];
           for (const pk of packs) {
             const n = pk.chunks.length;
-            const blockH = Math.floor((640 - n * 22) / n); // 每块图高（去小标题行）
+            // 按各块竖排布局实高加权分配版面（小支占少、大支占多）
+            const usable = 640 - n * 16;
+            const totalVH = pk.chunks.reduce((s, c) => s + c.vertical.height, 0) || 1;
             pages.push(
               <Page key={`tulu-chart-${pk.index}`} size="A4" style={styles.page} wrap>
                 <Header title={book.family.name} fontFamily={fontFamily} />
@@ -179,14 +181,14 @@ function AlbumDocument({
                   <View key={chunk.rootId}>
                     <Text style={styles.subtitle}>
                       自 {chunk.startGen} 世 · {chunk.rootName} 公支 · {chunk.maleIds.length} 人
-                      {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接（后嗣另图）` : ""}
+                      {chunk.continuationCount > 0 ? ` · ${chunk.continuationCount} 处续接（⋮ 后嗣另图）` : ""}
                     </Text>
-                    <AlbumLineageChart
-                      layout={chunk.layout}
+                    <AlbumVerticalLineage
+                      layout={chunk.vertical}
                       generationChars={genChars}
                       fontFamily={fontFamily}
                       contentW={483}
-                      contentH={blockH}
+                      contentH={Math.max(60, Math.floor((chunk.vertical.height / totalVH) * usable))}
                     />
                   </View>
                 ))}
@@ -290,8 +292,8 @@ function PackDetailPage({
                           <Text style={styles.detailWives}>妻 {cell.wives.join("、")}</Text>
                         ) : null}
                         {cell.sons.length > 0 ? (
-                          <Text style={styles.detailWives}>
-                            子{cell.sons.length}：{cell.sons.join(" ")}
+                          <Text style={styles.detailSons}>
+                            子{cell.sons.length}：{cell.sons.join("　")}
                           </Text>
                         ) : null}
                       </View>
@@ -743,6 +745,7 @@ function makeStyles(fontFamily: string) {
     detailName: { fontSize: 9.5, fontWeight: 700, color: "#0f172a", fontFamily },
     detailGenChar: { fontSize: 7, color: "#94a3b8", fontFamily },
     detailAnno: { marginTop: 1, fontSize: 7, lineHeight: 1.4, color: "#64748b", fontFamily },
+    detailSons: { fontSize: 6.5, color: "#a1a1aa", marginTop: 1, fontFamily },
     detailWives: { marginTop: 1, fontSize: 7, lineHeight: 1.4, color: "#9f1239", fontFamily },
   });
 }

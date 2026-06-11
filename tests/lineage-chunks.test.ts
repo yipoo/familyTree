@@ -125,7 +125,8 @@ function mkChunk(id: string, persons: number): LineageChunk {
     index: 0, rootId: id, rootName: id, startGen: 1,
     maleIds: Array.from({ length: persons }, (_, i) => `${id}-${i}`),
     layout: { nodes: [], lines: [], generations: [], yByGen: {}, width: 100, height: 100 } as never,
-    continuationCount: 0, detailRows: [],
+    continuationCount: 0, continuationIds: [], detailRows: [],
+    vertical: { nodes: [], links: [], width: 0, height: 0, rows: 0 },
   };
 }
 
@@ -154,5 +155,50 @@ describe("packLineageChunks", () => {
 
   it("空输入 → 空", () => {
     expect(packLineageChunks([])).toEqual([]);
+  });
+});
+
+import { layoutVerticalChunk, V_COL_W, V_CHAR_H } from "@/lib/services/lineage-chunks";
+
+function vp(id: string, name: string, generation: number): LineagePerson {
+  return { id, name, alias: null, generation, generationChar: null, gender: "MALE", isMarriedIn: false, birthOrder: null, birthYear: null, deathYear: null, status: "ALIVE", succession: null };
+}
+
+describe("layoutVerticalChunk（竖排吊线布局）", () => {
+  // 祖 r → 子 a、b；a → 孙 a1
+  const personById = new Map([
+    ["r", vp("r", "始祖", 1)],
+    ["a", vp("a", "长子", 2)],
+    ["b", vp("b", "次子", 2)],
+    ["a1", vp("a1", "长孙", 3)],
+  ]);
+  const childrenOf = new Map([
+    ["r", ["a", "b"]],
+    ["a", ["a1"]],
+  ]);
+  const males = new Set(["r", "a", "b", "a1"]);
+
+  it("父居诸子中点上方；叶子等距；行随世代", () => {
+    const v = layoutVerticalChunk("r", males, childrenOf, personById, new Set());
+    const at = (id: string) => v.nodes.find((n) => n.id === id)!;
+    expect(at("a1").x).toBe(at("a").x); // 独孙与父同列
+    expect(at("r").x).toBeCloseTo((at("a").x + at("b").x) / 2); // 父居中
+    expect(at("b").x - at("a").x).toBe(V_COL_W); // 叶距一列
+    expect(at("a").y).toBeGreaterThan(at("r").y); // 子行在下
+    expect(v.rows).toBe(3);
+  });
+
+  it("连线从父名底部起（线长随名字长短变化），无框", () => {
+    const v = layoutVerticalChunk("r", males, childrenOf, personById, new Set());
+    const at = (id: string) => v.nodes.find((n) => n.id === id)!;
+    const drop = v.links.find((l) => l.x1 === at("r").x && l.x2 === at("r").x && l.y1 > at("r").y);
+    expect(drop).toBeTruthy();
+    expect(drop!.y1).toBe(at("r").y + 2 * V_CHAR_H + 2); // "始祖"两字名 → 线自两字之下起
+  });
+
+  it("续接点带标记", () => {
+    const v = layoutVerticalChunk("r", males, childrenOf, personById, new Set(["a1"]));
+    expect(v.nodes.find((n) => n.id === "a1")!.isContinuation).toBe(true);
+    expect(v.nodes.find((n) => n.id === "r")!.isContinuation).toBe(false);
   });
 });
